@@ -1,0 +1,6 @@
+node_modules/
+dist/
+build/
+.env
+watch_folder/
+.DS_Store
