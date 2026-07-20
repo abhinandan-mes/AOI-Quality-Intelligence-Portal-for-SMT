@@ -4,7 +4,7 @@
 A production-ready web application for an SMT factory to automatically collect inspection data from Parmi AOI and SPI machines, store it, and provide real-time dashboards, analytics, and reports.
 
 ## Tech Stack
-*   **Frontend:** React, Vite, Material UI (MUI), Recharts, Socket.IO Client (Port 3030)
+*   **Frontend:** React, Vite, Vanilla CSS (Replaced MUI), Recharts, Socket.IO Client (Port 3030)
 *   **Backend:** Node.js, Express, Socket.IO, tsx (Port 5050)
 *   **Database:** PostgreSQL, Prisma ORM
 *   **Authentication:** JWT with Role-Based Access Control (RBAC)
@@ -31,11 +31,12 @@ A production-ready web application for an SMT factory to automatically collect i
 2.  [x] Database schema - Designed and pushed via Prisma to `smt_aoi_portal`.
 3.  [x] Folder structure - Frontend and Backend segregated.
 4.  [x] Backend APIs - Base Auth logic, Socket.IO setup, Prisma Client instantiated.
-5.  [x] Frontend pages - Vite scaffolded, Login page integrated using reference UI style.
+5.  [x] Frontend pages - Vite scaffolded, Login page integrated. Entire frontend migrated to Vanilla CSS.
 6.  [x] File watcher service - Tested successfully. Parses `.rst` and `.xml` and moves to Archive.
-7.  [ ] Dashboard implementation
-8.  [ ] Testing
-9.  [ ] Deployment guide
+7.  [x] Dashboard implementation - Live production metrics restored with Vanilla CSS.
+8.  [x] Barcode History implementation - Search with nested machine/defect JSON handling in Vanilla CSS.
+9.  [ ] Testing
+10. [ ] Deployment guide
 
 ## Open Notes
 *   Login credentials hardcoded to admin/admin temporarily until DB seeding.
