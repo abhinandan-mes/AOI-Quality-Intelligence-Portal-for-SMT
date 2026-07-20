@@ -82,13 +82,13 @@ export default function BarcodeHistory() {
       ...sortedData.map(row => [
         row.barcode,
         row.line,
-        row.machineName,
+        row.machine,
         row.side,
         row.status,
         `"${row.blockId || ''}"`,
         `"${row.defectLocation || ''}"`,
-        `"${row.defectPhenomenon || ''}"`,
-        new Date(row.timestamp).toLocaleString()
+        `"${row.phenomenon || ''}"`,
+        new Date(row.inspectionTime).toLocaleString()
       ].join(','))
     ].join('\n');
     
@@ -104,13 +104,13 @@ export default function BarcodeHistory() {
     const worksheet = XLSX.utils.json_to_sheet(sortedData.map(row => ({
       Barcode: row.barcode,
       Line: row.line,
-      Machine: row.machineName,
+      Machine: row.machine,
       Side: row.side,
       Status: row.status,
       Block: row.blockId,
       'Defect Location': row.defectLocation,
-      Phenomenon: row.defectPhenomenon,
-      Date: new Date(row.timestamp).toLocaleString()
+      Phenomenon: row.phenomenon,
+      Date: new Date(row.inspectionTime).toLocaleString()
     })));
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "History");
@@ -126,13 +126,13 @@ export default function BarcodeHistory() {
       htmlContent += `<tr>
         <td>${row.barcode}</td>
         <td>${row.line}</td>
-        <td>${row.machineName}</td>
+        <td>${row.machine}</td>
         <td>${row.side}</td>
         <td>${row.status}</td>
         <td>${row.blockId || ''}</td>
         <td>${row.defectLocation || ''}</td>
-        <td>${row.defectPhenomenon || ''}</td>
-        <td>${new Date(row.timestamp).toLocaleString()}</td>
+        <td>${row.phenomenon || ''}</td>
+        <td>${new Date(row.inspectionTime).toLocaleString()}</td>
       </tr>`;
     });
     htmlContent += "</table></body></html>";
@@ -154,13 +154,13 @@ export default function BarcodeHistory() {
       const rowData = [
         row.barcode,
         row.line,
-        row.machineName,
+        row.machine,
         row.side,
         row.status,
         row.blockId || '',
         row.defectLocation || '',
-        row.defectPhenomenon || '',
-        new Date(row.timestamp).toLocaleString()
+        row.phenomenon || '',
+        new Date(row.inspectionTime).toLocaleString()
       ];
       tableRows.push(rowData);
     });
@@ -263,8 +263,8 @@ export default function BarcodeHistory() {
               <tr>
                 <th>Barcode</th>
                 <th>Line</th>
-                <th onClick={() => handleSort('machineName')} style={{ cursor: 'pointer' }}>
-                  Machine {sortConfig?.key === 'machineName' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                <th onClick={() => handleSort('machine')} style={{ cursor: 'pointer' }}>
+                  Machine {sortConfig?.key === 'machine' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                 </th>
                 <th onClick={() => handleSort('side')} style={{ cursor: 'pointer' }}>
                   Side {sortConfig?.key === 'side' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
@@ -294,7 +294,7 @@ export default function BarcodeHistory() {
                   <tr key={row.id}>
                     <td style={{ fontWeight: 600 }}>{row.barcode}</td>
                     <td>{row.line}</td>
-                    <td><span className="badge-eqtype eq-POST_AOI">{row.machineName}</span></td>
+                    <td><span className="badge-eqtype eq-POST_AOI">{row.machine}</span></td>
                     <td>{row.side}</td>
                     <td>
                       <span className={`status-badge ${row.status === 'PASS' ? 'status-approved' : row.status === 'FAIL' ? 'status-disapproved' : 'status-submitted'}`}>
@@ -314,15 +314,15 @@ export default function BarcodeHistory() {
                       ) : '-'}
                     </td>
                     <td>
-                      {row.defectPhenomenon ? (
-                        row.defectPhenomenon.split(',').map((phenom: string, index: number) => (
+                      {row.phenomenon ? (
+                        row.phenomenon.split(',').map((phenom: string, index: number) => (
                           <div key={index} style={{ marginBottom: '4px', fontSize: '12px', color: '#64748b' }}>
                             {phenom.trim()}
                           </div>
                         ))
                       ) : '-'}
                     </td>
-                    <td style={{ color: '#64748b' }}>{new Date(row.timestamp).toLocaleString()}</td>
+                    <td style={{ color: '#64748b' }}>{new Date(row.inspectionTime).toLocaleString()}</td>
                   </tr>
                 ))
               )}
