@@ -27,7 +27,7 @@ export default function LineManagement() {
 
   const fetchLines = async () => {
     try {
-      const res = await axios.get('http://localhost:5050/api/lines');
+      const res = await axios.get(`http://${window.location.hostname}:5050/api/lines`);
       setLines(res.data);
     } catch (error) {
       console.error('Error fetching lines', error);
@@ -64,9 +64,9 @@ export default function LineManagement() {
   const handleSave = async () => {
     try {
       if (editingLine) {
-        await axios.put(`http://localhost:5050/api/lines/${editingLine.id}`, formData);
+        await axios.put(`http://${window.location.hostname}:5050/api/lines/${editingLine.id}`, formData);
       } else {
-        await axios.post('http://localhost:5050/api/lines', formData);
+        await axios.post(`http://${window.location.hostname}:5050/api/lines`, formData);
       }
       fetchLines();
       handleClose();
@@ -77,7 +77,7 @@ export default function LineManagement() {
 
   const handleToggle = async (line: Line) => {
     try {
-      await axios.put(`http://localhost:5050/api/lines/${line.id}`, { ...line, isInstalled: !line.isInstalled });
+      await axios.put(`http://${window.location.hostname}:5050/api/lines/${line.id}`, { ...line, isInstalled: !line.isInstalled });
       fetchLines();
     } catch (error) {
       console.error('Error toggling line', error);
@@ -87,7 +87,7 @@ export default function LineManagement() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this line?')) return;
     try {
-      await axios.delete(`http://localhost:5050/api/lines/${id}`);
+      await axios.delete(`http://${window.location.hostname}:5050/api/lines/${id}`);
       fetchLines();
     } catch (error) {
       console.error('Error deleting line', error);

@@ -29,8 +29,8 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
       const [summaryRes, hourlyRes] = await Promise.all([
-        axios.get('http://localhost:5050/api/dashboard/summary'),
-        axios.get('http://localhost:5050/api/dashboard/hourly')
+        axios.get(`http://${window.location.hostname}:5050/api/dashboard/summary`),
+        axios.get(`http://${window.location.hostname}:5050/api/dashboard/hourly`)
       ]);
       setSummary(summaryRes.data);
       setHourlyData(hourlyRes.data);
@@ -45,7 +45,7 @@ export default function Dashboard() {
     fetchData();
 
     // Listen for real-time updates from the File Watcher Service
-    const socket = io('http://localhost:5050');
+    const socket = io(`http://${window.location.hostname}:5050`);
     socket.on('new_inspection', () => {
       fetchData(); // Refetch data smoothly when a new file is imported
     });

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,27 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-enum Role {
-  TECHNICIAN
-  ENGINEER
-  MANAGER
-  ADMIN
-  SUPER_ADMIN
-}
-
-enum MachineType {
-  AOI
-  SPI
-}
-
-enum InspectionStatus {
-  GOOD
-  PASS
-  NG
-  FAIL
-  WARNING
 }
 
 model User {
@@ -46,76 +22,71 @@ model Line {
   id           String    @id @default(uuid())
   name         String    @unique
   description  String?
-  isInstalled  Boolean   @default(true)
-  aoiWatchPath String?
-  spiWatchPath String?
-  machines     Machine[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  aoiWatchPath String?
+  isInstalled  Boolean   @default(true)
+  spiWatchPath String?
+  machines     Machine[]
 }
 
 model Machine {
-  id          String      @id @default(uuid())
-  machineId   String      @unique // E.g., PARMI_AOI_1
+  id          String       @id @default(uuid())
+  machineId   String       @unique
   name        String
   type        MachineType
   lineId      String
-  line        Line        @relation(fields: [lineId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   inspections Inspection[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  line        Line         @relation(fields: [lineId], references: [id])
 }
 
 model ProductModel {
   id          String       @id @default(uuid())
-  name        String       @unique // E.g., 4906307-PD2577FEXM-0-TOP-0706 ok
+  name        String       @unique
   description String?
-  inspections Inspection[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  inspections Inspection[]
 }
 
 model Inspection {
-  id               String           @id @default(uuid())
-  barcode          String
-  modelId          String
-  productModel     ProductModel     @relation(fields: [modelId], references: [id])
-  machineId        String
-  machine          Machine          @relation(fields: [machineId], references: [id])
-  inspectionTime   DateTime
-  status           InspectionStatus
-  isFalseCall      Boolean          @default(false)
-  cycleTime        Float?
-  side             String?          // e.g., "TOP" or "BOTTOM"
-  
-  // Specific SPI metrics (nullable for AOI)
-  spiHeightAvg     Float?
-  spiAreaAvg       Float?
-  spiVolumeAvg     Float?
-  
-  defects          Defect[]
-  
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id             String           @id @default(uuid())
+  barcode        String
+  modelId        String
+  machineId      String
+  inspectionTime DateTime
+  status         InspectionStatus
+  isFalseCall    Boolean          @default(false)
+  cycleTime      Float?
+  spiHeightAvg   Float?
+  spiAreaAvg     Float?
+  spiVolumeAvg   Float?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  side           String?
+  defects        Defect[]
+  machine        Machine          @relation(fields: [machineId], references: [id])
+  productModel   ProductModel     @relation(fields: [modelId], references: [id])
 
   @@index([barcode])
   @@index([inspectionTime])
 }
 
 model Defect {
-  id              String      @id @default(uuid())
+  id              String     @id @default(uuid())
   inspectionId    String
-  inspection      Inspection  @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
-  componentName   String      // E.g., ANT3401
-  blockId         String?     // E.g., 1, 2, 3 (for panel blocks)
-  defectType      String      // E.g., Missing, Bridge, Offset
-  defectCount     Int         @default(1)
-  imagePath       String?     // Path to the AOI image
+  componentName   String
+  defectType      String
+  defectCount     Int        @default(1)
+  imagePath       String?
   engineerComment String?
-  repairStatus    String      @default("PENDING") // PENDING, REPAIRED, SCRAP
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  repairStatus    String     @default("PENDING")
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  blockId         String?
+  inspection      Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
 
   @@index([componentName])
 }
@@ -123,9 +94,30 @@ model Defect {
 model FileImportLog {
   id           String   @id @default(uuid())
   fileName     String
-  fileType     String   // RST, XML
+  fileType     String
   machineId    String?
-  status       String   // SUCCESS, ERROR, DUPLICATE
+  status       String
   errorMessage String?
   processedAt  DateTime @default(now())
+}
+
+enum Role {
+  TECHNICIAN
+  ENGINEER
+  MANAGER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum MachineType {
+  AOI
+  SPI
+}
+
+enum InspectionStatus {
+  PASS
+  FAIL
+  WARNING
+  GOOD
+  NG
 }

@@ -26,7 +26,7 @@ function App() {
     }
 
     try {
-      const response = await axios.post('http://localhost:5050/api/auth/login', credentials);
+      const response = await axios.post(`http://${window.location.hostname}:5050/api/auth/login`, credentials);
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         setIsAuthenticated(true);
