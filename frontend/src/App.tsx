@@ -5,6 +5,8 @@ import LoginPage from './components/LoginPage'
 import MainLayout from './layouts/MainLayout'
 import Dashboard from './pages/Dashboard'
 
+import LineManagement from './pages/LineManagement'
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -46,6 +48,7 @@ function App() {
         <Route path="/" element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="lines" element={<LineManagement />} />
           <Route path="history" element={<div style={{padding: '20px'}}>Barcode History (Coming Soon)</div>} />
           <Route path="search" element={<div style={{padding: '20px'}}>Defect Search (Coming Soon)</div>} />
           <Route path="reports" element={<div style={{padding: '20px'}}>Reports (Coming Soon)</div>} />

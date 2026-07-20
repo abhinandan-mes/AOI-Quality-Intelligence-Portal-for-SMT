@@ -5,58 +5,96 @@ import xml2js from 'xml2js';
 import prisma from '../prismaClient';
 import { io } from '../server';
 
-const WATCH_DIR = path.join(__dirname, '../../../watch_folder');
-const ARCHIVE_DIR = path.join(WATCH_DIR, 'Archive');
-const ERROR_DIR = path.join(WATCH_DIR, 'Error');
+let activeWatchers: chokidar.FSWatcher[] = [];
 
-// Ensure directories exist
-[WATCH_DIR, ARCHIVE_DIR, ERROR_DIR].forEach((dir) => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+// Helper to ensure archive and error dirs exist in the target path
+const ensureDirs = (basePath: string) => {
+  const archiveDir = path.join(basePath, 'Archive');
+  const errorDir = path.join(basePath, 'Error');
+  if (!fs.existsSync(archiveDir)) fs.mkdirSync(archiveDir, { recursive: true });
+  if (!fs.existsSync(errorDir)) fs.mkdirSync(errorDir, { recursive: true });
+  return { archiveDir, errorDir };
+};
+
+export const startFileWatcher = async () => {
+  console.log('Initializing dynamic file watchers...');
+  try {
+    const lines = await prisma.line.findMany({
+      where: { isInstalled: true }
+    });
+
+    lines.forEach(line => {
+      if (line.aoiWatchPath) setupWatcher(line.aoiWatchPath, 'AOI', line.name);
+      if (line.spiWatchPath) setupWatcher(line.spiWatchPath, 'SPI', line.name);
+    });
+  } catch (error) {
+    console.error('Error starting file watchers:', error);
   }
-});
+};
 
-export const startFileWatcher = () => {
-  console.log(`Starting file watcher on: ${WATCH_DIR}`);
-  
-  const watcher = chokidar.watch(WATCH_DIR, {
-    ignored: /(^|[\/\\])\../, // ignore dotfiles
+export const reloadWatchers = async () => {
+  console.log('Reloading file watchers...');
+  // Close all existing watchers
+  for (const watcher of activeWatchers) {
+    await watcher.close();
+  }
+  activeWatchers = [];
+  // Restart
+  await startFileWatcher();
+};
+
+const setupWatcher = (watchPath: string, type: 'AOI' | 'SPI', lineName: string) => {
+  if (!fs.existsSync(watchPath)) {
+    console.error(`Watch path does not exist for Line ${lineName} (${type}): ${watchPath}`);
+    return;
+  }
+
+  const { archiveDir, errorDir } = ensureDirs(watchPath);
+
+  const watcher = chokidar.watch(watchPath, {
+    ignored: /(^|[\/\\])\../,
     persistent: true,
     depth: 0,
-    awaitWriteFinish: {
-      stabilityThreshold: 2000,
-      pollInterval: 100
-    }
+    awaitWriteFinish: { stabilityThreshold: 2000, pollInterval: 100 }
   });
 
   watcher.on('add', async (filePath) => {
-    // Ignore files added inside Archive or Error
     if (filePath.includes('Archive') || filePath.includes('Error')) return;
     
-    console.log(`New file detected: ${filePath}`);
+    console.log(`[${lineName} ${type}] New file detected: ${filePath}`);
     const ext = path.extname(filePath).toLowerCase();
     
     try {
-      if (ext === '.rst' || ext === '.json' || ext === '.txt') {
-        await processAOIFile(filePath);
-      } else if (ext === '.xml') {
-        await processSPIFile(filePath);
+      if (type === 'AOI' && (ext === '.rst' || ext === '.json' || ext === '.txt')) {
+        await processAOIFile(filePath, lineName);
+      } else if (type === 'SPI' && ext === '.xml') {
+        await processSPIFile(filePath, lineName);
       } else {
-        throw new Error('Unsupported file extension');
+        throw new Error(`Unsupported file extension ${ext} for ${type}`);
       }
 
-      await moveToArchive(filePath);
+      await moveToDir(filePath, archiveDir);
       io.emit('new_inspection', { message: 'New inspection data imported.' });
-      
     } catch (error: any) {
       console.error(`Error processing file ${filePath}:`, error.message);
-      await moveToError(filePath);
+      await moveToDir(filePath, errorDir);
       await logImport(filePath, 'ERROR', error.message);
     }
   });
+
+  activeWatchers.push(watcher);
+  console.log(`Watching ${type} for Line ${lineName} at ${watchPath}`);
 };
 
-const processAOIFile = async (filePath: string) => {
+const moveToDir = async (filePath: string, targetDir: string) => {
+  const fileName = path.basename(filePath);
+  fs.renameSync(filePath, path.join(targetDir, fileName));
+};
+
+// Processing logic remains largely similar but we pass lineName 
+// instead of letting the machine ID dictate the line if line is already known.
+
+const processAOIFile = async (filePath: string, lineName: string) => {
   const content = fs.readFileSync(filePath, 'utf-8');
   let data;
   try {
@@ -72,12 +110,12 @@ const processAOIFile = async (filePath: string) => {
   const modelName = panel.ModelName;
   const machineId = panel.MachineID;
   const inspTime = new Date(panel.InspDateTime);
-  const result = panel.InspectResult === 64 || panel.InspectResult === 1 ? 'PASS' : 'FAIL'; // Simplification based on typical AOI codes
+  const result = panel.InspectResult === 64 || panel.InspectResult === 1 ? 'PASS' : 'FAIL';
   
-  await saveOrUpdateInspection(barcode, modelName, machineId, inspTime, result, filePath);
+  await saveOrUpdateInspection(barcode, modelName, machineId, lineName, 'AOI', inspTime, result, filePath);
 };
 
-const processSPIFile = async (filePath: string) => {
+const processSPIFile = async (filePath: string, lineName: string) => {
   const content = fs.readFileSync(filePath, 'utf-8');
   const parser = new xml2js.Parser({ explicitArray: false });
   const result = await parser.parseStringPromise(content);
@@ -89,27 +127,24 @@ const processSPIFile = async (filePath: string) => {
   const modelName = panel.$.ModelName;
   const machineId = panel.$.MachineName;
   const inspTime = new Date(panel.$.start_Insptime);
-  
-  // Checking resultcode or inspresult
   const status = panel.$.resultcode === "1" ? 'PASS' : 'FAIL'; 
 
-  // Extract average values for the panel
   const values = panel.Value;
   const spiHeightAvg = parseFloat(values?.Height?.$.data || "0");
   const spiAreaAvg = parseFloat(values?.Area?.$.data || "0");
   const spiVolumeAvg = parseFloat(values?.Volume?.$.data || "0");
 
-  await saveOrUpdateInspection(barcode, modelName, machineId, inspTime, status, filePath, {
-    spiHeightAvg,
-    spiAreaAvg,
-    spiVolumeAvg
+  await saveOrUpdateInspection(barcode, modelName, machineId, lineName, 'SPI', inspTime, status, filePath, {
+    spiHeightAvg, spiAreaAvg, spiVolumeAvg
   });
 };
 
 const saveOrUpdateInspection = async (
   barcode: string, 
   modelName: string, 
-  machineId: string, 
+  machineId: string,
+  lineName: string,
+  type: 'AOI' | 'SPI',
   inspTime: Date, 
   status: any, 
   filePath: string,
@@ -117,22 +152,16 @@ const saveOrUpdateInspection = async (
 ) => {
   if (!barcode) throw new Error('Barcode is empty');
 
-  // Ensure Line and Machine exist (mocking Line creation for simplicity)
   const line = await prisma.line.upsert({
-    where: { name: 'Line-1' },
+    where: { name: lineName },
     update: {},
-    create: { name: 'Line-1', description: 'Auto-created line' }
+    create: { name: lineName }
   });
 
   const machine = await prisma.machine.upsert({
     where: { machineId: machineId },
-    update: {},
-    create: {
-      machineId: machineId,
-      name: machineId,
-      type: filePath.endsWith('.xml') ? 'SPI' : 'AOI',
-      lineId: line.id
-    }
+    update: { type: type, lineId: line.id },
+    create: { machineId, name: machineId, type, lineId: line.id }
   });
 
   const model = await prisma.productModel.upsert({
@@ -141,25 +170,16 @@ const saveOrUpdateInspection = async (
     create: { name: modelName }
   });
 
-  // Check for duplicates/merge logic
   const existing = await prisma.inspection.findFirst({
-    where: {
-      barcode: barcode,
-      machineId: machine.id
-    },
+    where: { barcode: barcode, machineId: machine.id },
     orderBy: { inspectionTime: 'desc' }
   });
 
   if (existing) {
     if (existing.inspectionTime < inspTime) {
-      // Update with newer inspection
       await prisma.inspection.update({
         where: { id: existing.id },
-        data: {
-          status,
-          inspectionTime: inspTime,
-          ...extraData
-        }
+        data: { status, inspectionTime: inspTime, ...extraData }
       });
       await logImport(filePath, 'MERGED', `Updated existing barcode ${barcode}`, machine.id);
     } else {
@@ -168,26 +188,12 @@ const saveOrUpdateInspection = async (
   } else {
     await prisma.inspection.create({
       data: {
-        barcode,
-        modelId: model.id,
-        machineId: machine.id,
-        inspectionTime: inspTime,
-        status,
-        ...extraData
+        barcode, modelId: model.id, machineId: machine.id,
+        inspectionTime: inspTime, status, ...extraData
       }
     });
     await logImport(filePath, 'SUCCESS', 'Imported successfully', machine.id);
   }
-};
-
-const moveToArchive = async (filePath: string) => {
-  const fileName = path.basename(filePath);
-  fs.renameSync(filePath, path.join(ARCHIVE_DIR, fileName));
-};
-
-const moveToError = async (filePath: string) => {
-  const fileName = path.basename(filePath);
-  fs.renameSync(filePath, path.join(ERROR_DIR, fileName));
 };
 
 const logImport = async (filePath: string, status: string, message: string, machineId?: string) => {
@@ -195,7 +201,7 @@ const logImport = async (filePath: string, status: string, message: string, mach
     data: {
       fileName: path.basename(filePath),
       fileType: path.extname(filePath).toUpperCase().replace('.', ''),
-      machineId: machineId,
+      machineId: machineId || null,
       status: status,
       errorMessage: message
     }

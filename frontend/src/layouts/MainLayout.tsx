@@ -11,8 +11,11 @@ import vivoLogo from '../assets/vivo-logo.svg';
 
 const drawerWidth = 240;
 
+import SettingsIcon from '@mui/icons-material/Settings';
+
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+  { text: 'Line Management', icon: <SettingsIcon />, path: '/lines' },
   { text: 'Barcode History', icon: <HistoryIcon />, path: '/history' },
   { text: 'Defect Search', icon: <SearchIcon />, path: '/search' },
   { text: 'Reports', icon: <AssessmentIcon />, path: '/reports' },
