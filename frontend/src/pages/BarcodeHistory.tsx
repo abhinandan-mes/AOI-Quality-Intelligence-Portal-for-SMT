@@ -145,8 +145,9 @@ export default function BarcodeHistory() {
               <TableCell align="center">Machine</TableCell>
               <TableCell align="center">Side</TableCell>
               <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Block Count</TableCell>
-              <TableCell align="left">Defect Locations & Phenomenon</TableCell>
+              <TableCell align="center">Block</TableCell>
+              <TableCell align="left">Defect Location</TableCell>
+              <TableCell align="left">Phenomenon</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -199,7 +200,7 @@ export default function BarcodeHistory() {
                       <TableCell align="center">
                         {row.defects && row.defects.length > 0 ? (
                           <Typography variant="body2" fontWeight="medium">
-                            {Array.from(new Set(row.defects.map(d => d.blockId).filter(Boolean))).length}
+                            {Array.from(new Set(row.defects.map(d => d.blockId).filter(Boolean))).join(', ')}
                           </Typography>
                         ) : (
                           <Typography variant="caption" color="textSecondary">-</Typography>
@@ -207,15 +208,33 @@ export default function BarcodeHistory() {
                       </TableCell>
                       <TableCell align="left">
                         {row.defects && row.defects.length > 0 ? (
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                             {row.defects.map((d, i) => (
                               <Chip 
                                 key={i} 
-                                label={`[Block ${d.blockId || '?'}] ${d.componentName} - ${d.defectType}`} 
+                                label={`[Block ${d.blockId || '?'}] ${d.componentName}`} 
                                 size="small" 
                                 color="error" 
                                 variant="outlined"
-                                sx={{ fontWeight: 500, bgcolor: '#fef2f2' }}
+                                sx={{ fontWeight: 500, bgcolor: '#fef2f2', width: 'fit-content' }}
+                              />
+                            ))}
+                          </Box>
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">-</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell align="left">
+                        {row.defects && row.defects.length > 0 ? (
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                            {row.defects.map((d, i) => (
+                              <Chip 
+                                key={i} 
+                                label={d.defectType} 
+                                size="small" 
+                                color="error" 
+                                variant="outlined"
+                                sx={{ fontWeight: 500, bgcolor: '#fef2f2', width: 'fit-content' }}
                               />
                             ))}
                           </Box>
