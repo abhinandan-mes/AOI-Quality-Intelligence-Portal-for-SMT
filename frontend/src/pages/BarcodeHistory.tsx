@@ -21,6 +21,10 @@ interface Inspection {
   productModel: {
     name: string;
   };
+  defects: {
+    componentName: string;
+    defectType: string;
+  }[];
   spiHeightAvg: number | null;
   spiAreaAvg: number | null;
   spiVolumeAvg: number | null;
@@ -76,6 +80,7 @@ export default function BarcodeHistory() {
               value={barcode} 
               onChange={(e) => setBarcode(e.target.value)} 
               placeholder="Scan or type barcode..."
+              InputLabelProps={{ shrink: true }}
             />
           </Grid>
           <Grid item xs={12} md={2}>
@@ -85,6 +90,7 @@ export default function BarcodeHistory() {
               label="Status" 
               value={status} 
               onChange={(e) => setStatus(e.target.value)}
+              InputLabelProps={{ shrink: true }}
             >
               <MenuItem value="">All Statuses</MenuItem>
               <MenuItem value="PASS">PASS</MenuItem>
@@ -142,13 +148,14 @@ export default function BarcodeHistory() {
                 <TableCell fontWeight="bold">Line / Machine</TableCell>
                 <TableCell fontWeight="bold">Side</TableCell>
                 <TableCell fontWeight="bold">Status</TableCell>
+                <TableCell fontWeight="bold">Defect Location</TableCell>
                 <TableCell fontWeight="bold">SPI Metrics</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 3 }}>No data found for the given criteria.</TableCell>
+                  <TableCell colSpan={7} align="center" sx={{ py: 3 }}>No data found for the given criteria.</TableCell>
                 </TableRow>
               ) : (
                 data.map((row) => (
@@ -156,7 +163,20 @@ export default function BarcodeHistory() {
                     <TableCell>{new Date(row.inspectionTime).toLocaleString()}</TableCell>
                     <TableCell sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{row.barcode}</TableCell>
                     <TableCell>
-                      <Typography variant="body2">{row.machine.line.name}</Typography>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Typography variant="body2">{row.machine.line.name}</Typography>
+                        <Chip 
+                          label={row.machine.type} 
+                          size="small" 
+                          sx={{ 
+                            fontSize: '0.65rem', 
+                            height: 20, 
+                            bgcolor: row.machine.type === 'SPI' ? '#e0f2fe' : '#fce7f3',
+                            color: row.machine.type === 'SPI' ? '#0369a1' : '#be185d',
+                            fontWeight: 'bold'
+                          }} 
+                        />
+                      </Box>
                       <Typography variant="caption" color="textSecondary">{row.machine.name}</Typography>
                     </TableCell>
                     <TableCell>
@@ -173,6 +193,20 @@ export default function BarcodeHistory() {
                         color={row.status === 'PASS' ? 'success' : row.status === 'FAIL' ? 'error' : 'warning'} 
                         sx={{ fontWeight: 'bold' }}
                       />
+                    </TableCell>
+                    <TableCell>
+                      {row.defects && row.defects.length > 0 ? (
+                        <Box>
+                          <Typography variant="caption" fontWeight="bold" color="error">
+                            {row.defects.length === 1 ? 'Single' : 'Multiple'}
+                          </Typography>
+                          <Typography variant="caption" display="block" color="textSecondary">
+                            Block ID: {row.defects.map(d => d.componentName).join(', ')}
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Typography variant="caption" color="textSecondary">-</Typography>
+                      )}
                     </TableCell>
                     <TableCell>
                       {row.machine.type === 'SPI' ? (

@@ -32,7 +32,7 @@ export default function MainLayout() {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#eef1f8' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#eef1f8', maxWidth: '100vw', overflowX: 'hidden' }}>
       <CssBaseline />
       <AppBar 
         position="fixed" 
@@ -63,7 +63,7 @@ export default function MainLayout() {
         }}
       >
         <Toolbar />
-        <Box sx={{ overflow: 'auto', mt: 2 }}>
+        <Box sx={{ overflowX: 'hidden', overflowY: 'auto', mt: 2 }}>
           <List>
             {menuItems.map((item) => {
               const isSelected = location.pathname === item.path;

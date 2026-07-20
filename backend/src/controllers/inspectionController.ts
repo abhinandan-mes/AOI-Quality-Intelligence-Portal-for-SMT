@@ -39,7 +39,8 @@ export const searchInspections = async (req: Request, res: Response) => {
         machine: {
           include: { line: true }
         },
-        productModel: true
+        productModel: true,
+        defects: true
       },
       orderBy: { inspectionTime: 'desc' },
       take: 200 // Limit results for performance

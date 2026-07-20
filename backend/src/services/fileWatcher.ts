@@ -143,9 +143,21 @@ const processSPIFile = async (filePath: string, lineName: string) => {
   if (filePath.match(/[-_\\/]A[-_\\/]/i) || filePath.match(/[-_\\/]TOP[-_\\/]/i)) side = 'TOP';
   else if (filePath.match(/[-_\\/]B[-_\\/]/i) || filePath.match(/[-_\\/]BOTTOM[-_\\/]/i)) side = 'BOTTOM';
 
+  // Extract defects
+  const defects: { componentName: string; defectType: string }[] = [];
+  
+  if (panel.Component) {
+    const components = Array.isArray(panel.Component) ? panel.Component : [panel.Component];
+    for (const comp of components) {
+      if (comp.$.inspresult !== "0") {
+        defects.push({ componentName: comp.$.name || 'Unknown', defectType: 'SPI Defect' });
+      }
+    }
+  }
+
   await saveOrUpdateInspection(barcode, modelName, machineId, lineName, 'SPI', inspTime, status, filePath, {
     spiHeightAvg, spiAreaAvg, spiVolumeAvg, side
-  });
+  }, defects);
 };
 
 const saveOrUpdateInspection = async (
@@ -157,7 +169,8 @@ const saveOrUpdateInspection = async (
   inspTime: Date, 
   status: any, 
   filePath: string,
-  extraData: any = {}
+  extraData: any = {},
+  defects: { componentName: string; defectType: string }[] = []
 ) => {
   if (!barcode) throw new Error('Barcode is empty');
 
@@ -190,17 +203,28 @@ const saveOrUpdateInspection = async (
         where: { id: existing.id },
         data: { status, inspectionTime: inspTime, ...extraData }
       });
+      if (defects.length > 0) {
+        await prisma.defect.deleteMany({ where: { inspectionId: existing.id }});
+        await prisma.defect.createMany({
+          data: defects.map(d => ({ ...d, inspectionId: existing.id }))
+        });
+      }
       await logImport(filePath, 'MERGED', `Updated existing barcode ${barcode}`, machine.id);
     } else {
       await logImport(filePath, 'DUPLICATE', `Older or duplicate barcode ${barcode}`, machine.id);
     }
   } else {
-    await prisma.inspection.create({
+    const newInsp = await prisma.inspection.create({
       data: {
         barcode, modelId: model.id, machineId: machine.id,
         inspectionTime: inspTime, status, ...extraData
       }
     });
+    if (defects.length > 0) {
+      await prisma.defect.createMany({
+        data: defects.map(d => ({ ...d, inspectionId: newInsp.id }))
+      });
+    }
     await logImport(filePath, 'SUCCESS', 'Imported successfully', machine.id);
   }
 };
