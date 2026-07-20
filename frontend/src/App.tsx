@@ -6,6 +6,7 @@ import MainLayout from './layouts/MainLayout'
 import Dashboard from './pages/Dashboard'
 
 import LineManagement from './pages/LineManagement'
+import BarcodeHistory from './pages/BarcodeHistory'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -49,7 +50,7 @@ function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="lines" element={<LineManagement />} />
-          <Route path="history" element={<div style={{padding: '20px'}}>Barcode History (Coming Soon)</div>} />
+          <Route path="history" element={<BarcodeHistory />} />
           <Route path="search" element={<div style={{padding: '20px'}}>Defect Search (Coming Soon)</div>} />
           <Route path="reports" element={<div style={{padding: '20px'}}>Reports (Coming Soon)</div>} />
           <Route path="analytics" element={<div style={{padding: '20px'}}>Analytics (Coming Soon)</div>} />
