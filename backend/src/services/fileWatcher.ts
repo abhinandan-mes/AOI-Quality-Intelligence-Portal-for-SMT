@@ -134,14 +134,14 @@ const processSPIFile = async (filePath: string, lineName: string) => {
   const inspTime = new Date(panel.$.start_Insptime);
   
   let status = 'FAIL';
-  if (panel.$.resultcode === "1") status = 'GOOD';
+  if (panel.$.resultcode === "0" || panel.$.resultcode === "1") status = 'GOOD';
   else if (panel.$.resultcode === "2") status = 'PASS';
   else if (panel.$.resultcode === "3") status = 'NG';
 
   const values = panel.Value;
   const spiHeightAvg = parseFloat(values?.Height?.$.data || "0");
-  const spiAreaAvg = parseFloat(values?.Area?.$.data || "0");
-  const spiVolumeAvg = parseFloat(values?.Volume?.$.data || "0");
+  const spiAreaAvg = parseFloat(values?.Area?.$.per || "0");
+  const spiVolumeAvg = parseFloat(values?.Volume?.$.per || "0");
 
   let side: string | null = null;
   if (modelName?.match(/-A-/i) || filePath.match(/[-_\\/]A[-_\\/]/i) || filePath.match(/[-_\\/]TOP[-_\\/]/i)) side = 'TOP';
@@ -151,11 +151,13 @@ const processSPIFile = async (filePath: string, lineName: string) => {
   const defects: { componentName: string; defectType: string; blockId?: string }[] = [];
   
   // Only extract locations if there are alarms (which happens in NG and Operator PASS)
-  if (panel.Boards?.[0]?.Board) {
-    for (const board of panel.Boards[0].Board) {
+  if (panel.Boards?.Board) {
+    const boards = Array.isArray(panel.Boards.Board) ? panel.Boards.Board : [panel.Boards.Board];
+    for (const board of boards) {
       const blockId = board.$.id || board.$.orderid;
-      if (board.Components?.[0]?.Component) {
-        for (const comp of board.Components[0].Component) {
+      if (board.Components?.Component) {
+        const comps = Array.isArray(board.Components.Component) ? board.Components.Component : [board.Components.Component];
+        for (const comp of comps) {
           if (comp.$.inspresult !== "0") {
             // Avoid duplicate block IDs if multiple pads fail on same component
             if (!defects.find(d => d.componentName === comp.$.name)) {
