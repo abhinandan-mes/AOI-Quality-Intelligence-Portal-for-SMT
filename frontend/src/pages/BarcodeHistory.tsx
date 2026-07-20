@@ -24,6 +24,7 @@ interface Inspection {
   defects: {
     componentName: string;
     defectType: string;
+    blockId?: string;
   }[];
   spiHeightAvg: number | null;
   spiAreaAvg: number | null;
@@ -149,6 +150,7 @@ export default function BarcodeHistory() {
                 <TableCell fontWeight="bold">Line / Machine</TableCell>
                 <TableCell fontWeight="bold">Side</TableCell>
                 <TableCell fontWeight="bold">Status</TableCell>
+                <TableCell fontWeight="bold">Block</TableCell>
                 <TableCell fontWeight="bold">Defect Location</TableCell>
                 <TableCell fontWeight="bold">SPI / AOI Metrics</TableCell>
               </TableRow>
@@ -156,7 +158,7 @@ export default function BarcodeHistory() {
             <TableBody>
               {data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 3 }}>No data found for the given criteria.</TableCell>
+                  <TableCell colSpan={8} align="center" sx={{ py: 3 }}>No data found for the given criteria.</TableCell>
                 </TableRow>
               ) : (
                 data.map((row) => (
@@ -189,28 +191,41 @@ export default function BarcodeHistory() {
                         '-'
                       )}
                     </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={row.status} 
-                        size="small" 
-                        color={row.status === 'PASS' ? 'success' : row.status === 'FAIL' ? 'error' : 'warning'} 
-                        sx={{ fontWeight: 'bold' }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {row.defects && row.defects.length > 0 ? (
-                        <Box>
-                          <Typography variant="caption" fontWeight="bold" color="error">
-                            {row.defects.length === 1 ? 'Single' : 'Multiple'}
+                      <TableCell>
+                        <Chip 
+                          label={row.status} 
+                          size="small" 
+                          color={row.status === 'PASS' ? 'success' : row.status === 'FAIL' ? 'error' : 'warning'} 
+                          sx={{ fontWeight: 'bold' }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {row.defects && row.defects.length > 0 ? (
+                          <Typography variant="body2" fontWeight="medium">
+                            {Array.from(new Set(row.defects.map(d => d.blockId).filter(Boolean))).join(', ') || '-'}
                           </Typography>
-                          <Typography variant="caption" display="block" color="textSecondary">
-                            Block ID: {row.defects.map(d => d.componentName).join(', ')}
-                          </Typography>
-                        </Box>
-                      ) : (
-                        <Typography variant="caption" color="textSecondary">-</Typography>
-                      )}
-                    </TableCell>
+                        ) : (
+                          <Typography variant="caption" color="textSecondary">-</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {row.defects && row.defects.length > 0 ? (
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {row.defects.map((d, i) => (
+                              <Chip 
+                                key={i} 
+                                label={d.componentName} 
+                                size="small" 
+                                color="error" 
+                                variant="outlined"
+                                sx={{ borderRadius: 1, backgroundColor: '#fef2f2' }}
+                              />
+                            ))}
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" color="textSecondary">-</Typography>
+                        )}
+                      </TableCell>
                     <TableCell>
                       {row.machine.type === 'SPI' ? (
                         <Box sx={{ display: 'flex', gap: 1 }}>

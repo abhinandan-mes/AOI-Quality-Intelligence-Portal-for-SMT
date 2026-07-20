@@ -1,4 +1,4 @@
-import chokidar from 'chokidar';
+import * as chokidar from 'chokidar';
 import fs from 'fs';
 import path from 'path';
 import xml2js from 'xml2js';
@@ -144,16 +144,21 @@ const processSPIFile = async (filePath: string, lineName: string) => {
   else if (filePath.match(/[-_\\/]B[-_\\/]/i) || filePath.match(/[-_\\/]BOTTOM[-_\\/]/i)) side = 'BOTTOM';
 
   // Extract defects
-  const defects: { componentName: string; defectType: string }[] = [];
+  const defects: { componentName: string; defectType: string; blockId?: string }[] = [];
   
   if (panel.Boards?.[0]?.Board) {
     for (const board of panel.Boards[0].Board) {
+      const blockId = board.$.id || board.$.orderid;
       if (board.Components?.[0]?.Component) {
         for (const comp of board.Components[0].Component) {
           if (comp.$.inspresult !== "0") {
             // Avoid duplicate block IDs if multiple pads fail on same component
             if (!defects.find(d => d.componentName === comp.$.name)) {
-              defects.push({ componentName: comp.$.name || 'Unknown', defectType: 'SPI Defect' });
+              defects.push({ 
+                componentName: comp.$.name || 'Unknown', 
+                defectType: 'SPI Defect',
+                blockId: blockId
+              });
             }
           }
         }
@@ -176,7 +181,7 @@ const saveOrUpdateInspection = async (
   status: any, 
   filePath: string,
   extraData: any = {},
-  defects: { componentName: string; defectType: string }[] = []
+  defects: { componentName: string; defectType: string; blockId?: string }[] = []
 ) => {
   if (!barcode) throw new Error('Barcode is empty');
 
@@ -215,7 +220,8 @@ const saveOrUpdateInspection = async (
           data: defects.map(d => ({
             inspectionId: existing.id,
             componentName: d.componentName,
-            defectType: d.defectType
+            defectType: d.defectType,
+            blockId: d.blockId
           }))
         });
       }
@@ -232,7 +238,12 @@ const saveOrUpdateInspection = async (
     });
     if (defects.length > 0) {
       await prisma.defect.createMany({
-        data: defects.map(d => ({ ...d, inspectionId: newInsp.id }))
+        data: defects.map(d => ({ 
+          inspectionId: newInsp.id, 
+          componentName: d.componentName, 
+          defectType: d.defectType,
+          blockId: d.blockId
+        }))
       });
     }
     await logImport(filePath, 'SUCCESS', 'Imported successfully', machine.id);

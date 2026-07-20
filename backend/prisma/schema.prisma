@@ -105,6 +105,7 @@ model Defect {
   inspectionId    String
   inspection      Inspection  @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
   componentName   String      // E.g., ANT3401
+  blockId         String?     // E.g., 1, 2, 3 (for panel blocks)
   defectType      String      // E.g., Missing, Bridge, Offset
   defectCount     Int         @default(1)
   imagePath       String?     // Path to the AOI image
