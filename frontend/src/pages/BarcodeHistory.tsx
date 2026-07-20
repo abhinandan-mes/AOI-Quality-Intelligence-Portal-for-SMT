@@ -71,26 +71,27 @@ export default function BarcodeHistory() {
 
       {/* Advanced Search Panel */}
       <Paper sx={{ p: 3, mb: 4, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-        <Grid container spacing={2} alignItems="center">
+        <Grid container spacing={2} alignItems="flex-end">
           <Grid item xs={12} md={3}>
+            <Typography variant="caption" fontWeight="bold" color="textSecondary" mb={0.5} display="block">BARCODE</Typography>
             <TextField 
               fullWidth 
-              label="Barcode" 
               variant="outlined" 
+              size="small"
               value={barcode} 
               onChange={(e) => setBarcode(e.target.value)} 
               placeholder="Scan or type barcode..."
-              InputLabelProps={{ shrink: true }}
             />
           </Grid>
           <Grid item xs={12} md={2}>
+            <Typography variant="caption" fontWeight="bold" color="textSecondary" mb={0.5} display="block">STATUS</Typography>
             <TextField 
               fullWidth 
               select 
-              label="Status" 
+              size="small"
               value={status} 
               onChange={(e) => setStatus(e.target.value)}
-              InputLabelProps={{ shrink: true }}
+              SelectProps={{ displayEmpty: true }}
             >
               <MenuItem value="">All Statuses</MenuItem>
               <MenuItem value="PASS">PASS</MenuItem>
@@ -99,21 +100,21 @@ export default function BarcodeHistory() {
             </TextField>
           </Grid>
           <Grid item xs={12} md={2.5}>
+            <Typography variant="caption" fontWeight="bold" color="textSecondary" mb={0.5} display="block">START DATE</Typography>
             <TextField 
               fullWidth 
-              label="Start Date" 
+              size="small"
               type="date" 
-              InputLabelProps={{ shrink: true }}
               value={startDate} 
               onChange={(e) => setStartDate(e.target.value)} 
             />
           </Grid>
           <Grid item xs={12} md={2.5}>
+            <Typography variant="caption" fontWeight="bold" color="textSecondary" mb={0.5} display="block">END DATE</Typography>
             <TextField 
               fullWidth 
-              label="End Date" 
+              size="small"
               type="date" 
-              InputLabelProps={{ shrink: true }}
               value={endDate} 
               onChange={(e) => setEndDate(e.target.value)} 
             />
@@ -122,8 +123,8 @@ export default function BarcodeHistory() {
             <Button 
               fullWidth 
               variant="contained" 
-              size="large" 
-              sx={{ height: 56 }} 
+              size="small" 
+              sx={{ height: 40 }} 
               onClick={handleSearch}
               startIcon={<SearchIcon />}
             >
@@ -177,7 +178,9 @@ export default function BarcodeHistory() {
                           }} 
                         />
                       </Box>
-                      <Typography variant="caption" color="textSecondary">{row.machine.name}</Typography>
+                      <Typography variant="caption" color="textSecondary" fontWeight="bold">
+                        {row.machine.type}-{row.machine.line.name.replace('Line-', '')}
+                      </Typography>
                     </TableCell>
                     <TableCell>
                       {row.side ? (

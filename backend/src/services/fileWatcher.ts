@@ -198,7 +198,7 @@ const saveOrUpdateInspection = async (
   });
 
   if (existing) {
-    if (existing.inspectionTime < inspTime) {
+    if (existing.inspectionTime <= inspTime) {
       await prisma.inspection.update({
         where: { id: existing.id },
         data: { status, inspectionTime: inspTime, ...extraData }
