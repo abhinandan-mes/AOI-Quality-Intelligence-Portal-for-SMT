@@ -93,9 +93,14 @@ export default function MainLayout() {
           </List>
         </Box>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Toolbar />
-        <Outlet />
+        <Box sx={{ flexGrow: 1 }}>
+          <Outlet />
+        </Box>
+        <Box component="footer" sx={{ mt: 'auto', pt: 3, pb: 1, textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
+          <span style={{ fontWeight: 'bold', textTransform: 'lowercase' }}>vivo</span> V1.20.7.26
+        </Box>
       </Box>
     </Box>
   );

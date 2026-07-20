@@ -205,10 +205,10 @@ export default function BarcodeHistory() {
       <Typography color="textSecondary" mb={3}>Search and filter through historical AOI and SPI inspection records.</Typography>
 
       {/* Advanced Search Panel */}
-      <Paper sx={{ p: 3, mb: 4, borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', bgcolor: '#ffffff', border: '1px solid #e2e8f0' }}>
-        <Grid container spacing={2.5} alignItems="flex-end">
+      <Paper sx={{ p: 3, mb: 4, borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', bgcolor: '#ffffff', border: '1px solid #e2e8f0' }}>
+        <Grid container spacing={2} alignItems="flex-end">
           <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="caption" fontWeight="bold" color="textSecondary" mb={0.5} display="block" sx={{ letterSpacing: 0.5 }}>BARCODE</Typography>
+            <Typography variant="caption" fontWeight="600" color="textSecondary" mb={0.5} display="block">BARCODE</Typography>
             <TextField 
               fullWidth 
               variant="outlined" 
@@ -217,12 +217,12 @@ export default function BarcodeHistory() {
               onChange={(e) => setBarcode(e.target.value)} 
               placeholder="Scan or type barcode..."
               InputProps={{
-                sx: { borderRadius: 1.5, bgcolor: '#f8fafc' }
+                sx: { borderRadius: '8px', bgcolor: '#f8fafc', fontSize: '0.875rem' }
               }}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <Typography variant="caption" fontWeight="bold" color="textSecondary" mb={0.5} display="block" sx={{ letterSpacing: 0.5 }}>STATUS</Typography>
+          <Grid item xs={12} sm={6} md={3}>
+            <Typography variant="caption" fontWeight="600" color="textSecondary" mb={0.5} display="block">STATUS</Typography>
             <TextField 
               fullWidth 
               select 
@@ -231,7 +231,7 @@ export default function BarcodeHistory() {
               onChange={(e) => setStatus(e.target.value)}
               SelectProps={{ displayEmpty: true }}
               InputProps={{
-                sx: { borderRadius: 1.5, bgcolor: '#f8fafc' }
+                sx: { borderRadius: '8px', bgcolor: '#f8fafc', fontSize: '0.875rem' }
               }}
             >
               <MenuItem value="">All Statuses</MenuItem>
@@ -240,8 +240,8 @@ export default function BarcodeHistory() {
               <MenuItem value="WARNING">WARNING</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <Typography variant="caption" fontWeight="bold" color="textSecondary" mb={0.5} display="block" sx={{ letterSpacing: 0.5 }}>START DATE</Typography>
+          <Grid item xs={12} sm={6} md={2.5}>
+            <Typography variant="caption" fontWeight="600" color="textSecondary" mb={0.5} display="block">START DATE</Typography>
             <TextField 
               fullWidth 
               size="small"
@@ -249,12 +249,12 @@ export default function BarcodeHistory() {
               value={startDate} 
               onChange={(e) => setStartDate(e.target.value)} 
               InputProps={{
-                sx: { borderRadius: 1.5, bgcolor: '#f8fafc' }
+                sx: { borderRadius: '8px', bgcolor: '#f8fafc', fontSize: '0.875rem' }
               }}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
-            <Typography variant="caption" fontWeight="bold" color="textSecondary" mb={0.5} display="block" sx={{ letterSpacing: 0.5 }}>END DATE</Typography>
+          <Grid item xs={12} sm={6} md={2.5}>
+            <Typography variant="caption" fontWeight="600" color="textSecondary" mb={0.5} display="block">END DATE</Typography>
             <TextField 
               fullWidth 
               size="small"
@@ -262,34 +262,38 @@ export default function BarcodeHistory() {
               value={endDate} 
               onChange={(e) => setEndDate(e.target.value)} 
               InputProps={{
-                sx: { borderRadius: 1.5, bgcolor: '#f8fafc' }
+                sx: { borderRadius: '8px', bgcolor: '#f8fafc', fontSize: '0.875rem' }
               }}
             />
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={1} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button 
-              fullWidth 
               variant="contained" 
-              size="large" 
-              sx={{ height: 42, borderRadius: 1.5, textTransform: 'none', fontWeight: 'bold', fontSize: '1rem', boxShadow: 'none', '&:hover': { boxShadow: '0 4px 12px rgba(25, 118, 210, 0.2)' } }} 
+              sx={{ 
+                minWidth: 40, 
+                width: 40, 
+                height: 40, 
+                borderRadius: '8px', 
+                bgcolor: '#415fff', 
+                boxShadow: 'none', 
+                '&:hover': { bgcolor: '#2b44d1', boxShadow: '0 4px 12px rgba(65, 95, 255, 0.2)' } 
+              }} 
               onClick={handleSearch}
-              startIcon={<SearchIcon />}
-              disableElevation
             >
-              Search Data
+              <SearchIcon />
             </Button>
           </Grid>
         </Grid>
-        
-        {/* Export Options */}
-        <Box display="flex" justifyContent="flex-end" alignItems="center" mt={3} gap={1} pt={2} borderTop="1px solid #f1f5f9">
-            <Typography variant="caption" fontWeight="bold" color="textSecondary" mr={1}>EXPORT AS:</Typography>
-            <Button size="small" variant="outlined" startIcon={<TableViewIcon />} onClick={exportToCSV} sx={{ borderRadius: 1.5, textTransform: 'none' }}>CSV</Button>
-            <Button size="small" variant="outlined" startIcon={<TableViewIcon />} onClick={exportToExcel} color="success" sx={{ borderRadius: 1.5, textTransform: 'none' }}>Excel</Button>
-            <Button size="small" variant="outlined" startIcon={<DescriptionIcon />} onClick={exportToDoc} color="info" sx={{ borderRadius: 1.5, textTransform: 'none' }}>Doc</Button>
-            <Button size="small" variant="outlined" startIcon={<PictureAsPdfIcon />} onClick={exportToPDF} color="error" sx={{ borderRadius: 1.5, textTransform: 'none' }}>PDF</Button>
-        </Box>
       </Paper>
+
+      {/* Export Options & Actions */}
+      <Box display="flex" justifyContent="flex-end" alignItems="center" mb={2} gap={1}>
+          <Typography variant="caption" fontWeight="bold" color="textSecondary" mr={1}>EXPORT AS:</Typography>
+          <Button size="small" variant="outlined" startIcon={<TableViewIcon />} onClick={exportToCSV} sx={{ borderRadius: '8px', textTransform: 'none', bgcolor: '#fff' }}>CSV</Button>
+          <Button size="small" variant="outlined" startIcon={<TableViewIcon />} onClick={exportToExcel} color="success" sx={{ borderRadius: '8px', textTransform: 'none', bgcolor: '#fff' }}>Excel</Button>
+          <Button size="small" variant="outlined" startIcon={<DescriptionIcon />} onClick={exportToDoc} color="info" sx={{ borderRadius: '8px', textTransform: 'none', bgcolor: '#fff' }}>Doc</Button>
+          <Button size="small" variant="outlined" startIcon={<PictureAsPdfIcon />} onClick={exportToPDF} color="error" sx={{ borderRadius: '8px', textTransform: 'none', bgcolor: '#fff' }}>PDF</Button>
+      </Box>
 
       {/* Results Table */}
       <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
