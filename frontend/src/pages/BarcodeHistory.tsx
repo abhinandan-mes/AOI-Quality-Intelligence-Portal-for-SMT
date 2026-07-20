@@ -1,74 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, Typography, TextField, Button, Grid, MenuItem, 
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
-  Paper, CircularProgress, Chip 
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import DownloadIcon from '@mui/icons-material/Download';
-import TableViewIcon from '@mui/icons-material/TableView';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import DescriptionIcon from '@mui/icons-material/Description';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import axios from 'axios';
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
+import './Reports.css';
+import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-
-interface Inspection {
-  id: string;
-  barcode: string;
-  inspectionTime: string;
-  status: string;
-  side: string | null;
-  machine: {
-    name: string;
-    type: string;
-    line: { name: string };
-  };
-  productModel: {
-    name: string;
-  };
-  defects: {
-    componentName: string;
-    defectType: string;
-    blockId?: string;
-  }[];
-  spiHeightAvg: number | null;
-  spiAreaAvg: number | null;
-  spiVolumeAvg: number | null;
-}
+import * as XLSX from 'xlsx';
 
 export default function BarcodeHistory() {
-  const [data, setData] = useState<Inspection[]>([]);
-  const [loading, setLoading] = useState(false);
-  
-  // Filters
   const [barcode, setBarcode] = useState('');
   const [status, setStatus] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSearch = async () => {
-    setLoading(true);
+  // Sorting state
+  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
+  
+  // Pagination state
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+
+  const fetchHistory = async () => {
     try {
+      setLoading(true);
+      setError('');
+      
       const params = new URLSearchParams();
       if (barcode) params.append('barcode', barcode);
       if (status) params.append('status', status);
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
 
-      const response = await axios.get(`http://localhost:5050/api/inspections?${params.toString()}`);
+      const response = await axios.get(`http://localhost:5050/api/history?${params.toString()}`);
       setData(response.data);
-    } catch (error) {
-      console.error('Error searching data:', error);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to fetch history');
     } finally {
       setLoading(false);
     }
   };
 
-  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  const handleSearch = () => {
+    setPage(0);
+    fetchHistory();
+  };
 
   const handleSort = (key: string) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -82,21 +62,10 @@ export default function BarcodeHistory() {
     let sortableItems = [...data];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
-        let aValue: any = a;
-        let bValue: any = b;
-        
-        if (sortConfig.key === 'machine') {
-          aValue = a.machine.line.name + a.machine.type;
-          bValue = b.machine.line.name + b.machine.type;
-        } else if (sortConfig.key === 'side') {
-          aValue = a.side || '';
-          bValue = b.side || '';
-        }
-
-        if (aValue < bValue) {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
-        if (aValue > bValue) {
+        if (a[sortConfig.key] > b[sortConfig.key]) {
           return sortConfig.direction === 'asc' ? 1 : -1;
         }
         return 0;
@@ -105,313 +74,288 @@ export default function BarcodeHistory() {
     return sortableItems;
   }, [data, sortConfig]);
 
-  const renderSortIcon = (key: string) => {
-    if (sortConfig?.key !== key) return null;
-    return sortConfig.direction === 'asc' ? <ArrowUpwardIcon fontSize="inherit" /> : <ArrowDownwardIcon fontSize="inherit" />;
-  };
-
   const exportToCSV = () => {
-    const ws = XLSX.utils.json_to_sheet(sortedData.map(d => ({
-      Time: new Date(d.inspectionTime).toLocaleString(),
-      Barcode: d.barcode,
-      Machine: `${d.machine.line.name} (${d.machine.type})`,
-      Side: d.side || '-',
-      Status: d.status,
-      BlockCount: Array.from(new Set(d.defects.map(df => df.blockId).filter(Boolean))).length,
-      Defects: d.defects.map(df => `[Block ${df.blockId || '?'}] ${df.componentName} - ${df.defectType}`).join('; ')
-    })));
-    const csv = XLSX.utils.sheet_to_csv(ws);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    if (sortedData.length === 0) return;
+    const headers = ['Barcode', 'Line', 'Machine', 'Side', 'Status', 'Block', 'Defect Location', 'Phenomenon', 'Date'];
+    const csvContent = [
+      headers.join(','),
+      ...sortedData.map(row => [
+        row.barcode,
+        row.line,
+        row.machineName,
+        row.side,
+        row.status,
+        `"${row.blockId || ''}"`,
+        `"${row.defectLocation || ''}"`,
+        `"${row.defectPhenomenon || ''}"`,
+        new Date(row.timestamp).toLocaleString()
+      ].join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', 'barcode_history.csv');
-    document.body.appendChild(link);
+    link.download = 'barcode_history.csv';
     link.click();
-    document.body.removeChild(link);
   };
 
   const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(sortedData.map(d => ({
-      Time: new Date(d.inspectionTime).toLocaleString(),
-      Barcode: d.barcode,
-      Machine: `${d.machine.line.name} (${d.machine.type})`,
-      Side: d.side || '-',
-      Status: d.status,
-      BlockCount: Array.from(new Set(d.defects.map(df => df.blockId).filter(Boolean))).length,
-      Defects: d.defects.map(df => `[Block ${df.blockId || '?'}] ${df.componentName} - ${df.defectType}`).join('; ')
+    if (sortedData.length === 0) return;
+    const worksheet = XLSX.utils.json_to_sheet(sortedData.map(row => ({
+      Barcode: row.barcode,
+      Line: row.line,
+      Machine: row.machineName,
+      Side: row.side,
+      Status: row.status,
+      Block: row.blockId,
+      'Defect Location': row.defectLocation,
+      Phenomenon: row.defectPhenomenon,
+      Date: new Date(row.timestamp).toLocaleString()
     })));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "History");
-    XLSX.writeFile(wb, "barcode_history.xlsx");
-  };
-
-  const exportToPDF = () => {
-    const doc = new jsPDF('landscape');
-    doc.text("Barcode History", 14, 15);
-    (doc as any).autoTable({
-      head: [['Time', 'Barcode', 'Machine', 'Side', 'Status', 'Defects']],
-      body: sortedData.map(d => [
-        new Date(d.inspectionTime).toLocaleString(),
-        d.barcode,
-        `${d.machine.line.name} (${d.machine.type})`,
-        d.side || '-',
-        d.status,
-        d.defects.map(df => `[${df.blockId}] ${df.componentName}`).join(', ')
-      ]),
-      startY: 20,
-      styles: { fontSize: 8 }
-    });
-    doc.save('barcode_history.pdf');
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "History");
+    XLSX.writeFile(workbook, "barcode_history.xlsx");
   };
 
   const exportToDoc = () => {
-    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
-    const footer = "</body></html>";
-    const tableHTML = `
-      <table border="1" style="border-collapse: collapse; width: 100%;">
-        <tr><th>Time</th><th>Barcode</th><th>Machine</th><th>Side</th><th>Status</th><th>Defects</th></tr>
-        ${sortedData.map(d => `
-          <tr>
-            <td>${new Date(d.inspectionTime).toLocaleString()}</td>
-            <td>${d.barcode}</td>
-            <td>${d.machine.line.name} (${d.machine.type})</td>
-            <td>${d.side || '-'}</td>
-            <td>${d.status}</td>
-            <td>${d.defects.map(df => `[${df.blockId}] ${df.componentName} - ${df.defectType}`).join(', ')}</td>
-          </tr>
-        `).join('')}
-      </table>
-    `;
-    const sourceHTML = header + tableHTML + footer;
-    const blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
-    const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+    if (sortedData.length === 0) return;
+    let htmlContent = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
+    htmlContent += "<h2>Barcode History</h2><table border='1' style='border-collapse:collapse;width:100%;'><tr><th>Barcode</th><th>Line</th><th>Machine</th><th>Side</th><th>Status</th><th>Block</th><th>Defect Location</th><th>Phenomenon</th><th>Date</th></tr>";
+    
+    sortedData.forEach(row => {
+      htmlContent += `<tr>
+        <td>${row.barcode}</td>
+        <td>${row.line}</td>
+        <td>${row.machineName}</td>
+        <td>${row.side}</td>
+        <td>${row.status}</td>
+        <td>${row.blockId || ''}</td>
+        <td>${row.defectLocation || ''}</td>
+        <td>${row.defectPhenomenon || ''}</td>
+        <td>${new Date(row.timestamp).toLocaleString()}</td>
+      </tr>`;
+    });
+    htmlContent += "</table></body></html>";
+    
+    const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
     const link = document.createElement('a');
-    link.href = url;
+    link.href = URL.createObjectURL(blob);
     link.download = 'barcode_history.doc';
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
   };
 
-  useEffect(() => {
-    // Initial fetch to show some recent data
-    handleSearch();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const exportToPDF = () => {
+    if (sortedData.length === 0) return;
+    const doc = new jsPDF('landscape');
+    const tableColumn = ["Barcode", "Line", "Machine", "Side", "Status", "Block", "Defect Location", "Phenomenon", "Date"];
+    const tableRows: any[] = [];
+
+    sortedData.forEach(row => {
+      const rowData = [
+        row.barcode,
+        row.line,
+        row.machineName,
+        row.side,
+        row.status,
+        row.blockId || '',
+        row.defectLocation || '',
+        row.defectPhenomenon || '',
+        new Date(row.timestamp).toLocaleString()
+      ];
+      tableRows.push(rowData);
+    });
+
+    doc.text("Barcode History Report", 14, 15);
+    (doc as any).autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [65, 95, 255] }
+    });
+    doc.save("barcode_history.pdf");
+  };
+
+  const handleChangePage = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const totalPages = Math.ceil(sortedData.length / rowsPerPage);
 
   return (
-    <Box>
-      <Typography variant="h4" fontWeight="bold" mb={1}>Barcode History & Data Search</Typography>
-      <Typography color="textSecondary" mb={3}>Search and filter through historical AOI and SPI inspection records.</Typography>
+    <div className="reports-container">
+      <div className="reports-heading">
+        <div>
+          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '1.8rem', fontWeight: 800 }}>Barcode History & Data Search</h2>
+          <p style={{ color: '#64748b', marginTop: '8px' }}>Search and filter through historical AOI and SPI inspection records.</p>
+        </div>
+      </div>
 
-      {/* Advanced Search Panel */}
-      <Paper sx={{ p: 3, mb: 4, borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', bgcolor: '#ffffff', border: '1px solid #e2e8f0' }}>
-        <Grid container spacing={2} alignItems="flex-end">
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="caption" fontWeight="600" color="textSecondary" mb={0.5} display="block">BARCODE</Typography>
-            <TextField 
-              fullWidth 
-              variant="outlined" 
-              size="small"
+      <div className="premium-kpi-card" style={{ flexDirection: 'column', alignItems: 'stretch', marginBottom: '24px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '16px', alignItems: 'flex-end', width: '100%' }}>
+          <div>
+            <label className="meta-label">BARCODE</label>
+            <input 
+              type="text" 
+              className="premium-modal-textarea" 
+              style={{ height: '38px', padding: '0 12px' }}
               value={barcode} 
               onChange={(e) => setBarcode(e.target.value)} 
               placeholder="Scan or type barcode..."
-              InputProps={{
-                sx: { borderRadius: '8px', bgcolor: '#f8fafc', fontSize: '0.875rem' }
-              }}
             />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography variant="caption" fontWeight="600" color="textSecondary" mb={0.5} display="block">STATUS</Typography>
-            <TextField 
-              fullWidth 
-              select 
-              size="small"
+          </div>
+          <div>
+            <label className="meta-label">STATUS</label>
+            <select 
+              className="premium-modal-textarea" 
+              style={{ height: '38px', padding: '0 12px' }}
               value={status} 
               onChange={(e) => setStatus(e.target.value)}
-              SelectProps={{ displayEmpty: true }}
-              InputProps={{
-                sx: { borderRadius: '8px', bgcolor: '#f8fafc', fontSize: '0.875rem' }
-              }}
             >
-              <MenuItem value="">All Statuses</MenuItem>
-              <MenuItem value="PASS">PASS</MenuItem>
-              <MenuItem value="FAIL">FAIL</MenuItem>
-              <MenuItem value="WARNING">WARNING</MenuItem>
-            </TextField>
-          </Grid>
-          <Grid item xs={12} sm={6} md={2.5}>
-            <Typography variant="caption" fontWeight="600" color="textSecondary" mb={0.5} display="block">START DATE</Typography>
-            <TextField 
-              fullWidth 
-              size="small"
+              <option value="">All Statuses</option>
+              <option value="PASS">PASS</option>
+              <option value="FAIL">FAIL</option>
+              <option value="WARNING">WARNING</option>
+            </select>
+          </div>
+          <div>
+            <label className="meta-label">START DATE</label>
+            <input 
               type="date" 
+              className="premium-modal-textarea" 
+              style={{ height: '38px', padding: '0 12px' }}
               value={startDate} 
               onChange={(e) => setStartDate(e.target.value)} 
-              InputProps={{
-                sx: { borderRadius: '8px', bgcolor: '#f8fafc', fontSize: '0.875rem' }
-              }}
             />
-          </Grid>
-          <Grid item xs={12} sm={6} md={2.5}>
-            <Typography variant="caption" fontWeight="600" color="textSecondary" mb={0.5} display="block">END DATE</Typography>
-            <TextField 
-              fullWidth 
-              size="small"
+          </div>
+          <div>
+            <label className="meta-label">END DATE</label>
+            <input 
               type="date" 
+              className="premium-modal-textarea" 
+              style={{ height: '38px', padding: '0 12px' }}
               value={endDate} 
               onChange={(e) => setEndDate(e.target.value)} 
-              InputProps={{
-                sx: { borderRadius: '8px', bgcolor: '#f8fafc', fontSize: '0.875rem' }
-              }}
             />
-          </Grid>
-          <Grid item xs={12} md={1} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button 
-              variant="contained" 
-              sx={{ 
-                minWidth: 40, 
-                width: 40, 
-                height: 40, 
-                borderRadius: '8px', 
-                bgcolor: '#415fff', 
-                boxShadow: 'none', 
-                '&:hover': { bgcolor: '#2b44d1', boxShadow: '0 4px 12px rgba(65, 95, 255, 0.2)' } 
-              }} 
-              onClick={handleSearch}
-            >
-              <SearchIcon />
-            </Button>
-          </Grid>
-        </Grid>
-      </Paper>
+          </div>
+          <div>
+            <button className="btn-action-approve" style={{ height: '38px', width: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#415fff', boxShadow: 'none' }} onClick={handleSearch}>
+              <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24" style={{ width: '20px', height: '20px', fill: 'white' }}><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
+            </button>
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+          <span className="meta-label" style={{ alignSelf: 'center', marginBottom: 0, marginRight: '8px' }}>EXPORT AS:</span>
+          <button className="toggle-details-btn" onClick={exportToCSV}>CSV</button>
+          <button className="toggle-details-btn" onClick={exportToExcel} style={{ color: '#16a34a', borderColor: '#16a34a' }}>Excel</button>
+          <button className="toggle-details-btn" onClick={exportToDoc} style={{ color: '#0284c7', borderColor: '#0284c7' }}>Doc</button>
+          <button className="toggle-details-btn" onClick={exportToPDF} style={{ color: '#dc2626', borderColor: '#dc2626' }}>PDF</button>
+        </div>
+      </div>
 
-      {/* Export Options & Actions */}
-      <Box display="flex" justifyContent="flex-end" alignItems="center" mb={2} gap={1}>
-          <Typography variant="caption" fontWeight="bold" color="textSecondary" mr={1}>EXPORT AS:</Typography>
-          <Button size="small" variant="outlined" startIcon={<TableViewIcon />} onClick={exportToCSV} sx={{ borderRadius: '8px', textTransform: 'none', bgcolor: '#fff' }}>CSV</Button>
-          <Button size="small" variant="outlined" startIcon={<TableViewIcon />} onClick={exportToExcel} color="success" sx={{ borderRadius: '8px', textTransform: 'none', bgcolor: '#fff' }}>Excel</Button>
-          <Button size="small" variant="outlined" startIcon={<DescriptionIcon />} onClick={exportToDoc} color="info" sx={{ borderRadius: '8px', textTransform: 'none', bgcolor: '#fff' }}>Doc</Button>
-          <Button size="small" variant="outlined" startIcon={<PictureAsPdfIcon />} onClick={exportToPDF} color="error" sx={{ borderRadius: '8px', textTransform: 'none', bgcolor: '#fff' }}>PDF</Button>
-      </Box>
+      {error && <div className="machine-card-rejection" style={{ marginBottom: '20px' }}>{error}</div>}
 
-      {/* Results Table */}
-      <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-        <Table>
-          <TableHead sx={{ bgcolor: '#f8fafc' }}>
-            <TableRow>
-              <TableCell fontWeight="bold">Time</TableCell>
-              <TableCell fontWeight="bold">Barcode</TableCell>
-              <TableCell align="center" onClick={() => handleSort('machine')} sx={{ cursor: 'pointer', fontWeight: 'bold', userSelect: 'none', '&:hover': { bgcolor: '#f1f5f9' } }}>
-                Machine {renderSortIcon('machine')}
-              </TableCell>
-              <TableCell align="center" onClick={() => handleSort('side')} sx={{ cursor: 'pointer', fontWeight: 'bold', userSelect: 'none', '&:hover': { bgcolor: '#f1f5f9' } }}>
-                Side {renderSortIcon('side')}
-              </TableCell>
-              <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Block</TableCell>
-              <TableCell align="left">Defect Location</TableCell>
-              <TableCell align="left">Phenomenon</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 10 }}>
-                  <CircularProgress />
-                </TableCell>
-              </TableRow>
-            ) : sortedData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>No data found for the given criteria.</TableCell>
-              </TableRow>
-            ) : (
-                sortedData.map((row) => (
-                  <TableRow key={row.id} hover>
-                    <TableCell>{new Date(row.inspectionTime).toLocaleString()}</TableCell>
-                    <TableCell sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{row.barcode}</TableCell>
-                    <TableCell align="center">
-                      <Box display="flex" flexDirection="column" alignItems="center" gap={0.5}>
-                        <Typography variant="body2" fontWeight="bold">{row.machine.line.name}</Typography>
-                        <Chip 
-                          label={row.machine.type} 
-                          size="small" 
-                          sx={{ 
-                            fontSize: '0.65rem', 
-                            height: 20, 
-                            bgcolor: row.machine.type === 'SPI' ? '#e0f2fe' : '#fce7f3',
-                            color: row.machine.type === 'SPI' ? '#0369a1' : '#be185d',
-                            fontWeight: 'bold'
-                          }} 
-                        />
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      {row.side ? (
-                        <Chip label={row.side} size="small" variant="outlined" color={row.side === 'TOP' ? 'primary' : 'secondary'} />
-                      ) : (
-                        '-'
-                      )}
-                    </TableCell>
-                      <TableCell align="center">
-                        <Chip 
-                          label={row.status} 
-                          size="small" 
-                          color={['PASS', 'GOOD'].includes(row.status) ? 'success' : ['FAIL', 'NG'].includes(row.status) ? 'error' : 'warning'} 
-                          sx={{ fontWeight: 'bold' }}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        {row.defects && row.defects.length > 0 ? (
-                          <Typography variant="body2" fontWeight="medium">
-                            {Array.from(new Set(row.defects.map(d => d.blockId).filter(Boolean))).join(', ')}
-                          </Typography>
-                        ) : (
-                          <Typography variant="caption" color="textSecondary">-</Typography>
-                        )}
-                      </TableCell>
-                      <TableCell align="left">
-                        {row.defects && row.defects.length > 0 ? (
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                            {row.defects.map((d, i) => (
-                              <Chip 
-                                key={i} 
-                                label={`[Block ${d.blockId || '?'}] ${d.componentName}`} 
-                                size="small" 
-                                color="error" 
-                                variant="outlined"
-                                sx={{ fontWeight: 500, bgcolor: '#fef2f2', width: 'fit-content' }}
-                              />
-                            ))}
-                          </Box>
-                        ) : (
-                          <Typography variant="body2" color="text.secondary">-</Typography>
-                        )}
-                      </TableCell>
-                      <TableCell align="left">
-                        {row.defects && row.defects.length > 0 ? (
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                            {row.defects.map((d, i) => (
-                              <Chip 
-                                key={i} 
-                                label={d.defectType} 
-                                size="small" 
-                                color="error" 
-                                variant="outlined"
-                                sx={{ fontWeight: 500, bgcolor: '#fef2f2', width: 'fit-content' }}
-                              />
-                            ))}
-                          </Box>
-                        ) : (
-                          <Typography variant="body2" color="text.secondary">-</Typography>
-                        )}
-                      </TableCell>
-                  </TableRow>
+      <div className="premium-machine-card" style={{ padding: 0 }}>
+        <div className="report-table-wrap">
+          <table className="report-table">
+            <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: '#f8fafc' }}>
+              <tr>
+                <th>Barcode</th>
+                <th>Line</th>
+                <th onClick={() => handleSort('machineName')} style={{ cursor: 'pointer' }}>
+                  Machine {sortConfig?.key === 'machineName' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                </th>
+                <th onClick={() => handleSort('side')} style={{ cursor: 'pointer' }}>
+                  Side {sortConfig?.key === 'side' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                </th>
+                <th>Status</th>
+                <th>Block</th>
+                <th>Defect Location</th>
+                <th>Phenomenon</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={9} style={{ textAlign: 'center', padding: '40px' }}>
+                    <div style={{ display: 'inline-block', width: '24px', height: '24px', border: '3px solid #f3f3f3', borderTop: '3px solid #415fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                  </td>
+                </tr>
+              ) : sortedData.length === 0 ? (
+                <tr>
+                  <td colSpan={9} style={{ textAlign: 'center', color: '#64748b' }}>No data available</td>
+                </tr>
+              ) : (
+                sortedData
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => (
+                  <tr key={row.id}>
+                    <td style={{ fontWeight: 600 }}>{row.barcode}</td>
+                    <td>{row.line}</td>
+                    <td><span className="badge-eqtype eq-POST_AOI">{row.machineName}</span></td>
+                    <td>{row.side}</td>
+                    <td>
+                      <span className={`status-badge ${row.status === 'PASS' ? 'status-approved' : row.status === 'FAIL' ? 'status-disapproved' : 'status-submitted'}`}>
+                        {row.status}
+                      </span>
+                    </td>
+                    <td>{row.blockId || '-'}</td>
+                    <td>
+                      {row.defectLocation ? (
+                        row.defectLocation.split(',').map((loc: string, index: number) => (
+                          <div key={index} style={{ marginBottom: '4px' }}>
+                            <span className="status-badge status-disapproved" style={{ fontSize: '10px', padding: '2px 8px' }}>
+                              {loc.trim()}
+                            </span>
+                          </div>
+                        ))
+                      ) : '-'}
+                    </td>
+                    <td>
+                      {row.defectPhenomenon ? (
+                        row.defectPhenomenon.split(',').map((phenom: string, index: number) => (
+                          <div key={index} style={{ marginBottom: '4px', fontSize: '12px', color: '#64748b' }}>
+                            {phenom.trim()}
+                          </div>
+                        ))
+                      ) : '-'}
+                    </td>
+                    <td style={{ color: '#64748b' }}>{new Date(row.timestamp).toLocaleString()}</td>
+                  </tr>
                 ))
               )}
-            </TableBody>
-          </Table>
-      </TableContainer>
-    </Box>
+            </tbody>
+          </table>
+        </div>
+        
+        {!loading && sortedData.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 24px', borderTop: '1px solid #e2e8f0', width: '100%' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.85rem', color: '#64748b', marginRight: '16px' }}>
+                Page {page + 1} of {totalPages}
+              </span>
+              <button 
+                className="toggle-details-btn" 
+                disabled={page === 0} 
+                onClick={() => handleChangePage(page - 1)}
+                style={{ opacity: page === 0 ? 0.5 : 1, cursor: page === 0 ? 'not-allowed' : 'pointer' }}
+              >
+                Previous
+              </button>
+              <button 
+                className="toggle-details-btn" 
+                disabled={page >= totalPages - 1} 
+                onClick={() => handleChangePage(page + 1)}
+                style={{ opacity: page >= totalPages - 1 ? 0.5 : 1, cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

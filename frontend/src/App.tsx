@@ -1,30 +1,12 @@
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import './App.css'
 import LoginPage from './components/LoginPage'
 import MainLayout from './layouts/MainLayout'
 import Dashboard from './pages/Dashboard'
-
 import LineManagement from './pages/LineManagement'
 import BarcodeHistory from './pages/BarcodeHistory'
-
-const theme = createTheme({
-  typography: {
-    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-  },
-  palette: {
-    primary: {
-      main: '#415fff',
-    },
-    background: {
-      default: '#f8fafc',
-    }
-  },
-  shape: {
-    borderRadius: 20,
-  }
-});
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -57,9 +39,8 @@ function App() {
   if (loading) return null;
 
   return (
-    <ThemeProvider theme={theme}>
-      <Router>
-        <Routes>
+    <Router>
+      <Routes>
         <Route 
           path="/login" 
           element={!isAuthenticated ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/dashboard" replace />} 
@@ -76,7 +57,6 @@ function App() {
         </Route>
       </Routes>
     </Router>
-    </ThemeProvider>
   )
 }
 

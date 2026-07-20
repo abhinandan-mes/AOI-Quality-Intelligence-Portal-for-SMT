@@ -1,25 +1,14 @@
 import React from 'react';
-import { Box, Drawer, AppBar, Toolbar, Typography, List, ListItem, ListItemIcon, ListItemText, CssBaseline, IconButton } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import SearchIcon from '@mui/icons-material/Search';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import HistoryIcon from '@mui/icons-material/History';
-import LogoutIcon from '@mui/icons-material/Logout';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import vivoLogo from '../assets/vivo-logo.svg';
 
-const drawerWidth = 240;
-
-import SettingsIcon from '@mui/icons-material/Settings';
-
 const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-  { text: 'Line Management', icon: <SettingsIcon />, path: '/lines' },
-  { text: 'Barcode History', icon: <HistoryIcon />, path: '/history' },
-  { text: 'Defect Search', icon: <SearchIcon />, path: '/search' },
-  { text: 'Reports', icon: <AssessmentIcon />, path: '/reports' },
-  { text: 'Analytics', icon: <TimelineIcon />, path: '/analytics' },
+  { text: 'Dashboard', icon: '📊', path: '/dashboard' },
+  { text: 'Line Management', icon: '⚙️', path: '/lines' },
+  { text: 'Barcode History', icon: '📜', path: '/history' },
+  { text: 'Defect Search', icon: '🔍', path: '/search' },
+  { text: 'Reports', icon: '📄', path: '/reports' },
+  { text: 'Analytics', icon: '📈', path: '/analytics' },
 ];
 
 export default function MainLayout() {
@@ -32,76 +21,62 @@ export default function MainLayout() {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#eef1f8', maxWidth: '100vw', overflowX: 'hidden' }}>
-      <CssBaseline />
-      <AppBar 
-        position="fixed" 
-        sx={{ 
-          zIndex: (theme) => theme.zIndex.drawer + 1,
-          backgroundColor: '#1d4ed8',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}
-      >
-        <Toolbar>
-          <Box sx={{ display: 'flex', alignItems: 'center', width: drawerWidth - 24 }}>
-            <img src={vivoLogo} alt="vivo" style={{ height: 28, filter: 'brightness(0) invert(1)' }} />
-          </Box>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontWeight: 700 }}>
-            AOI Quality Intelligence Portal
-          </Typography>
-          <IconButton color="inherit" onClick={handleLogout} title="Logout">
-            <LogoutIcon />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box', borderRight: '1px solid rgba(0,0,0,0.08)' },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflowX: 'hidden', overflowY: 'auto', mt: 2 }}>
-          <List>
-            {menuItems.map((item) => {
-              const isSelected = location.pathname === item.path;
-              return (
-                <ListItem 
-                  button 
-                  key={item.text} 
-                  onClick={() => navigate(item.path)}
-                  sx={{
-                    mb: 1,
-                    mx: 1,
-                    borderRadius: 2,
-                    backgroundColor: isSelected ? 'rgba(29, 78, 216, 0.08)' : 'transparent',
-                    color: isSelected ? '#1d4ed8' : '#475569',
-                    '&:hover': {
-                      backgroundColor: 'rgba(29, 78, 216, 0.04)',
-                    }
-                  }}
-                >
-                  <ListItemIcon sx={{ color: isSelected ? '#1d4ed8' : '#64748b' }}>
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText primary={item.text} primaryTypographyProps={{ fontWeight: isSelected ? 700 : 500 }} />
-                </ListItem>
-              );
-            })}
-          </List>
-        </Box>
-      </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Toolbar />
-        <Box sx={{ flexGrow: 1 }}>
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc', maxWidth: '100vw', overflowX: 'hidden' }}>
+      {/* Sidebar */}
+      <div style={{ width: '240px', backgroundColor: '#ffffff', borderRight: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '20px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', backgroundColor: '#415fff' }}>
+          <img src={vivoLogo} alt="vivo" style={{ height: '24px', filter: 'brightness(0) invert(1)' }} />
+        </div>
+        <div style={{ flexGrow: 1, padding: '16px 8px', overflowY: 'auto' }}>
+          {menuItems.map((item) => {
+            const isSelected = location.pathname === item.path;
+            return (
+              <div 
+                key={item.text}
+                onClick={() => navigate(item.path)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '12px 16px',
+                  marginBottom: '8px',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  backgroundColor: isSelected ? 'rgba(65, 95, 255, 0.08)' : 'transparent',
+                  color: isSelected ? '#415fff' : '#64748b',
+                  fontWeight: isSelected ? 700 : 500,
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => { if(!isSelected) e.currentTarget.style.backgroundColor = '#f1f5f9' }}
+                onMouseLeave={(e) => { if(!isSelected) e.currentTarget.style.backgroundColor = 'transparent' }}
+              >
+                <span style={{ marginRight: '12px', fontSize: '1.2rem' }}>{item.icon}</span>
+                <span style={{ fontSize: '0.9rem' }}>{item.text}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflowX: 'hidden' }}>
+        {/* Header */}
+        <header style={{ height: '64px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', padding: '0 24px', justifyContent: 'space-between' }}>
+          <h1 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b', fontWeight: 700 }}>AOI Quality Intelligence Portal</h1>
+          <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>Logout</span> 🚪
+          </button>
+        </header>
+
+        {/* Page Content */}
+        <main style={{ flexGrow: 1, padding: '24px' }}>
           <Outlet />
-        </Box>
-        <Box component="footer" sx={{ mt: 'auto', pt: 3, pb: 1, textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
-          <span style={{ fontWeight: 'bold', textTransform: 'lowercase' }}>vivo</span> V1.20.7.26
-        </Box>
-      </Box>
-    </Box>
+        </main>
+
+        {/* Footer */}
+        <footer style={{ marginTop: 'auto', padding: '16px 24px', textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
+          <span className="small-brand" style={{ fontWeight: 'bold' }}>vivo</span> <span className="footer-version" style={{ color: '#415fff' }}>V1.20.7.26</span>
+        </footer>
+      </div>
+    </div>
   );
 }
