@@ -146,11 +146,17 @@ const processSPIFile = async (filePath: string, lineName: string) => {
   // Extract defects
   const defects: { componentName: string; defectType: string }[] = [];
   
-  if (panel.Component) {
-    const components = Array.isArray(panel.Component) ? panel.Component : [panel.Component];
-    for (const comp of components) {
-      if (comp.$.inspresult !== "0") {
-        defects.push({ componentName: comp.$.name || 'Unknown', defectType: 'SPI Defect' });
+  if (panel.Boards?.[0]?.Board) {
+    for (const board of panel.Boards[0].Board) {
+      if (board.Components?.[0]?.Component) {
+        for (const comp of board.Components[0].Component) {
+          if (comp.$.inspresult !== "0") {
+            // Avoid duplicate block IDs if multiple pads fail on same component
+            if (!defects.find(d => d.componentName === comp.$.name)) {
+              defects.push({ componentName: comp.$.name || 'Unknown', defectType: 'SPI Defect' });
+            }
+          }
+        }
       }
     }
   }
@@ -203,10 +209,14 @@ const saveOrUpdateInspection = async (
         where: { id: existing.id },
         data: { status, inspectionTime: inspTime, ...extraData }
       });
-      if (defects.length > 0) {
-        await prisma.defect.deleteMany({ where: { inspectionId: existing.id }});
+      if (defects && defects.length > 0) {
+        await prisma.defect.deleteMany({ where: { inspectionId: existing.id } });
         await prisma.defect.createMany({
-          data: defects.map(d => ({ ...d, inspectionId: existing.id }))
+          data: defects.map(d => ({
+            inspectionId: existing.id,
+            componentName: d.componentName,
+            defectType: d.defectType
+          }))
         });
       }
       await logImport(filePath, 'MERGED', `Updated existing barcode ${barcode}`, machine.id);

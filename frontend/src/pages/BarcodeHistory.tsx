@@ -150,7 +150,7 @@ export default function BarcodeHistory() {
                 <TableCell fontWeight="bold">Side</TableCell>
                 <TableCell fontWeight="bold">Status</TableCell>
                 <TableCell fontWeight="bold">Defect Location</TableCell>
-                <TableCell fontWeight="bold">SPI Metrics</TableCell>
+                <TableCell fontWeight="bold">SPI / AOI Metrics</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
