@@ -137,30 +137,31 @@ export default function BarcodeHistory() {
 
       {/* Results Table */}
       <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-        {loading ? (
-          <Box display="flex" justifyContent="center" p={5}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Table>
-            <TableHead sx={{ bgcolor: '#f8fafc' }}>
+        <Table>
+          <TableHead sx={{ bgcolor: '#f8fafc' }}>
+            <TableRow>
+              <TableCell fontWeight="bold">Time</TableCell>
+              <TableCell fontWeight="bold">Barcode</TableCell>
+              <TableCell fontWeight="bold">Line / Machine</TableCell>
+              <TableCell fontWeight="bold">Side</TableCell>
+              <TableCell fontWeight="bold">Status</TableCell>
+              <TableCell fontWeight="bold">Block</TableCell>
+              <TableCell fontWeight="bold">Defect Location</TableCell>
+              <TableCell fontWeight="bold">SPI / AOI Metrics</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loading ? (
               <TableRow>
-                <TableCell fontWeight="bold">Time</TableCell>
-                <TableCell fontWeight="bold">Barcode</TableCell>
-                <TableCell fontWeight="bold">Line / Machine</TableCell>
-                <TableCell fontWeight="bold">Side</TableCell>
-                <TableCell fontWeight="bold">Status</TableCell>
-                <TableCell fontWeight="bold">Block</TableCell>
-                <TableCell fontWeight="bold">Defect Location</TableCell>
-                <TableCell fontWeight="bold">SPI / AOI Metrics</TableCell>
+                <TableCell colSpan={8} align="center" sx={{ py: 10 }}>
+                  <CircularProgress />
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 3 }}>No data found for the given criteria.</TableCell>
-                </TableRow>
-              ) : (
+            ) : data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} align="center" sx={{ py: 3 }}>No data found for the given criteria.</TableCell>
+              </TableRow>
+            ) : (
                 data.map((row) => (
                   <TableRow key={row.id} hover>
                     <TableCell>{new Date(row.inspectionTime).toLocaleString()}</TableCell>
@@ -226,23 +227,22 @@ export default function BarcodeHistory() {
                           <Typography variant="caption" color="textSecondary">-</Typography>
                         )}
                       </TableCell>
-                    <TableCell>
-                      {row.machine.type === 'SPI' ? (
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>H: {row.spiHeightAvg} µm</Typography>
-                          <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>A: {row.spiAreaAvg}%</Typography>
-                          <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>V: {row.spiVolumeAvg}%</Typography>
-                        </Box>
-                      ) : (
-                        <Typography variant="caption" color="textSecondary">N/A (AOI)</Typography>
-                      )}
-                    </TableCell>
+                      <TableCell>
+                        {row.machine.type === 'SPI' ? (
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>H: {row.spiHeightAvg ? (row.spiHeightAvg * 1000).toFixed(1) : '-'} µm</Typography>
+                            <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>A: {row.spiAreaAvg ? (row.spiAreaAvg * 100).toFixed(1) : '-'}%</Typography>
+                            <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>V: {row.spiVolumeAvg ? (row.spiVolumeAvg * 100).toFixed(1) : '-'}%</Typography>
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" color="textSecondary">N/A (AOI)</Typography>
+                        )}
+                      </TableCell>
                   </TableRow>
                 ))
               )}
             </TableBody>
           </Table>
-        )}
       </TableContainer>
     </Box>
   );
