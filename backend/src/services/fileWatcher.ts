@@ -132,7 +132,11 @@ const processSPIFile = async (filePath: string, lineName: string) => {
   const modelName = panel.$.ModelName;
   const machineId = panel.$.MachineName;
   const inspTime = new Date(panel.$.start_Insptime);
-  const status = panel.$.resultcode === "1" ? 'PASS' : 'FAIL'; 
+  
+  let status = 'FAIL';
+  if (panel.$.resultcode === "1") status = 'GOOD';
+  else if (panel.$.resultcode === "2") status = 'PASS';
+  else if (panel.$.resultcode === "3") status = 'NG';
 
   const values = panel.Value;
   const spiHeightAvg = parseFloat(values?.Height?.$.data || "0");
@@ -146,6 +150,7 @@ const processSPIFile = async (filePath: string, lineName: string) => {
   // Extract defects
   const defects: { componentName: string; defectType: string; blockId?: string }[] = [];
   
+  // Only extract locations if there are alarms (which happens in NG and Operator PASS)
   if (panel.Boards?.[0]?.Board) {
     for (const board of panel.Boards[0].Board) {
       const blockId = board.$.id || board.$.orderid;

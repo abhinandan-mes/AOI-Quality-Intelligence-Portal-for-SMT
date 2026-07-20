@@ -24,7 +24,9 @@ enum MachineType {
 }
 
 enum InspectionStatus {
+  GOOD
   PASS
+  NG
   FAIL
   WARNING
 }

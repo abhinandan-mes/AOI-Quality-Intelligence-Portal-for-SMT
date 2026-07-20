@@ -195,7 +195,7 @@ export default function BarcodeHistory() {
                         <Chip 
                           label={row.status} 
                           size="small" 
-                          color={row.status === 'PASS' ? 'success' : row.status === 'FAIL' ? 'error' : 'warning'} 
+                          color={['PASS', 'GOOD'].includes(row.status) ? 'success' : ['FAIL', 'NG'].includes(row.status) ? 'error' : 'warning'} 
                           sx={{ fontWeight: 'bold' }}
                         />
                       </TableCell>
@@ -229,9 +229,9 @@ export default function BarcodeHistory() {
                     <TableCell>
                       {row.machine.type === 'SPI' ? (
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>H: {row.spiHeightAvg}</Typography>
-                          <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>A: {row.spiAreaAvg}</Typography>
-                          <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>V: {row.spiVolumeAvg}</Typography>
+                          <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>H: {row.spiHeightAvg} µm</Typography>
+                          <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>A: {row.spiAreaAvg}%</Typography>
+                          <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>V: {row.spiVolumeAvg}%</Typography>
                         </Box>
                       ) : (
                         <Typography variant="caption" color="textSecondary">N/A (AOI)</Typography>
