@@ -4,6 +4,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
+import dashboardRoutes from './routes/dashboard';
 import { startFileWatcher } from './services/fileWatcher';
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Socket.io connection
 io.on('connection', (socket) => {
