@@ -144,8 +144,8 @@ const processSPIFile = async (filePath: string, lineName: string) => {
   const spiVolumeAvg = parseFloat(values?.Volume?.$.data || "0");
 
   let side: string | null = null;
-  if (filePath.match(/[-_\\/]A[-_\\/]/i) || filePath.match(/[-_\\/]TOP[-_\\/]/i)) side = 'TOP';
-  else if (filePath.match(/[-_\\/]B[-_\\/]/i) || filePath.match(/[-_\\/]BOTTOM[-_\\/]/i)) side = 'BOTTOM';
+  if (modelName?.match(/-A-/i) || filePath.match(/[-_\\/]A[-_\\/]/i) || filePath.match(/[-_\\/]TOP[-_\\/]/i)) side = 'TOP';
+  else if (modelName?.match(/-B-/i) || filePath.match(/[-_\\/]B[-_\\/]/i) || filePath.match(/[-_\\/]BOTTOM[-_\\/]/i)) side = 'BOTTOM';
 
   // Extract defects
   const defects: { componentName: string; defectType: string; blockId?: string }[] = [];
