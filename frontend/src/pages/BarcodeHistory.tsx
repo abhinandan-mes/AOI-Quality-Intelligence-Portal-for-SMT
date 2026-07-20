@@ -82,12 +82,12 @@ export default function BarcodeHistory() {
       ...sortedData.map(row => [
         row.barcode,
         row.line,
-        row.machine,
+        row.machine?.name || '',
         row.side,
         row.status,
-        `"${row.blockId || ''}"`,
-        `"${row.defectLocation || ''}"`,
-        `"${row.phenomenon || ''}"`,
+        `"${row.defects?.map((d: any) => d.blockId).join(', ') || ''}"`,
+        `"${row.defects?.map((d: any) => d.componentName).join(', ') || ''}"`,
+        `"${row.defects?.map((d: any) => d.defectType).join(', ') || ''}"`,
         new Date(row.inspectionTime).toLocaleString()
       ].join(','))
     ].join('\n');
@@ -104,12 +104,12 @@ export default function BarcodeHistory() {
     const worksheet = XLSX.utils.json_to_sheet(sortedData.map(row => ({
       Barcode: row.barcode,
       Line: row.line,
-      Machine: row.machine,
+      Machine: row.machine?.name || '',
       Side: row.side,
       Status: row.status,
-      Block: row.blockId,
-      'Defect Location': row.defectLocation,
-      Phenomenon: row.phenomenon,
+      Block: row.defects?.map((d: any) => d.blockId).join(', ') || '',
+      'Defect Location': row.defects?.map((d: any) => d.componentName).join(', ') || '',
+      Phenomenon: row.defects?.map((d: any) => d.defectType).join(', ') || '',
       Date: new Date(row.inspectionTime).toLocaleString()
     })));
     const workbook = XLSX.utils.book_new();
@@ -126,12 +126,12 @@ export default function BarcodeHistory() {
       htmlContent += `<tr>
         <td>${row.barcode}</td>
         <td>${row.line}</td>
-        <td>${row.machine}</td>
+        <td>${row.machine?.name || ''}</td>
         <td>${row.side}</td>
         <td>${row.status}</td>
-        <td>${row.blockId || ''}</td>
-        <td>${row.defectLocation || ''}</td>
-        <td>${row.phenomenon || ''}</td>
+        <td>${row.defects?.map((d: any) => d.blockId).join(', ') || ''}</td>
+        <td>${row.defects?.map((d: any) => d.componentName).join(', ') || ''}</td>
+        <td>${row.defects?.map((d: any) => d.defectType).join(', ') || ''}</td>
         <td>${new Date(row.inspectionTime).toLocaleString()}</td>
       </tr>`;
     });
@@ -154,12 +154,12 @@ export default function BarcodeHistory() {
       const rowData = [
         row.barcode,
         row.line,
-        row.machine,
+        row.machine?.name || '',
         row.side,
         row.status,
-        row.blockId || '',
-        row.defectLocation || '',
-        row.phenomenon || '',
+        row.defects?.map((d: any) => d.blockId).join(', ') || '',
+        row.defects?.map((d: any) => d.componentName).join(', ') || '',
+        row.defects?.map((d: any) => d.defectType).join(', ') || '',
         new Date(row.inspectionTime).toLocaleString()
       ];
       tableRows.push(rowData);
@@ -293,31 +293,31 @@ export default function BarcodeHistory() {
                   .map((row) => (
                   <tr key={row.id}>
                     <td style={{ fontWeight: 600 }}>{row.barcode}</td>
-                    <td>{row.line}</td>
-                    <td><span className="badge-eqtype eq-POST_AOI">{row.machine}</span></td>
+                    <td>{row.machine?.line?.name || row.line || '-'}</td>
+                    <td><span className="badge-eqtype eq-POST_AOI">{row.machine?.name || '-'}</span></td>
                     <td>{row.side}</td>
                     <td>
-                      <span className={`status-badge ${row.status === 'PASS' ? 'status-approved' : row.status === 'FAIL' ? 'status-disapproved' : 'status-submitted'}`}>
+                      <span className={`status-badge ${['PASS', 'GOOD'].includes(row.status) ? 'status-approved' : ['FAIL', 'NG'].includes(row.status) ? 'status-disapproved' : 'status-submitted'}`}>
                         {row.status}
                       </span>
                     </td>
-                    <td>{row.blockId || '-'}</td>
+                    <td>{row.defects && row.defects.length > 0 ? Array.from(new Set(row.defects.map((d: any) => d.blockId).filter(Boolean))).join(', ') : '-'}</td>
                     <td>
-                      {row.defectLocation ? (
-                        row.defectLocation.split(',').map((loc: string, index: number) => (
+                      {row.defects && row.defects.length > 0 ? (
+                        row.defects.map((d: any, index: number) => (
                           <div key={index} style={{ marginBottom: '4px' }}>
                             <span className="status-badge status-disapproved" style={{ fontSize: '10px', padding: '2px 8px' }}>
-                              {loc.trim()}
+                              {d.componentName}
                             </span>
                           </div>
                         ))
                       ) : '-'}
                     </td>
                     <td>
-                      {row.phenomenon ? (
-                        row.phenomenon.split(',').map((phenom: string, index: number) => (
+                      {row.defects && row.defects.length > 0 ? (
+                        row.defects.map((d: any, index: number) => (
                           <div key={index} style={{ marginBottom: '4px', fontSize: '12px', color: '#64748b' }}>
-                            {phenom.trim()}
+                            {d.defectType}
                           </div>
                         ))
                       ) : '-'}
