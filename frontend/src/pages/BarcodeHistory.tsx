@@ -32,7 +32,7 @@ export default function BarcodeHistory() {
       if (startDate) params.append('startDate', startDate);
       if (endDate) params.append('endDate', endDate);
 
-      const response = await axios.get(`http://localhost:5050/api/history?${params.toString()}`);
+      const response = await axios.get(`http://localhost:5050/api/inspections?${params.toString()}`);
       setData(response.data);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to fetch history');
