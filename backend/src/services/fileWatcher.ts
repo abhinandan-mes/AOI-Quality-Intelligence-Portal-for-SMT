@@ -135,7 +135,7 @@ const processSPIFile = async (filePath: string, lineName: string) => {
   
   let status = 'FAIL';
   if (panel.$.resultcode === "0" || panel.$.resultcode === "1") status = 'GOOD';
-  else if (panel.$.resultcode === "2") status = 'PASS';
+  else if (panel.$.resultcode === "2" || panel.$.resultcode === "5") status = 'PASS';
   else if (panel.$.resultcode === "3") status = 'NG';
 
   const values = panel.Value;
@@ -159,11 +159,27 @@ const processSPIFile = async (filePath: string, lineName: string) => {
         const comps = Array.isArray(board.Components.Component) ? board.Components.Component : [board.Components.Component];
         for (const comp of comps) {
           if (comp.$.inspresult !== "0") {
-            // Avoid duplicate block IDs if multiple pads fail on same component
             if (!defects.find(d => d.componentName === comp.$.name)) {
+              let defectType = 'SPI Defect';
+              const code = parseInt(comp.$.inspresult, 10);
+              if (!isNaN(code) && code > 0) {
+                const types = [];
+                if (code & 1) types.push('Height Excess');
+                if (code & 2) types.push('Height Insuff');
+                if (code & 4) types.push('Area Excess');
+                if (code & 8) types.push('Area Insuff');
+                if (code & 16) types.push('Volume Excess');
+                if (code & 32) types.push('Volume Insuff');
+                if (code & 64) types.push('Offset X');
+                if (code & 128) types.push('Offset Y');
+                if (code & 256) types.push('Bridge');
+                if (code & 512) types.push('Shape');
+                if (types.length > 0) defectType = types.join(', ');
+              }
+
               defects.push({ 
                 componentName: comp.$.name || 'Unknown', 
-                defectType: 'SPI Defect',
+                defectType: defectType,
                 blockId: blockId
               });
             }

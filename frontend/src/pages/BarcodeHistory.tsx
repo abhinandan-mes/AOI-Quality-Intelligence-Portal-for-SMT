@@ -142,33 +142,32 @@ export default function BarcodeHistory() {
             <TableRow>
               <TableCell fontWeight="bold">Time</TableCell>
               <TableCell fontWeight="bold">Barcode</TableCell>
-              <TableCell fontWeight="bold">Line / Machine</TableCell>
-              <TableCell fontWeight="bold">Side</TableCell>
-              <TableCell fontWeight="bold">Status</TableCell>
-              <TableCell fontWeight="bold">Block</TableCell>
-              <TableCell fontWeight="bold">Defect Location</TableCell>
-              <TableCell fontWeight="bold">SPI / AOI Metrics</TableCell>
+              <TableCell align="center">Machine</TableCell>
+              <TableCell align="center">Side</TableCell>
+              <TableCell align="center">Status</TableCell>
+              <TableCell align="center">Block Count</TableCell>
+              <TableCell align="left">Defect Locations & Phenomenon</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 10 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 10 }}>
                   <CircularProgress />
                 </TableCell>
               </TableRow>
             ) : data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 3 }}>No data found for the given criteria.</TableCell>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>No data found for the given criteria.</TableCell>
               </TableRow>
             ) : (
                 data.map((row) => (
                   <TableRow key={row.id} hover>
                     <TableCell>{new Date(row.inspectionTime).toLocaleString()}</TableCell>
                     <TableCell sx={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{row.barcode}</TableCell>
-                    <TableCell>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Typography variant="body2">{row.machine.line.name}</Typography>
+                    <TableCell align="center">
+                      <Box display="flex" flexDirection="column" alignItems="center" gap={0.5}>
+                        <Typography variant="body2" fontWeight="bold">{row.machine.line.name}</Typography>
                         <Chip 
                           label={row.machine.type} 
                           size="small" 
@@ -181,18 +180,15 @@ export default function BarcodeHistory() {
                           }} 
                         />
                       </Box>
-                      <Typography variant="caption" color="textSecondary" fontWeight="bold">
-                        {row.machine.type}-{row.machine.line.name.replace('Line-', '')}
-                      </Typography>
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       {row.side ? (
                         <Chip label={row.side} size="small" variant="outlined" color={row.side === 'TOP' ? 'primary' : 'secondary'} />
                       ) : (
                         '-'
                       )}
                     </TableCell>
-                      <TableCell>
+                      <TableCell align="center">
                         <Chip 
                           label={row.status} 
                           size="small" 
@@ -200,42 +196,31 @@ export default function BarcodeHistory() {
                           sx={{ fontWeight: 'bold' }}
                         />
                       </TableCell>
-                      <TableCell>
+                      <TableCell align="center">
                         {row.defects && row.defects.length > 0 ? (
                           <Typography variant="body2" fontWeight="medium">
-                            {Array.from(new Set(row.defects.map(d => d.blockId).filter(Boolean))).join(', ') || '-'}
+                            {Array.from(new Set(row.defects.map(d => d.blockId).filter(Boolean))).length}
                           </Typography>
                         ) : (
                           <Typography variant="caption" color="textSecondary">-</Typography>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell align="left">
                         {row.defects && row.defects.length > 0 ? (
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                             {row.defects.map((d, i) => (
                               <Chip 
                                 key={i} 
-                                label={d.componentName} 
+                                label={`[Block ${d.blockId || '?'}] ${d.componentName} - ${d.defectType}`} 
                                 size="small" 
                                 color="error" 
                                 variant="outlined"
-                                sx={{ borderRadius: 1, backgroundColor: '#fef2f2' }}
+                                sx={{ fontWeight: 500, bgcolor: '#fef2f2' }}
                               />
                             ))}
                           </Box>
                         ) : (
-                          <Typography variant="caption" color="textSecondary">-</Typography>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {row.machine.type === 'SPI' ? (
-                          <Box sx={{ display: 'flex', gap: 1 }}>
-                            <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>H: {row.spiHeightAvg ? (row.spiHeightAvg * 1000).toFixed(1) : '-'} µm</Typography>
-                            <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>A: {row.spiAreaAvg ? (row.spiAreaAvg * 100).toFixed(1) : '-'}%</Typography>
-                            <Typography variant="caption" bgcolor="#f1f5f9" px={1} borderRadius={1}>V: {row.spiVolumeAvg ? (row.spiVolumeAvg * 100).toFixed(1) : '-'}%</Typography>
-                          </Box>
-                        ) : (
-                          <Typography variant="caption" color="textSecondary">N/A (AOI)</Typography>
+                          <Typography variant="body2" color="text.secondary">-</Typography>
                         )}
                       </TableCell>
                   </TableRow>
