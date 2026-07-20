@@ -84,6 +84,7 @@ model Inspection {
   status           InspectionStatus
   isFalseCall      Boolean          @default(false)
   cycleTime        Float?
+  side             String?          // e.g., "TOP" or "BOTTOM"
   
   // Specific SPI metrics (nullable for AOI)
   spiHeightAvg     Float?

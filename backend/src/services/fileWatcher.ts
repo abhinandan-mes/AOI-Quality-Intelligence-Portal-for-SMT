@@ -54,7 +54,6 @@ const setupWatcher = (watchPath: string, type: 'AOI' | 'SPI', lineName: string) 
   const watcher = chokidar.watch(watchPath, {
     ignored: /(^|[\/\\])\../,
     persistent: true,
-    depth: 0,
     awaitWriteFinish: { stabilityThreshold: 2000, pollInterval: 100 }
   });
 
@@ -87,8 +86,11 @@ const setupWatcher = (watchPath: string, type: 'AOI' | 'SPI', lineName: string) 
 };
 
 const moveToDir = async (filePath: string, targetDir: string) => {
-  const fileName = path.basename(filePath);
-  fs.renameSync(filePath, path.join(targetDir, fileName));
+  const ext = path.extname(filePath);
+  const baseName = path.basename(filePath, ext);
+  const timestamp = new Date().getTime();
+  const newFileName = `${baseName}_${timestamp}${ext}`;
+  fs.renameSync(filePath, path.join(targetDir, newFileName));
 };
 
 // Processing logic remains largely similar but we pass lineName 
@@ -111,8 +113,11 @@ const processAOIFile = async (filePath: string, lineName: string) => {
   const machineId = panel.MachineID;
   const inspTime = new Date(panel.InspDateTime);
   const result = panel.InspectResult === 64 || panel.InspectResult === 1 ? 'PASS' : 'FAIL';
+  let side: string | null = null;
+  if (filePath.match(/[-_\\/]A[-_\\/]/i) || filePath.match(/[-_\\/]TOP[-_\\/]/i)) side = 'TOP';
+  else if (filePath.match(/[-_\\/]B[-_\\/]/i) || filePath.match(/[-_\\/]BOTTOM[-_\\/]/i)) side = 'BOTTOM';
   
-  await saveOrUpdateInspection(barcode, modelName, machineId, lineName, 'AOI', inspTime, result, filePath);
+  await saveOrUpdateInspection(barcode, modelName, machineId, lineName, 'AOI', inspTime, result, filePath, { side });
 };
 
 const processSPIFile = async (filePath: string, lineName: string) => {
@@ -134,8 +139,12 @@ const processSPIFile = async (filePath: string, lineName: string) => {
   const spiAreaAvg = parseFloat(values?.Area?.$.data || "0");
   const spiVolumeAvg = parseFloat(values?.Volume?.$.data || "0");
 
+  let side: string | null = null;
+  if (filePath.match(/[-_\\/]A[-_\\/]/i) || filePath.match(/[-_\\/]TOP[-_\\/]/i)) side = 'TOP';
+  else if (filePath.match(/[-_\\/]B[-_\\/]/i) || filePath.match(/[-_\\/]BOTTOM[-_\\/]/i)) side = 'BOTTOM';
+
   await saveOrUpdateInspection(barcode, modelName, machineId, lineName, 'SPI', inspTime, status, filePath, {
-    spiHeightAvg, spiAreaAvg, spiVolumeAvg
+    spiHeightAvg, spiAreaAvg, spiVolumeAvg, side
   });
 };
 
