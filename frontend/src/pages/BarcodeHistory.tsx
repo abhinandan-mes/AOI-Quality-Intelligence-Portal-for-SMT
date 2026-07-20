@@ -257,7 +257,7 @@ export default function BarcodeHistory() {
       {error && <div className="machine-card-rejection" style={{ marginBottom: '20px' }}>{error}</div>}
 
       <div className="premium-machine-card" style={{ padding: 0 }}>
-        <div className="report-table-wrap">
+        <div className="report-table-wrap" style={{ width: '100%' }}>
           <table className="report-table">
             <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: '#f8fafc' }}>
               <tr>
@@ -294,7 +294,7 @@ export default function BarcodeHistory() {
                   <tr key={row.id}>
                     <td style={{ fontWeight: 600 }}>{row.barcode}</td>
                     <td>{row.machine?.line?.name || row.line || '-'}</td>
-                    <td><span className="badge-eqtype eq-POST_AOI">{row.machine?.name || '-'}</span></td>
+                    <td><span className={`badge-eqtype eq-${row.machine?.type === 'SPI' ? 'SPI' : 'POST_AOI'}`}>{row.machine?.type || '-'}</span></td>
                     <td>{row.side}</td>
                     <td>
                       <span className={`status-badge ${['PASS', 'GOOD'].includes(row.status) ? 'status-approved' : ['FAIL', 'NG'].includes(row.status) ? 'status-disapproved' : 'status-submitted'}`}>
