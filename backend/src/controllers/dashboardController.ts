@@ -11,11 +11,11 @@ export const getSummary = async (req: Request, res: Response) => {
     });
 
     const passCount = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today }, status: 'PASS' }
+      where: { inspectionTime: { gte: today }, status: { in: ['PASS', 'GOOD'] } }
     });
 
     const failCount = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today }, status: 'FAIL' }
+      where: { inspectionTime: { gte: today }, status: { in: ['FAIL', 'NG'] } }
     });
 
     const falseCalls = await prisma.inspection.count({
@@ -27,7 +27,7 @@ export const getSummary = async (req: Request, res: Response) => {
     });
     
     const aoiPass = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today }, status: 'PASS', machine: { type: 'AOI' } }
+      where: { inspectionTime: { gte: today }, status: { in: ['PASS', 'GOOD'] }, machine: { type: 'AOI' } }
     });
 
     const spiTotal = await prisma.inspection.count({
@@ -35,7 +35,7 @@ export const getSummary = async (req: Request, res: Response) => {
     });
 
     const spiPass = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today }, status: 'PASS', machine: { type: 'SPI' } }
+      where: { inspectionTime: { gte: today }, status: { in: ['PASS', 'GOOD'] }, machine: { type: 'SPI' } }
     });
 
     const aoiYield = aoiTotal > 0 ? (aoiPass / aoiTotal) * 100 : 100;
@@ -89,12 +89,13 @@ export const getHourlyProduction = async (req: Request, res: Response) => {
     inspections.forEach(insp => {
       const hour = insp.inspectionTime.getHours();
       const isAOI = insp.machine.type === 'AOI';
+      const isPass = insp.status === 'PASS' || insp.status === 'GOOD';
       
       if (isAOI) {
-        if (insp.status === 'PASS') hourlyData[hour].AOI_Pass++;
+        if (isPass) hourlyData[hour].AOI_Pass++;
         else hourlyData[hour].AOI_Fail++;
       } else {
-        if (insp.status === 'PASS') hourlyData[hour].SPI_Pass++;
+        if (isPass) hourlyData[hour].SPI_Pass++;
         else hourlyData[hour].SPI_Fail++;
       }
     });

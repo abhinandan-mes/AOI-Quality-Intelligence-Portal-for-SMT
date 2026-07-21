@@ -213,8 +213,8 @@ export default function BarcodeHistory() {
               onChange={(e) => setStatus(e.target.value)}
             >
               <option value="">All Statuses</option>
-              <option value="PASS">PASS</option>
-              <option value="FAIL">FAIL</option>
+              <option value="PASS">PASS / GOOD</option>
+              <option value="FAIL">FAIL / NG</option>
               <option value="WARNING">WARNING</option>
             </select>
           </div>
