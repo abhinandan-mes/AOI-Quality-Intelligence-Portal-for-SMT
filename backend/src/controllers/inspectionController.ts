@@ -12,13 +12,7 @@ export const searchInspections = async (req: Request, res: Response) => {
     }
     
     if (status) {
-      if (status === 'PASS') {
-        whereClause.status = { in: ['PASS', 'GOOD'] };
-      } else if (status === 'FAIL') {
-        whereClause.status = { in: ['FAIL', 'NG'] };
-      } else {
-        whereClause.status = String(status);
-      }
+      whereClause.status = String(status);
     }
 
     if (machineType) {

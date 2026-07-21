@@ -208,8 +208,10 @@ export default function BarcodeHistory() {
           <div className="filter-group">
             <select value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="">All Statuses</option>
-              <option value="PASS">PASS / GOOD</option>
-              <option value="FAIL">FAIL / NG</option>
+              <option value="PASS">PASS</option>
+              <option value="GOOD">GOOD</option>
+              <option value="FAIL">FAIL</option>
+              <option value="NG">NG</option>
               <option value="WARNING">WARNING</option>
             </select>
           </div>
