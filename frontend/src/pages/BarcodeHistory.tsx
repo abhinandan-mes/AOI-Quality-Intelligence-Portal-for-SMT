@@ -183,90 +183,76 @@ export default function BarcodeHistory() {
   const totalPages = Math.ceil(sortedData.length / rowsPerPage);
 
   return (
-    <div className="reports-container">
-      <div className="reports-heading">
+    <div className="reports-container animate-fade-in">
+      <div className="reports-heading" style={{ marginBottom: '32px' }}>
         <div>
-          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '1.8rem', fontWeight: 800 }}>Barcode History & Data Search</h2>
-          <p style={{ color: '#64748b', marginTop: '8px' }}>Search and filter through historical AOI and SPI inspection records.</p>
+          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px' }}>Barcode History</h2>
+          <p style={{ color: '#64748b', marginTop: '8px', fontSize: '1rem' }}>Search, filter, and export historical AOI and SPI inspection records.</p>
         </div>
       </div>
 
-      <div className="premium-kpi-card" style={{ flexDirection: 'column', alignItems: 'stretch', marginBottom: '24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '16px', alignItems: 'flex-end', width: '100%' }}>
-          <div>
-            <label className="meta-label">BARCODE</label>
+      {/* Unified Toolbar */}
+      <div className="premium-toolbar animate-slide-up">
+        <div className="toolbar-filters">
+          <div className="filter-group">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="filter-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input 
               type="text" 
-              className="premium-modal-textarea" 
-              style={{ height: '38px', padding: '0 12px' }}
+              placeholder="Search barcode..."
               value={barcode} 
               onChange={(e) => setBarcode(e.target.value)} 
-              placeholder="Scan or type barcode..."
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
-          <div>
-            <label className="meta-label">STATUS</label>
-            <select 
-              className="premium-modal-textarea" 
-              style={{ height: '38px', padding: '0 12px' }}
-              value={status} 
-              onChange={(e) => setStatus(e.target.value)}
-            >
+          <div className="filter-divider"></div>
+          <div className="filter-group">
+            <select value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="">All Statuses</option>
               <option value="PASS">PASS / GOOD</option>
               <option value="FAIL">FAIL / NG</option>
               <option value="WARNING">WARNING</option>
             </select>
           </div>
-          <div>
-            <label className="meta-label">START DATE</label>
-            <input 
-              type="date" 
-              className="premium-modal-textarea" 
-              style={{ height: '38px', padding: '0 12px' }}
-              value={startDate} 
-              onChange={(e) => setStartDate(e.target.value)} 
-            />
+          <div className="filter-divider"></div>
+          <div className="filter-group date-group">
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            <span className="date-separator">to</span>
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </div>
-          <div>
-            <label className="meta-label">END DATE</label>
-            <input 
-              type="date" 
-              className="premium-modal-textarea" 
-              style={{ height: '38px', padding: '0 12px' }}
-              value={endDate} 
-              onChange={(e) => setEndDate(e.target.value)} 
-            />
-          </div>
-          <div>
-            <button className="btn-action-approve" style={{ height: '38px', width: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#415fff', boxShadow: 'none' }} onClick={handleSearch}>
-              <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24" style={{ width: '20px', height: '20px', fill: 'white' }}><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path></svg>
-            </button>
-          </div>
+          <button className="btn-primary-search" onClick={handleSearch}>
+            Search
+          </button>
         </div>
-        
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
-          <span className="meta-label" style={{ alignSelf: 'center', marginBottom: 0, marginRight: '8px' }}>EXPORT AS:</span>
-          <button className="toggle-details-btn" onClick={exportToCSV}>CSV</button>
-          <button className="toggle-details-btn" onClick={exportToExcel} style={{ color: '#16a34a', borderColor: '#16a34a' }}>Excel</button>
-          <button className="toggle-details-btn" onClick={exportToDoc} style={{ color: '#0284c7', borderColor: '#0284c7' }}>Doc</button>
-          <button className="toggle-details-btn" onClick={exportToPDF} style={{ color: '#dc2626', borderColor: '#dc2626' }}>PDF</button>
+
+        <div className="toolbar-actions">
+          <button className="export-icon-btn" onClick={exportToCSV} title="Export as CSV">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </button>
+          <button className="export-icon-btn excel" onClick={exportToExcel} title="Export as Excel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line><polyline points="10.5 12 12 15 13.5 12"></polyline></svg>
+          </button>
+          <button className="export-icon-btn doc" onClick={exportToDoc} title="Export as Word">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </button>
+          <button className="export-icon-btn pdf" onClick={exportToPDF} title="Export as PDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </button>
         </div>
       </div>
 
-      {error && <div className="machine-card-rejection" style={{ marginBottom: '20px' }}>{error}</div>}
+      {error && <div className="machine-card-rejection animate-slide-up" style={{ marginBottom: '20px' }}>{error}</div>}
 
-      <div className="premium-machine-card" style={{ padding: 0 }}>
-        <div className="report-table-wrap" style={{ width: '100%' }}>
-          <table className="report-table">
-            <thead style={{ position: 'sticky', top: 0, zIndex: 10, background: '#f8fafc' }}>
+      <div className="premium-table-card animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <div className="report-table-wrap">
+          <table className="report-table premium-table">
+            <thead>
               <tr>
                 <th>Barcode</th>
                 <th>Line</th>
-                <th onClick={() => handleSort('machine')} style={{ cursor: 'pointer' }}>
+                <th onClick={() => handleSort('machine')} style={{ cursor: 'pointer' }} className="sortable-header">
                   Machine {sortConfig?.key === 'machine' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                 </th>
-                <th onClick={() => handleSort('side')} style={{ cursor: 'pointer' }}>
+                <th onClick={() => handleSort('side')} style={{ cursor: 'pointer' }} className="sortable-header">
                   Side {sortConfig?.key === 'side' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                 </th>
                 <th>Status</th>
@@ -278,35 +264,49 @@ export default function BarcodeHistory() {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', padding: '40px' }}>
-                    <div style={{ display: 'inline-block', width: '24px', height: '24px', border: '3px solid #f3f3f3', borderTop: '3px solid #415fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                  </td>
-                </tr>
+                Array.from({ length: 8 }).map((_, i) => (
+                  <tr key={i} className="skeleton-row">
+                    <td><div className="skeleton-box" style={{ width: '120px' }}></div></td>
+                    <td><div className="skeleton-box" style={{ width: '80px' }}></div></td>
+                    <td><div className="skeleton-box" style={{ width: '60px' }}></div></td>
+                    <td><div className="skeleton-box" style={{ width: '40px' }}></div></td>
+                    <td><div className="skeleton-box" style={{ width: '60px', borderRadius: '12px' }}></div></td>
+                    <td><div className="skeleton-box" style={{ width: '50px' }}></div></td>
+                    <td><div className="skeleton-box" style={{ width: '90px' }}></div></td>
+                    <td><div className="skeleton-box" style={{ width: '100px' }}></div></td>
+                    <td><div className="skeleton-box" style={{ width: '140px' }}></div></td>
+                  </tr>
+                ))
               ) : sortedData.length === 0 ? (
                 <tr>
-                  <td colSpan={9} style={{ textAlign: 'center', color: '#64748b' }}>No data available</td>
+                  <td colSpan={9}>
+                    <div className="premium-empty-state">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                      <h4>No Inspection Records Found</h4>
+                      <p>Try adjusting your search filters or dates to find what you're looking for.</p>
+                    </div>
+                  </td>
                 </tr>
               ) : (
                 sortedData
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => (
                   <tr key={row.id}>
-                    <td style={{ fontWeight: 600 }}>{row.barcode}</td>
-                    <td>{row.machine?.line?.name || row.line || '-'}</td>
-                    <td><span className={`badge-eqtype eq-${row.machine?.type === 'SPI' ? 'SPI' : 'POST_AOI'}`}>{row.machine?.type || '-'}</span></td>
-                    <td>{row.side}</td>
+                    <td className="barcode-cell">{row.barcode}</td>
+                    <td className="text-muted">{row.machine?.line?.name || row.line || '-'}</td>
+                    <td><span className={\`badge-eqtype eq-\${row.machine?.type === 'SPI' ? 'SPI' : 'POST_AOI'}\`}>{row.machine?.type || '-'}</span></td>
+                    <td className="text-muted">{row.side}</td>
                     <td>
-                      <span className={`status-badge ${['PASS', 'GOOD'].includes(row.status) ? 'status-approved' : ['FAIL', 'NG'].includes(row.status) ? 'status-disapproved' : 'status-submitted'}`}>
+                      <span className={\`status-badge \${['PASS', 'GOOD'].includes(row.status) ? 'status-approved' : ['FAIL', 'NG'].includes(row.status) ? 'status-disapproved' : 'status-submitted'}\`}>
                         {row.status}
                       </span>
                     </td>
-                    <td>{row.defects && row.defects.length > 0 ? Array.from(new Set(row.defects.map((d: any) => d.blockId).filter(Boolean))).join(', ') : '-'}</td>
+                    <td className="text-muted">{row.defects && row.defects.length > 0 ? Array.from(new Set(row.defects.map((d: any) => d.blockId).filter(Boolean))).join(', ') : '-'}</td>
                     <td>
                       {row.defects && row.defects.length > 0 ? (
                         row.defects.map((d: any, index: number) => (
                           <div key={index} style={{ marginBottom: '4px' }}>
-                            <span className="status-badge status-disapproved" style={{ fontSize: '10px', padding: '2px 8px' }}>
+                            <span className="defect-badge">
                               {d.componentName}
                             </span>
                           </div>
@@ -322,7 +322,7 @@ export default function BarcodeHistory() {
                         ))
                       ) : '-'}
                     </td>
-                    <td style={{ color: '#64748b' }}>{new Date(row.inspectionTime).toLocaleString()}</td>
+                    <td className="text-muted">{new Date(row.inspectionTime).toLocaleString()}</td>
                   </tr>
                 ))
               )}
@@ -331,24 +331,23 @@ export default function BarcodeHistory() {
         </div>
         
         {!loading && sortedData.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 24px', borderTop: '1px solid #e2e8f0', width: '100%' }}>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.85rem', color: '#64748b', marginRight: '16px' }}>
-                Page {page + 1} of {totalPages}
-              </span>
+          <div className="premium-pagination">
+            <span className="pagination-info">
+              Showing {page * rowsPerPage + 1} to {Math.min((page + 1) * rowsPerPage, sortedData.length)} of {sortedData.length} entries
+            </span>
+            <div className="pagination-controls">
               <button 
-                className="toggle-details-btn" 
+                className="pagination-btn" 
                 disabled={page === 0} 
                 onClick={() => handleChangePage(page - 1)}
-                style={{ opacity: page === 0 ? 0.5 : 1, cursor: page === 0 ? 'not-allowed' : 'pointer' }}
               >
                 Previous
               </button>
+              <span className="pagination-current">{page + 1}</span>
               <button 
-                className="toggle-details-btn" 
+                className="pagination-btn" 
                 disabled={page >= totalPages - 1} 
                 onClick={() => handleChangePage(page + 1)}
-                style={{ opacity: page >= totalPages - 1 ? 0.5 : 1, cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}
               >
                 Next
               </button>
