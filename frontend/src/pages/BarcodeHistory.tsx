@@ -294,10 +294,10 @@ export default function BarcodeHistory() {
                   <tr key={row.id}>
                     <td className="barcode-cell">{row.barcode}</td>
                     <td className="text-muted">{row.machine?.line?.name || row.line || '-'}</td>
-                    <td><span className={\`badge-eqtype eq-\${row.machine?.type === 'SPI' ? 'SPI' : 'POST_AOI'}\`}>{row.machine?.type || '-'}</span></td>
+                    <td><span className={`badge-eqtype eq-${row.machine?.type === 'SPI' ? 'SPI' : 'POST_AOI'}`}>{row.machine?.type || '-'}</span></td>
                     <td className="text-muted">{row.side}</td>
                     <td>
-                      <span className={\`status-badge \${['PASS', 'GOOD'].includes(row.status) ? 'status-approved' : ['FAIL', 'NG'].includes(row.status) ? 'status-disapproved' : 'status-submitted'}\`}>
+                      <span className={`status-badge ${['PASS', 'GOOD'].includes(row.status) ? 'status-approved' : ['FAIL', 'NG'].includes(row.status) ? 'status-disapproved' : 'status-submitted'}`}>
                         {row.status}
                       </span>
                     </td>
