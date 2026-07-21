@@ -8,7 +8,8 @@ const svc = new Service({
   // Since we use tsx in dev, for production we should compile to JS or use ts-node.
   // We'll compile to build/server.js in production, or if not compiled, use tsx/ts-node.
   // Assuming tsc is run to produce 'build/server.js'
-  script: path.join(__dirname, 'build', 'server.js'),
+  script: path.join(__dirname, 'node_modules', 'tsx', 'dist', 'cli.mjs'),
+  scriptOptions: 'src/server.ts',
   nodeOptions: [
     '--harmony',
     '--max_old_space_size=4096'

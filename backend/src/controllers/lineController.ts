@@ -28,7 +28,7 @@ export const createLine = async (req: Request, res: Response) => {
 
 export const updateLine = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const { name, description, isInstalled, aoiWatchPath, spiWatchPath } = req.body;
     
     const line = await prisma.line.update({
@@ -44,7 +44,7 @@ export const updateLine = async (req: Request, res: Response) => {
 
 export const deleteLine = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     await prisma.line.delete({ where: { id } });
     reloadWatchers();
     res.json({ success: true });
