@@ -80,9 +80,11 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
 
         {/* Unified Global Footer */}
         <footer style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '0.75rem', fontWeight: 500 }}>
-          <div>{t('footer.line1')}</div>
+          <div>
+            {t('footer.line1').split(' | ')[0]} | <span style={{ color: '#2b52f6', fontWeight: 700 }}>{t('footer.line1').split(' | ')[1]}</span>
+          </div>
           <div style={{ marginTop: '4px' }}>
-            {t('footer.line2')} <a href="https://abhinandan.pro" target="_blank" rel="noreferrer" style={{ color: '#224be6', fontWeight: 700, textDecoration: 'none' }}>Abhinandan Kumar</a>
+            {t('footer.line2')} <a href="http://localhost:8951/?action=talkapi&toUserCode=95003989" target="_blank" rel="noreferrer" style={{ color: '#2b52f6', fontWeight: 700, textDecoration: 'none' }}>Abhinandan Kumar</a>
           </div>
         </footer>
       </div>

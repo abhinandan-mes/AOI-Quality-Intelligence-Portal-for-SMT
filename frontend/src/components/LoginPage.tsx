@@ -35,10 +35,10 @@ export default function LoginPage({ onLogin }: { onLogin: (cred: any) => void })
           overflow: 'hidden' 
         }}>
           
-          {/* Left Pane - Blue Gradient */}
+          {/* Left Pane - Blue Gradient & Shapes */}
           <div style={{ 
             flex: '1.4', 
-            background: 'linear-gradient(180deg, #3753e8 0%, #224be6 100%)',
+            backgroundColor: '#2b52f6',
             color: 'white',
             display: 'flex',
             flexDirection: 'column',
@@ -51,7 +51,7 @@ export default function LoginPage({ onLogin }: { onLogin: (cred: any) => void })
               alignItems: 'center', 
               gap: '16px', 
               padding: '24px 40px',
-              borderBottom: '1px solid rgba(255,255,255,0.15)',
+              backgroundColor: '#304be7',
               zIndex: 1 
             }}>
               <img src={vivoLogo} alt="vivo" style={{ height: '24px', filter: 'brightness(0) invert(1)' }} />
@@ -59,29 +59,55 @@ export default function LoginPage({ onLogin }: { onLogin: (cred: any) => void })
               <span style={{ fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.02em' }}>{t('login.title')}</span>
             </div>
 
-            {/* Decorative background circle */}
+            {/* Decorative background shapes (3 circles as per reference) */}
+            {/* Top Right Large Circle */}
             <div style={{
               position: 'absolute',
-              top: '10%',
-              right: '-15%',
-              width: '500px',
-              height: '500px',
-              background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%)',
+              top: '-15%',
+              right: '-20%',
+              width: '600px',
+              height: '600px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '50%',
+              pointerEvents: 'none'
+            }} />
+            
+            {/* Bottom Left Circle */}
+            <div style={{
+              position: 'absolute',
+              bottom: '-10%',
+              left: '-10%',
+              width: '300px',
+              height: '300px',
+              backgroundColor: 'rgba(255, 255, 255, 0.04)',
+              borderRadius: '50%',
+              pointerEvents: 'none'
+            }} />
+
+            {/* Bottom Right Circle */}
+            <div style={{
+              position: 'absolute',
+              bottom: '10%',
+              right: '-10%',
+              width: '250px',
+              height: '250px',
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
               borderRadius: '50%',
               pointerEvents: 'none'
             }} />
 
             <div style={{ zIndex: 1, padding: '48px 40px', marginTop: '20px' }}>
+              {/* Badge */}
               <div style={{ 
                 display: 'inline-block', 
-                padding: '6px 12px', 
-                background: 'rgba(255,255,255,0.2)', 
+                padding: '8px 16px', 
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
                 borderRadius: '100px',
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 letterSpacing: '0.05em',
                 marginBottom: '24px',
-                backdropFilter: 'blur(4px)'
               }}>
                 ✦ {t('login.subtitle')}
               </div>
@@ -218,9 +244,11 @@ export default function LoginPage({ onLogin }: { onLogin: (cred: any) => void })
 
       {/* Unified Global Footer */}
       <footer style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '0.75rem', fontWeight: 500 }}>
-        <div>{t('footer.line1')}</div>
+        <div>
+          {t('footer.line1').split(' | ')[0]} | <span style={{ color: '#2b52f6', fontWeight: 700 }}>{t('footer.line1').split(' | ')[1]}</span>
+        </div>
         <div style={{ marginTop: '4px' }}>
-          {t('footer.line2')} <a href="https://abhinandan.pro" target="_blank" rel="noreferrer" style={{ color: '#224be6', fontWeight: 700, textDecoration: 'none' }}>Abhinandan Kumar</a>
+          {t('footer.line2')} <a href="http://localhost:8951/?action=talkapi&toUserCode=95003989" target="_blank" rel="noreferrer" style={{ color: '#2b52f6', fontWeight: 700, textDecoration: 'none' }}>Abhinandan Kumar</a>
         </div>
       </footer>
     </div>

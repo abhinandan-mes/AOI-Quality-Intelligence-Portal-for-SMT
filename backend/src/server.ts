@@ -3,7 +3,10 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth';
+import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
+import permissionRoutes from './routes/permissionRoutes';
+import activityRoutes from './routes/activityRoutes';
 import dashboardRoutes from './routes/dashboard';
 import lineRoutes from './routes/lineRoutes';
 import inspectionRoutes from './routes/inspectionRoutes';
@@ -31,6 +34,9 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/permissions', permissionRoutes);
+app.use('/api/activity', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/lines', lineRoutes);
 app.use('/api/inspections', inspectionRoutes);
