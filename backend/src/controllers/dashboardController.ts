@@ -1,55 +1,48 @@
 import { Request, Response } from 'express';
 import prisma from '../prismaClient';
 
+const getDateFromTimeframe = (timeframe: string) => {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  if (timeframe === 'weekly') {
+    date.setDate(date.getDate() - 7);
+  } else if (timeframe === 'monthly') {
+    date.setMonth(date.getMonth() - 1);
+  }
+  return date;
+};
+
 export const getSummary = async (req: Request, res: Response) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const timeframe = (req.query.timeframe as string) || 'today';
+    const startDate = getDateFromTimeframe(timeframe);
 
     const totalInspections = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today } }
+      where: { inspectionTime: { gte: startDate } }
     });
 
     const passCount = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today }, status: { in: ['PASS', 'GOOD'] } }
+      where: { inspectionTime: { gte: startDate }, status: { in: ['PASS', 'GOOD'] } }
     });
 
-    const failCount = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today }, status: { in: ['FAIL', 'NG'] } }
+    // We'll count the total number of Defects
+    const defectCount = await prisma.defect.count({
+      where: { inspection: { inspectionTime: { gte: startDate } } }
     });
 
-    const falseCalls = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today }, isFalseCall: true }
+    // Active machines (machines that had an inspection in this timeframe)
+    const activeMachinesRes = await prisma.inspection.groupBy({
+      by: ['machineId'],
+      where: { inspectionTime: { gte: startDate } },
+      _count: { machineId: true }
     });
-
-    const aoiTotal = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today }, machine: { type: 'AOI' } }
-    });
-    
-    const aoiPass = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today }, status: { in: ['PASS', 'GOOD'] }, machine: { type: 'AOI' } }
-    });
-
-    const spiTotal = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today }, machine: { type: 'SPI' } }
-    });
-
-    const spiPass = await prisma.inspection.count({
-      where: { inspectionTime: { gte: today }, status: { in: ['PASS', 'GOOD'] }, machine: { type: 'SPI' } }
-    });
-
-    const aoiYield = aoiTotal > 0 ? (aoiPass / aoiTotal) * 100 : 100;
-    const spiYield = spiTotal > 0 ? (spiPass / spiTotal) * 100 : 100;
-    const overallYield = totalInspections > 0 ? (passCount / totalInspections) * 100 : 100;
+    const activeMachinesCount = activeMachinesRes.length;
 
     res.json({
       totalInspections,
       passCount,
-      failCount,
-      falseCalls,
-      aoiYield: parseFloat(aoiYield.toFixed(2)),
-      spiYield: parseFloat(spiYield.toFixed(2)),
-      overallYield: parseFloat(overallYield.toFixed(2))
+      defectCount,
+      activeMachinesCount
     });
   } catch (error) {
     console.error('Error fetching summary:', error);
@@ -57,56 +50,92 @@ export const getSummary = async (req: Request, res: Response) => {
   }
 };
 
-export const getHourlyProduction = async (req: Request, res: Response) => {
+export const getDashboardData = async (req: Request, res: Response) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const timeframe = (req.query.timeframe as string) || 'today';
+    const startDate = getDateFromTimeframe(timeframe);
 
-    const inspections = await prisma.inspection.findMany({
-      where: { inspectionTime: { gte: today } },
-      select: {
-        inspectionTime: true,
-        status: true,
-        machine: {
-          select: { type: true }
-        }
-      }
-    });
-
-    // Group by hour
-    const hourlyData: Record<number, { hour: string, AOI_Pass: number, AOI_Fail: number, SPI_Pass: number, SPI_Fail: number }> = {};
-
-    for (let i = 0; i < 24; i++) {
-      hourlyData[i] = {
-        hour: `${i.toString().padStart(2, '0')}:00`,
-        AOI_Pass: 0,
-        AOI_Fail: 0,
-        SPI_Pass: 0,
-        SPI_Fail: 0
-      };
+    // 1. Output Trend (Inspections per day/hour)
+    let trendData: any[] = [];
+    if (timeframe === 'today') {
+      const inspections = await prisma.inspection.findMany({
+        where: { inspectionTime: { gte: startDate } },
+        select: { inspectionTime: true }
+      });
+      const hourly = new Array(24).fill(0);
+      inspections.forEach(i => {
+        hourly[i.inspectionTime.getHours()]++;
+      });
+      trendData = hourly.map((count, hour) => ({ name: `${hour}:00`, count })).filter(d => d.count > 0);
+    } else {
+      const inspections = await prisma.inspection.findMany({
+        where: { inspectionTime: { gte: startDate } },
+        select: { inspectionTime: true }
+      });
+      const daily: Record<string, number> = {};
+      inspections.forEach(i => {
+        const d = i.inspectionTime.toLocaleDateString('en-US', { weekday: 'short' });
+        daily[d] = (daily[d] || 0) + 1;
+      });
+      // We want to sort them somewhat sequentially, but for now just output
+      trendData = Object.keys(daily).map(key => ({ name: key, count: daily[key] }));
     }
 
-    inspections.forEach(insp => {
-      const hour = insp.inspectionTime.getHours();
-      const isAOI = insp.machine.type === 'AOI';
-      const isPass = insp.status === 'PASS' || insp.status === 'GOOD';
-      
-      if (isAOI) {
-        if (isPass) hourlyData[hour].AOI_Pass++;
-        else hourlyData[hour].AOI_Fail++;
-      } else {
-        if (isPass) hourlyData[hour].SPI_Pass++;
-        else hourlyData[hour].SPI_Fail++;
+    // 2. Distribution (Yield: Pass vs Fail vs NG)
+    const distDataRaw = await prisma.inspection.groupBy({
+      by: ['status'],
+      where: { inspectionTime: { gte: startDate } },
+      _count: { status: true }
+    });
+    const distData = distDataRaw.map(d => ({ name: d.status, value: d._count.status }));
+
+    // 3. Top Defective Components
+    const defects = await prisma.defect.findMany({
+      where: { inspection: { inspectionTime: { gte: startDate } } },
+      select: { componentName: true, defectType: true }
+    });
+    
+    const compCount: Record<string, { type: string, count: number }> = {};
+    defects.forEach(d => {
+      const comp = d.componentName || 'Unknown';
+      if (!compCount[comp]) compCount[comp] = { type: d.defectType, count: 0 };
+      compCount[comp].count++;
+    });
+    
+    const topComponents = Object.keys(compCount)
+      .map(comp => ({ 
+        component: comp, 
+        defectType: compCount[comp].type, 
+        count: compCount[comp].count 
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5); // Top 5
+
+    // 4. Recent Inspections
+    const recentInspections = await prisma.inspection.findMany({
+      orderBy: { inspectionTime: 'desc' },
+      take: 5,
+      include: {
+        machine: { include: { line: true } }
       }
     });
 
-    const chartData = Object.values(hourlyData).filter(d => 
-      d.AOI_Pass > 0 || d.AOI_Fail > 0 || d.SPI_Pass > 0 || d.SPI_Fail > 0
-    );
+    const recentFormatted = recentInspections.map(i => ({
+      barcode: i.barcode,
+      line: i.machine?.line?.name || '-',
+      machine: i.machine?.name || '-',
+      status: i.status,
+      timestamp: i.inspectionTime.toLocaleString()
+    }));
 
-    res.json(chartData);
+    res.json({
+      trendData,
+      distData,
+      topComponents,
+      recentInspections: recentFormatted
+    });
   } catch (error) {
-    console.error('Error fetching hourly data:', error);
+    console.error('Error fetching dashboard data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };

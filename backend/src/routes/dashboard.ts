@@ -1,9 +1,9 @@
-import { Router } from 'express';
-import { getSummary, getHourlyProduction } from '../controllers/dashboardController';
+import express from 'express';
+import { getSummary, getDashboardData } from '../controllers/dashboardController';
 
-const router = Router();
+const router = express.Router();
 
 router.get('/summary', getSummary);
-router.get('/hourly', getHourlyProduction);
+router.get('/data', getDashboardData);
 
 export default router;
