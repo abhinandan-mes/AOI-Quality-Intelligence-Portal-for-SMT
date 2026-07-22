@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Dashboard.css';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Dashboard() {
+  const { t } = useLanguage();
   const [timeframe, setTimeframe] = useState<'today' | 'weekly' | 'monthly'>('weekly');
   const [summary, setSummary] = useState<any>({ totalInspections: 0, passCount: 0, defectCount: 0, activeMachinesCount: 0 });
   const [trendData, setTrendData] = useState<any[]>([]);
@@ -41,7 +43,7 @@ export default function Dashboard() {
     <div className="dashboard-container">
       <div className="dashboard-header">
         <div>
-          <h1>Production Dashboard</h1>
+          <h1>{t('menu.dashboard')}</h1>
           <div className="subtitle">
             {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')} | Last refreshed {new Date().toLocaleTimeString()}
           </div>
@@ -71,22 +73,22 @@ export default function Dashboard() {
 
       <div className="summary-cards-grid">
         <div className="summary-card blue">
-          <div className="summary-card-title">Total Inspections</div>
+          <div className="summary-card-title">{t('dashboard.totalInspections')}</div>
           <div className="summary-card-value">{summary.totalInspections.toLocaleString()}</div>
           <div className="summary-card-subtitle">Total panel barcodes</div>
         </div>
         <div className="summary-card green">
-          <div className="summary-card-title">Passed Boards</div>
+          <div className="summary-card-title">{t('dashboard.passedBoards')}</div>
           <div className="summary-card-value">{summary.passCount.toLocaleString()}</div>
           <div className="summary-card-subtitle">Boards passed inspection</div>
         </div>
         <div className="summary-card orange">
-          <div className="summary-card-title">Defects Detected</div>
+          <div className="summary-card-title">{t('dashboard.defectsDetected')}</div>
           <div className="summary-card-value">{summary.defectCount.toLocaleString()}</div>
           <div className="summary-card-subtitle">Total individual defects</div>
         </div>
         <div className="summary-card teal">
-          <div className="summary-card-title">Active Machines</div>
+          <div className="summary-card-title">{t('dashboard.activeMachines')}</div>
           <div className="summary-card-value">{summary.activeMachinesCount.toLocaleString()}</div>
           <div className="summary-card-subtitle">In-progress sessions</div>
         </div>

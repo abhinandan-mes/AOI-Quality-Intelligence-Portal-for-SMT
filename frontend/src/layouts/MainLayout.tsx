@@ -1,19 +1,21 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import vivoLogo from '../assets/vivo-logo.svg';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const menuItems = [
-  { text: 'Dashboard', icon: '📊', path: '/dashboard' },
-  { text: 'Line Management', icon: '⚙️', path: '/lines' },
-  { text: 'Barcode History', icon: '📜', path: '/history' },
-  { text: 'Defect Search', icon: '🔍', path: '/search' },
-  { text: 'Reports', icon: '📄', path: '/reports' },
-  { text: 'Analytics', icon: '📈', path: '/analytics' },
+  { key: 'menu.dashboard', icon: '📊', path: '/dashboard' },
+  { key: 'menu.lines', icon: '⚙️', path: '/lines' },
+  { key: 'menu.history', icon: '📜', path: '/history' },
+  { key: 'menu.search', icon: '🔍', path: '/search' },
+  { key: 'menu.reports', icon: '📄', path: '/reports' },
+  { key: 'menu.analytics', icon: '📈', path: '/analytics' },
 ];
 
 export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -36,7 +38,7 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
             const isSelected = location.pathname === item.path;
             return (
               <div 
-                key={item.text}
+                key={item.key}
                 onClick={() => navigate(item.path)}
                 style={{
                   display: 'flex',
@@ -54,7 +56,7 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
                 onMouseLeave={(e) => { if(!isSelected) e.currentTarget.style.backgroundColor = 'transparent' }}
               >
                 <span style={{ marginRight: '12px', fontSize: '1.2rem' }}>{item.icon}</span>
-                <span style={{ fontSize: '0.9rem' }}>{item.text}</span>
+                <span style={{ fontSize: '0.9rem' }}>{t(item.key)}</span>
               </div>
             );
           })}
@@ -65,9 +67,9 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
       <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflowX: 'hidden' }}>
         {/* Header */}
         <header style={{ height: '64px', backgroundColor: '#ffffff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', padding: '0 24px', justifyContent: 'space-between' }}>
-          <h1 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b', fontWeight: 700 }}>AOI Quality Intelligence Portal</h1>
+          <h1 style={{ margin: 0, fontSize: '1.1rem', color: '#1e293b', fontWeight: 700 }}>{t('login.title')}</h1>
           <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>Logout</span> 🚪
+            <span>{t('menu.logout')}</span> 🚪
           </button>
         </header>
 
@@ -76,9 +78,12 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
           <Outlet />
         </main>
 
-        {/* Footer */}
-        <footer style={{ marginTop: 'auto', padding: '16px 24px', textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 500 }}>
-          <span className="small-brand" style={{ fontWeight: 'bold' }}>vivo</span> <span className="footer-version" style={{ color: '#415fff' }}>V1.20.7.26</span>
+        {/* Unified Global Footer */}
+        <footer style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '0.75rem', fontWeight: 500 }}>
+          <div>{t('footer.line1')}</div>
+          <div style={{ marginTop: '4px' }}>
+            {t('footer.line2')} <span style={{ color: '#3b82f6', fontWeight: 700 }}>Abhinandan Kumar</span>
+          </div>
         </footer>
       </div>
     </div>
