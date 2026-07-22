@@ -58,7 +58,7 @@ export default function Analytics() {
     <div className="dashboard-container animate-fade-in">
       <div className="dashboard-header" style={{ marginBottom: '32px' }}>
         <div>
-          <h1 style={{ marginBottom: '8px' }}>Line Analytics</h1>
+          <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>Line Analytics</h1>
           <div className="subtitle">Deep dive into specific line performance and defect correlation.</div>
         </div>
         

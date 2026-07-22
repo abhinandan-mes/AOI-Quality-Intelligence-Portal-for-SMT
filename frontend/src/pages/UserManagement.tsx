@@ -78,15 +78,41 @@ export default function UserManagement() {
     'VIEW_DASHBOARD', 'VIEW_HISTORY', 'VIEW_SEARCH', 'VIEW_REPORTS', 'VIEW_ANALYTICS', 'MANAGE_LINES', 'MANAGE_USERS', 'VIEW_LOGS'
   ];
 
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newUser, setNewUser] = useState({ name: '', username: '', role: 'INSPECTOR', password: '' });
+
+  const handleAddUser = async () => {
+    try {
+      await axios.post(`${API_BASE}/users`, newUser);
+      setShowAddUserModal(false);
+      setNewUser({ name: '', username: '', role: 'INSPECTOR', password: '' });
+      fetchUsers();
+    } catch (e: any) {
+      alert(e.response?.data?.error || 'Failed to add user');
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
         <div>
-          <h1>{t('menu.users') || 'User Management'}</h1>
+          <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{t('menu.users') || 'User Management'}</h1>
           <div className="subtitle">
             Manage roles, permissions, and view system audits
           </div>
         </div>
+        <button 
+          onClick={() => setShowAddUserModal(true)} 
+          style={{ 
+            background: '#3b82f6', color: 'white', border: 'none', 
+            padding: '10px 20px', borderRadius: '6px', fontWeight: 600, 
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+            boxShadow: '0 2px 4px rgba(59, 130, 246, 0.3)'
+          }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add New User
+        </button>
       </div>
 
       <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
@@ -225,6 +251,53 @@ export default function UserManagement() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {showAddUserModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
+          <div className="table-card animate-slide-up" style={{ width: '100%', maxWidth: '400px', padding: '32px' }}>
+            <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '1.25rem', color: '#0f172a', fontWeight: 700 }}>Add New User</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '32px', marginTop: '24px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Full Name</label>
+                <input 
+                  type="text" value={newUser.name} onChange={(e) => setNewUser({...newUser, name: e.target.value})} 
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }} placeholder="e.g., John Doe"
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Username</label>
+                <input 
+                  type="text" value={newUser.username} onChange={(e) => setNewUser({...newUser, username: e.target.value})} 
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }} placeholder="e.g., john_doe"
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Role</label>
+                <select 
+                  value={newUser.role} onChange={(e) => setNewUser({...newUser, role: e.target.value})} 
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', background: 'white' }}
+                >
+                  <option value="INSPECTOR">Inspector</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="ADMIN">Admin</option>
+                  <option value="SUPER_ADMIN">Super Admin</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Password</label>
+                <input 
+                  type="password" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value})} 
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }} placeholder="Initial password"
+                />
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button onClick={() => setShowAddUserModal(false)} style={{ background: 'transparent', border: 'none', color: '#64748b', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={handleAddUser} disabled={!newUser.name || !newUser.username || !newUser.password} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', opacity: (!newUser.name || !newUser.username || !newUser.password) ? 0.5 : 1 }}>Create User</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

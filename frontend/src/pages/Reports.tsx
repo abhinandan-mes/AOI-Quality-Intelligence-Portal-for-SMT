@@ -70,7 +70,7 @@ export default function Reports() {
     <div className="reports-container animate-fade-in">
       <div className="reports-heading" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px' }}>Quality Analytics</h2>
+          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>Quality Analytics</h2>
           <p style={{ color: '#64748b', marginTop: '8px', fontSize: '1rem' }}>Visualize defect trends, pareto analysis, and yield rates over time.</p>
         </div>
         

@@ -37,13 +37,19 @@ export default function Dashboard() {
     fetchDashboardData();
   }, [timeframe]);
 
-  const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'];
+  const getStatusColor = (status: string) => {
+    const s = status.toUpperCase();
+    if (['PASS', 'GOOD'].includes(s)) return '#10b981'; // Green
+    if (['FAIL', 'NG'].includes(s)) return '#ef4444'; // Red
+    if (['WARNING'].includes(s)) return '#f59e0b'; // Orange
+    return '#3b82f6'; // Blue
+  };
 
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
         <div>
-          <h1>{t('menu.dashboard')}</h1>
+          <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{t('menu.dashboard')}</h1>
           <div className="subtitle">
             {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')} | Last refreshed {new Date().toLocaleTimeString()}
           </div>
@@ -133,7 +139,7 @@ export default function Dashboard() {
                     stroke="none"
                   >
                     {distData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={getStatusColor(entry.name)} />
                     ))}
                   </Pie>
                   <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
@@ -147,7 +153,7 @@ export default function Dashboard() {
             <div style={{ position: 'absolute', right: 10, top: '40%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {distData.map((d, i) => (
                 <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#334155', fontWeight: 600 }}>
-                  <div style={{ width: '8px', height: '8px', backgroundColor: COLORS[i % COLORS.length] }}></div>
+                  <div style={{ width: '8px', height: '8px', backgroundColor: getStatusColor(d.name) }}></div>
                   {d.name}
                 </div>
               ))}

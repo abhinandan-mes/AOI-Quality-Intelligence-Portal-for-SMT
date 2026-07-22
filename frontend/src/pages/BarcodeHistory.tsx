@@ -193,7 +193,7 @@ export default function BarcodeHistory() {
     <div className="reports-container animate-fade-in">
       <div className="reports-heading" style={{ marginBottom: '32px' }}>
         <div>
-          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px' }}>Barcode History</h2>
+          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>Barcode History</h2>
           <p style={{ color: '#64748b', marginTop: '8px', fontSize: '1rem' }}>Search, filter, and export historical AOI and SPI inspection records.</p>
         </div>
       </div>

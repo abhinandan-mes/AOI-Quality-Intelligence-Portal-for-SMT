@@ -103,7 +103,7 @@ export default function LineManagement() {
     <div className="dashboard-container animate-fade-in">
       <div className="dashboard-header" style={{ marginBottom: '32px' }}>
         <div>
-          <h1 style={{ marginBottom: '8px' }}>Line Management</h1>
+          <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>Line Management</h1>
           <div className="subtitle">Configure production lines and network paths for automated file processing.</div>
         </div>
         

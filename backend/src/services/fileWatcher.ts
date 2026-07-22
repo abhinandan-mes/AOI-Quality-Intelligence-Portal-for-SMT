@@ -57,10 +57,38 @@ const setupWatcher = (watchPath: string, type: 'AOI' | 'SPI', lineName: string) 
     awaitWriteFinish: { stabilityThreshold: 2000, pollInterval: 100 }
   });
 
-  watcher.on('add', async (filePath) => {
+  watcher.on('add', (filePath) => {
     if (filePath.includes('Archive') || filePath.includes('Error')) return;
     
-    console.log(`[${lineName} ${type}] New file detected: ${filePath}`);
+    console.log(`[${lineName} ${type}] New file detected: ${filePath}. Added to queue.`);
+    fileQueue.push({ filePath, type, lineName, archiveDir, errorDir });
+    processQueue();
+  });
+
+  activeWatchers.push(watcher);
+  console.log(`Watching ${type} for Line ${lineName} at ${watchPath}`);
+};
+
+interface QueueItem {
+  filePath: string;
+  type: 'AOI' | 'SPI';
+  lineName: string;
+  archiveDir: string;
+  errorDir: string;
+}
+
+const fileQueue: QueueItem[] = [];
+let isProcessingQueue = false;
+
+const processQueue = async () => {
+  if (isProcessingQueue) return;
+  isProcessingQueue = true;
+
+  while (fileQueue.length > 0) {
+    const item = fileQueue.shift();
+    if (!item) continue;
+    
+    const { filePath, type, lineName, archiveDir, errorDir } = item;
     const ext = path.extname(filePath).toLowerCase();
     
     try {
@@ -76,13 +104,16 @@ const setupWatcher = (watchPath: string, type: 'AOI' | 'SPI', lineName: string) 
       io.emit('new_inspection', { message: 'New inspection data imported.' });
     } catch (error: any) {
       console.error(`Error processing file ${filePath}:`, error.message);
-      await moveToDir(filePath, errorDir);
+      try {
+        await moveToDir(filePath, errorDir);
+      } catch (e) {
+        console.error(`Failed to move to error directory: ${filePath}`);
+      }
       await logImport(filePath, 'ERROR', error.message);
     }
-  });
+  }
 
-  activeWatchers.push(watcher);
-  console.log(`Watching ${type} for Line ${lineName} at ${watchPath}`);
+  isProcessingQueue = false;
 };
 
 const moveToDir = async (filePath: string, targetDir: string) => {
