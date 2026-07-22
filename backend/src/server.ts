@@ -7,6 +7,8 @@ import authRoutes from './routes/auth';
 import dashboardRoutes from './routes/dashboard';
 import lineRoutes from './routes/lineRoutes';
 import inspectionRoutes from './routes/inspectionRoutes';
+import defectRoutes from './routes/defectRoutes';
+import reportRoutes from './routes/reportRoutes';
 import { startFileWatcher } from './services/fileWatcher';
 
 dotenv.config();
@@ -32,6 +34,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/lines', lineRoutes);
 app.use('/api/inspections', inspectionRoutes);
+app.use('/api/defects', defectRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Socket.io connection
 io.on('connection', (socket) => {

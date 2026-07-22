@@ -7,6 +7,8 @@ import MainLayout from './layouts/MainLayout'
 import Dashboard from './pages/Dashboard'
 import LineManagement from './pages/LineManagement'
 import BarcodeHistory from './pages/BarcodeHistory'
+import DefectSearch from './pages/DefectSearch'
+import Reports from './pages/Reports'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -51,8 +53,8 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="lines" element={<LineManagement />} />
           <Route path="history" element={<BarcodeHistory />} />
-          <Route path="search" element={<div style={{padding: '20px'}}>Defect Search (Coming Soon)</div>} />
-          <Route path="reports" element={<div style={{padding: '20px'}}>Reports (Coming Soon)</div>} />
+          <Route path="search" element={<DefectSearch />} />
+          <Route path="reports" element={<Reports />} />
           <Route path="analytics" element={<div style={{padding: '20px'}}>Analytics (Coming Soon)</div>} />
         </Route>
       </Routes>
