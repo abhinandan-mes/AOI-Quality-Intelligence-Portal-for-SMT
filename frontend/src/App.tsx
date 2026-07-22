@@ -49,7 +49,7 @@ function App() {
           element={!isAuthenticated ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/dashboard" replace />} 
         />
         
-        <Route path="/" element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />}>
+        <Route path="/" element={isAuthenticated ? <MainLayout onLogout={() => setIsAuthenticated(false)} /> : <Navigate to="/login" replace />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="lines" element={<LineManagement />} />

@@ -11,13 +11,17 @@ const menuItems = [
   { text: 'Analytics', icon: '📈', path: '/analytics' },
 ];
 
-export default function MainLayout() {
+export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    navigate('/login');
+    if (onLogout) {
+      onLogout();
+    } else {
+      navigate('/login');
+    }
   };
 
   return (
