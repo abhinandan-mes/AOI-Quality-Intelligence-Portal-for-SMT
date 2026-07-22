@@ -20,6 +20,16 @@ export const createUser = async (req: Request, res: Response) => {
     const user = await prisma.user.create({
       data: { username, password: hashedPassword, name, role }
     });
+    
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        action: 'User Created',
+        details: `User ${username} was created with role ${role}`,
+        ipAddress: req.ip
+      }
+    });
+
     // @ts-ignore
     delete user.password;
     res.status(201).json(user);
@@ -42,6 +52,16 @@ export const updateUser = async (req: Request, res: Response) => {
       where: { id },
       data: updateData
     });
+    
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        action: 'User Updated',
+        details: `User ${user.username} was updated`,
+        ipAddress: req.ip
+      }
+    });
+
     // @ts-ignore
     delete user.password;
     res.json(user);
@@ -53,7 +73,17 @@ export const updateUser = async (req: Request, res: Response) => {
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    await prisma.user.delete({ where: { id } });
+    const user = await prisma.user.delete({ where: { id } });
+    
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        action: 'User Deleted',
+        details: `User ${user.username} was deleted`,
+        ipAddress: req.ip
+      }
+    });
+
     res.json({ message: 'User deleted' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete user' });

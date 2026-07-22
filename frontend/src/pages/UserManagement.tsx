@@ -79,8 +79,11 @@ export default function UserManagement() {
   ];
 
   const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', username: '', role: 'INSPECTOR', password: '' });
+  const [editUser, setEditUser] = useState<any>(null);
   const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [formError, setFormError] = useState<string>('');
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
@@ -88,6 +91,7 @@ export default function UserManagement() {
   };
 
   const handleAddUser = async () => {
+    setFormError('');
     try {
       await axios.post(`${API_BASE}/users`, newUser);
       setShowAddUserModal(false);
@@ -95,25 +99,47 @@ export default function UserManagement() {
       showToast('User created successfully', 'success');
       fetchUsers();
     } catch (e: any) {
-      showToast(e.response?.data?.error || 'Failed to add user', 'error');
+      setFormError(e.response?.data?.error || 'Failed to add user');
+    }
+  };
+
+  const handleEditUser = async () => {
+    setFormError('');
+    try {
+      const dataToUpdate: any = { name: editUser.name, role: editUser.role, isActive: editUser.isActive };
+      if (editUser.password) dataToUpdate.password = editUser.password;
+      await axios.put(`${API_BASE}/users/${editUser.id}`, dataToUpdate);
+      setShowEditUserModal(false);
+      setEditUser(null);
+      showToast('User updated successfully', 'success');
+      fetchUsers();
+    } catch (e: any) {
+      setFormError(e.response?.data?.error || 'Failed to update user');
+    }
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await axios.delete(`${API_BASE}/users/${id}`);
+      showToast('User deleted successfully', 'success');
+      fetchUsers();
+    } catch (e: any) {
+      showToast(e.response?.data?.error || 'Failed to delete user', 'error');
     }
   };
 
   return (
     <div className="dashboard-container">
-      {toast && (
+      {toast && toast.type === 'success' && (
         <div style={{
           position: 'fixed', top: '24px', right: '24px', zIndex: 9999,
-          background: toast.type === 'error' ? '#fef2f2' : '#f0fdf4',
-          color: toast.type === 'error' ? '#ef4444' : '#10b981',
-          padding: '16px 24px', borderRadius: '8px',
+          background: '#f0fdf4', color: '#10b981', padding: '16px 24px', borderRadius: '8px',
           boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-          border: `1px solid ${toast.type === 'error' ? '#fecaca' : '#bbf7d0'}`,
-          display: 'flex', alignItems: 'center', gap: '12px',
-          fontWeight: 600, fontSize: '0.9rem',
-          animation: 'slideInRight 0.3s ease-out'
+          border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: '12px',
+          fontWeight: 600, fontSize: '0.9rem', animation: 'slideInRight 0.3s ease-out'
         }}>
-          {toast.type === 'error' ? '⚠️' : '✅'} {toast.message}
+          ✅ {toast.message}
         </div>
       )}
       
@@ -125,7 +151,7 @@ export default function UserManagement() {
           </div>
         </div>
         <button 
-          onClick={() => setShowAddUserModal(true)} 
+          onClick={() => { setFormError(''); setShowAddUserModal(true); }} 
           style={{ 
             background: '#3b82f6', color: 'white', border: 'none', 
             padding: '10px 20px', borderRadius: '6px', fontWeight: 600, 
@@ -195,8 +221,15 @@ export default function UserManagement() {
                       <span style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.85rem' }}>● Inactive</span>
                     )}
                   </td>
-                  <td style={{ padding: '16px', textAlign: 'right' }}>
-                    <button style={{ color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Edit</button>
+                  <td style={{ padding: '16px', textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                    {u.role !== 'SUPER_ADMIN' ? (
+                      <>
+                        <button onClick={() => { setEditUser(u); setFormError(''); setShowEditUserModal(true); }} style={{ color: '#3b82f6', background: '#3b82f615', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Edit</button>
+                        <button onClick={() => handleDeleteUser(u.id)} style={{ color: '#ef4444', background: '#ef444415', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Delete</button>
+                      </>
+                    ) : (
+                      <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>Protected</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -262,8 +295,8 @@ export default function UserManagement() {
                   <td style={{ padding: '12px 16px' }}>
                     <span style={{ 
                       padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700,
-                      background: l.action === 'FAILED_LOGIN' ? '#fef2f2' : '#f1f5f9',
-                      color: l.action === 'FAILED_LOGIN' ? '#ef4444' : '#334155'
+                      background: l.action === 'FAILED_LOGIN' || l.action === 'User Deleted' ? '#fef2f2' : '#f1f5f9',
+                      color: l.action === 'FAILED_LOGIN' || l.action === 'User Deleted' ? '#ef4444' : '#334155'
                     }}>
                       {l.action}
                     </span>
@@ -305,7 +338,6 @@ export default function UserManagement() {
                   <option value="INSPECTOR">Inspector</option>
                   <option value="MANAGER">Manager</option>
                   <option value="ADMIN">Admin</option>
-                  <option value="SUPER_ADMIN">Super Admin</option>
                 </select>
               </div>
               <div>
@@ -316,9 +348,68 @@ export default function UserManagement() {
                 />
               </div>
             </div>
+            {formError && (
+              <div style={{ color: '#ef4444', fontSize: '0.85rem', fontWeight: 600, padding: '10px', background: '#fef2f2', borderRadius: '6px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ⚠️ {formError}
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button onClick={() => setShowAddUserModal(false)} style={{ background: 'transparent', border: 'none', color: '#64748b', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
               <button onClick={handleAddUser} disabled={!newUser.name || !newUser.username || !newUser.password} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', opacity: (!newUser.name || !newUser.username || !newUser.password) ? 0.5 : 1 }}>Create User</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditUserModal && editUser && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
+          <div className="table-card animate-slide-up" style={{ width: '100%', maxWidth: '400px', padding: '32px' }}>
+            <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '1.25rem', color: '#0f172a', fontWeight: 700 }}>Edit User</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '32px', marginTop: '24px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Full Name</label>
+                <input 
+                  type="text" value={editUser.name} onChange={(e) => setEditUser({...editUser, name: e.target.value})} 
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Role</label>
+                <select 
+                  value={editUser.role} onChange={(e) => setEditUser({...editUser, role: e.target.value})} 
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', background: 'white' }}
+                >
+                  <option value="INSPECTOR">Inspector</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Status</label>
+                <select 
+                  value={editUser.isActive ? 'true' : 'false'} onChange={(e) => setEditUser({...editUser, isActive: e.target.value === 'true'})} 
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', background: 'white' }}
+                >
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>New Password (Leave blank to keep current)</label>
+                <input 
+                  type="password" value={editUser.password || ''} onChange={(e) => setEditUser({...editUser, password: e.target.value})} 
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }} placeholder="Optional"
+                />
+              </div>
+            </div>
+            {formError && (
+              <div style={{ color: '#ef4444', fontSize: '0.85rem', fontWeight: 600, padding: '10px', background: '#fef2f2', borderRadius: '6px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ⚠️ {formError}
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button onClick={() => { setShowEditUserModal(false); setEditUser(null); }} style={{ background: 'transparent', border: 'none', color: '#64748b', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={handleEditUser} disabled={!editUser.name} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', opacity: !editUser.name ? 0.5 : 1 }}>Save Changes</button>
             </div>
           </div>
         </div>
