@@ -82,7 +82,7 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
         <footer style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '0.75rem', fontWeight: 500 }}>
           <div>{t('footer.line1')}</div>
           <div style={{ marginTop: '4px' }}>
-            {t('footer.line2')} <span style={{ color: '#3b82f6', fontWeight: 700 }}>Abhinandan Kumar</span>
+            {t('footer.line2')} <a href="https://abhinandan.pro" target="_blank" rel="noreferrer" style={{ color: '#224be6', fontWeight: 700, textDecoration: 'none' }}>Abhinandan Kumar</a>
           </div>
         </footer>
       </div>

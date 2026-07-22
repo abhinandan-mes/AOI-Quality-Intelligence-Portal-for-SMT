@@ -37,33 +37,41 @@ export default function LoginPage({ onLogin }: { onLogin: (cred: any) => void })
           
           {/* Left Pane - Blue Gradient */}
           <div style={{ 
-            flex: '1.2', 
-            background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
+            flex: '1.4', 
+            background: 'linear-gradient(180deg, #3753e8 0%, #224be6 100%)',
             color: 'white',
-            padding: '48px',
             display: 'flex',
             flexDirection: 'column',
             position: 'relative',
             overflow: 'hidden'
           }}>
+            {/* Top Bar inside Left Pane */}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '16px', 
+              padding: '24px 40px',
+              borderBottom: '1px solid rgba(255,255,255,0.15)',
+              zIndex: 1 
+            }}>
+              <img src={vivoLogo} alt="vivo" style={{ height: '24px', filter: 'brightness(0) invert(1)' }} />
+              <div style={{ width: '1px', height: '16px', backgroundColor: 'rgba(255,255,255,0.5)' }}></div>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, letterSpacing: '0.02em' }}>{t('login.title')}</span>
+            </div>
+
             {/* Decorative background circle */}
             <div style={{
               position: 'absolute',
-              top: '-10%',
-              right: '-10%',
-              width: '400px',
-              height: '400px',
-              background: 'radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%)',
+              top: '10%',
+              right: '-15%',
+              width: '500px',
+              height: '500px',
+              background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 70%)',
               borderRadius: '50%',
               pointerEvents: 'none'
             }} />
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '64px', zIndex: 1 }}>
-              <img src={vivoLogo} alt="vivo" style={{ height: '28px', filter: 'brightness(0) invert(1)' }} />
-              <span style={{ fontSize: '0.9rem', fontWeight: 600, opacity: 0.9 }}>{t('login.title')}</span>
-            </div>
-
-            <div style={{ zIndex: 1, marginTop: 'auto', marginBottom: 'auto' }}>
+            <div style={{ zIndex: 1, padding: '48px 40px', marginTop: '20px' }}>
               <div style={{ 
                 display: 'inline-block', 
                 padding: '6px 12px', 
@@ -212,7 +220,7 @@ export default function LoginPage({ onLogin }: { onLogin: (cred: any) => void })
       <footer style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '0.75rem', fontWeight: 500 }}>
         <div>{t('footer.line1')}</div>
         <div style={{ marginTop: '4px' }}>
-          {t('footer.line2')} <span style={{ color: '#3b82f6', fontWeight: 700 }}>Abhinandan Kumar</span>
+          {t('footer.line2')} <a href="https://abhinandan.pro" target="_blank" rel="noreferrer" style={{ color: '#224be6', fontWeight: 700, textDecoration: 'none' }}>Abhinandan Kumar</a>
         </div>
       </footer>
     </div>
