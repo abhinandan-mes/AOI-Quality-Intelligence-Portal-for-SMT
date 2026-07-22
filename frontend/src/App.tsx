@@ -9,6 +9,7 @@ import LineManagement from './pages/LineManagement'
 import BarcodeHistory from './pages/BarcodeHistory'
 import DefectSearch from './pages/DefectSearch'
 import Reports from './pages/Reports'
+import Analytics from './pages/Analytics'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -21,7 +22,7 @@ function App() {
   }, [])
 
   const handleLogin = async (credentials: any) => {
-    if (credentials.username === 'admin' && credentials.password === 'admin') {
+    if (credentials.username === 'abhinandan' && credentials.password === '95003989') {
       localStorage.setItem('token', 'dev-token');
       setIsAuthenticated(true);
       return;
@@ -55,7 +56,7 @@ function App() {
           <Route path="history" element={<BarcodeHistory />} />
           <Route path="search" element={<DefectSearch />} />
           <Route path="reports" element={<Reports />} />
-          <Route path="analytics" element={<div style={{padding: '20px'}}>Analytics (Coming Soon)</div>} />
+          <Route path="analytics" element={<Analytics />} />
         </Route>
       </Routes>
     </Router>

@@ -3,16 +3,24 @@ import prisma from '../prismaClient';
 
 export const getDefectPareto = async (req: Request, res: Response) => {
   try {
-    const { startDate, endDate } = req.query;
+    const { startDate, endDate, lineName } = req.query;
 
     const whereClause: any = {};
-    if (startDate || endDate) {
-      whereClause.inspection = { inspectionTime: {} };
-      if (startDate) whereClause.inspection.inspectionTime.gte = new Date(String(startDate));
-      if (endDate) {
-        const end = new Date(String(endDate));
-        end.setHours(23, 59, 59, 999);
-        whereClause.inspection.inspectionTime.lte = end;
+    if (startDate || endDate || lineName) {
+      whereClause.inspection = { machine: {} };
+      
+      if (startDate || endDate) {
+        whereClause.inspection.inspectionTime = {};
+        if (startDate) whereClause.inspection.inspectionTime.gte = new Date(String(startDate));
+        if (endDate) {
+          const end = new Date(String(endDate));
+          end.setHours(23, 59, 59, 999);
+          whereClause.inspection.inspectionTime.lte = end;
+        }
+      }
+
+      if (lineName) {
+        whereClause.inspection.machine.line = { name: String(lineName) };
       }
     }
 
@@ -49,9 +57,10 @@ export const getDefectPareto = async (req: Request, res: Response) => {
 
 export const getYieldTrend = async (req: Request, res: Response) => {
   try {
-    const { startDate, endDate } = req.query;
+    const { startDate, endDate, lineName } = req.query;
 
     const whereClause: any = {};
+    
     if (startDate || endDate) {
       whereClause.inspectionTime = {};
       if (startDate) whereClause.inspectionTime.gte = new Date(String(startDate));
@@ -65,6 +74,10 @@ export const getYieldTrend = async (req: Request, res: Response) => {
       const lastWeek = new Date();
       lastWeek.setDate(lastWeek.getDate() - 7);
       whereClause.inspectionTime = { gte: lastWeek };
+    }
+
+    if (lineName) {
+      whereClause.machine = { line: { name: String(lineName) } };
     }
 
     const inspections = await prisma.inspection.findMany({

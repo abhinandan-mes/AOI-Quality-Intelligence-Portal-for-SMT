@@ -12,14 +12,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    // For development, allow admin/admin login
-    if (username === 'admin' && password === 'admin') {
+    // For development, allow fallback superadmin login
+    if (username === 'abhinandan' && password === '95003989') {
       const token = jwt.sign(
-        { id: '1', username: 'admin', role: 'SUPER_ADMIN' },
+        { id: '1', username: 'abhinandan', role: 'SUPER_ADMIN' },
         process.env.JWT_SECRET || 'fallback_secret',
         { expiresIn: '8h' }
       );
-      res.json({ token, user: { username: 'admin', role: 'SUPER_ADMIN' } });
+      res.json({ token, user: { username: 'abhinandan', role: 'SUPER_ADMIN' } });
       return;
     }
 
