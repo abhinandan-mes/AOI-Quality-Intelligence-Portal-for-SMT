@@ -80,20 +80,43 @@ export default function UserManagement() {
 
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', username: '', role: 'INSPECTOR', password: '' });
+  const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const handleAddUser = async () => {
     try {
       await axios.post(`${API_BASE}/users`, newUser);
       setShowAddUserModal(false);
       setNewUser({ name: '', username: '', role: 'INSPECTOR', password: '' });
+      showToast('User created successfully', 'success');
       fetchUsers();
     } catch (e: any) {
-      alert(e.response?.data?.error || 'Failed to add user');
+      showToast(e.response?.data?.error || 'Failed to add user', 'error');
     }
   };
 
   return (
     <div className="dashboard-container">
+      {toast && (
+        <div style={{
+          position: 'fixed', top: '24px', right: '24px', zIndex: 9999,
+          background: toast.type === 'error' ? '#fef2f2' : '#f0fdf4',
+          color: toast.type === 'error' ? '#ef4444' : '#10b981',
+          padding: '16px 24px', borderRadius: '8px',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+          border: `1px solid ${toast.type === 'error' ? '#fecaca' : '#bbf7d0'}`,
+          display: 'flex', alignItems: 'center', gap: '12px',
+          fontWeight: 600, fontSize: '0.9rem',
+          animation: 'slideInRight 0.3s ease-out'
+        }}>
+          {toast.type === 'error' ? '⚠️' : '✅'} {toast.message}
+        </div>
+      )}
+      
       <div className="dashboard-header">
         <div>
           <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{t('menu.users') || 'User Management'}</h1>

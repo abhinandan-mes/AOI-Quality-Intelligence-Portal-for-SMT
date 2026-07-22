@@ -25,6 +25,7 @@ A production-ready web application for an SMT factory to automatically collect i
     - `WARNING` -> Orange (`#f59e0b`)
     - Default / Informational -> Blue (`#3b82f6`) or Gray (`#64748b`)
 5.  **Tables:** Use the `.vivo-table` class. Table headers (`th`) must be light gray (`#f8fafc`) with a bottom border (`2px solid #e2e8f0`) and dark gray text (`#64748b`). Avoid heavy colored pill shapes for table headers.
+6.  **Pop-ups and Notifications:** Do NOT use default browser `alert()` or `confirm()`. Implement custom unified HTML/CSS floating Toasts (top-right, `z-index: 9999`) or Modals that adhere to the corporate color palette.
 
 ## Key Modules
 1.  **Dashboard:** Real-time production metrics (Yield, Pass/NG, Machine Status, etc.)
