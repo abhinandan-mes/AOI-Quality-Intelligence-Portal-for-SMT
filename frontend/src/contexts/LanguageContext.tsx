@@ -38,6 +38,7 @@ export const translations: Translations = {
   'menu.search': { en: 'Defect Search', zh: '缺陷搜索' },
   'menu.reports': { en: 'Reports', zh: '报告' },
   'menu.analytics': { en: 'Analytics', zh: '分析' },
+  'menu.users': { en: 'User Management', zh: '用户管理' },
   'menu.logout': { en: 'Logout', zh: '退出登录' },
 
   // Dashboard Summary

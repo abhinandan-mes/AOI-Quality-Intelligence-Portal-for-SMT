@@ -10,6 +10,7 @@ const menuItems = [
   { key: 'menu.search', icon: '🔍', path: '/search' },
   { key: 'menu.reports', icon: '📄', path: '/reports' },
   { key: 'menu.analytics', icon: '📈', path: '/analytics' },
+  { key: 'menu.users', icon: '👥', path: '/users' },
 ];
 
 export default function MainLayout({ onLogout }: { onLogout?: () => void }) {

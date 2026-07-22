@@ -10,6 +10,7 @@ import BarcodeHistory from './pages/BarcodeHistory'
 import DefectSearch from './pages/DefectSearch'
 import Reports from './pages/Reports'
 import Analytics from './pages/Analytics'
+import UserManagement from './pages/UserManagement'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -57,6 +58,7 @@ function App() {
           <Route path="search" element={<DefectSearch />} />
           <Route path="reports" element={<Reports />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="users" element={<UserManagement />} />
         </Route>
       </Routes>
     </Router>
