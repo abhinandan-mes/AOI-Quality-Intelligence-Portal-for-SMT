@@ -12,7 +12,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+    const ipAddress = (req.ip || req.connection.remoteAddress || 'unknown').replace(/^::ffff:/, '');
 
     // For development, allow fallback superadmin login
     if (username === 'abhinandan' && password === '95003989') {
@@ -84,7 +84,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 export const logout = async (req: Request, res: Response): Promise<void> => {
   const { username } = req.body;
   try {
-    const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+    const ipAddress = (req.ip || req.connection.remoteAddress || 'unknown').replace(/^::ffff:/, '');
     if (username) {
       await prisma.activityLog.create({
         data: { username, action: 'LOGOUT', ipAddress, details: 'Successful logout' }

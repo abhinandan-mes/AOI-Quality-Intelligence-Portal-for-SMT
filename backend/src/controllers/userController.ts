@@ -27,7 +27,7 @@ export const createUser = async (req: Request, res: Response) => {
         username: performerUsername || 'System',
         action: 'User Created',
         details: `User ${username} was created with role ${role}`,
-        ipAddress: req.ip
+        ipAddress: (req.ip || 'unknown').replace(/^::ffff:/, '')
       }
     });
 
@@ -60,7 +60,7 @@ export const updateUser = async (req: Request, res: Response) => {
         username: performerUsername || 'System',
         action: 'User Updated',
         details: `User ${user.username} was updated`,
-        ipAddress: req.ip
+        ipAddress: (req.ip || 'unknown').replace(/^::ffff:/, '')
       }
     });
 
@@ -84,7 +84,7 @@ export const deleteUser = async (req: Request, res: Response) => {
         username: performerUsername || 'System',
         action: 'User Deleted',
         details: `User ${user.username} was deleted`,
-        ipAddress: req.ip
+        ipAddress: (req.ip || 'unknown').replace(/^::ffff:/, '')
       }
     });
 

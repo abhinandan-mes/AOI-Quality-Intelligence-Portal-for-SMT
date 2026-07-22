@@ -15,7 +15,7 @@ function LiveClock() {
 export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t, language, changeLanguage } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   
   // Since we haven't implemented context for user yet, we get it from localStorage or auth hook
   // We'll mock it for now based on previous implementation
@@ -131,14 +131,14 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
             <button 
               type="button" 
               style={{ border: 'none', background: language === 'en' ? 'white' : 'transparent', color: language === 'en' ? '#415fff' : 'white', borderRadius: '2px', padding: '2px 8px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
-              onClick={() => changeLanguage('en')}
+              onClick={() => setLanguage('en')}
             >
               EN
             </button>
             <button 
               type="button" 
               style={{ border: 'none', background: language === 'zh' ? 'white' : 'transparent', color: language === 'zh' ? '#415fff' : 'white', borderRadius: '2px', padding: '2px 8px', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
-              onClick={() => changeLanguage('zh')}
+              onClick={() => setLanguage('zh')}
             >
               中
             </button>
