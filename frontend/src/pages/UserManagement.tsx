@@ -12,7 +12,13 @@ export default function UserManagement() {
   
   const API_BASE = `http://${window.location.hostname}:5050/api`;
 
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
   useEffect(() => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      setCurrentUser(JSON.parse(userStr));
+    }
     fetchUsers();
     fetchLogs();
     fetchPermissions();
@@ -93,7 +99,10 @@ export default function UserManagement() {
   const handleAddUser = async () => {
     setFormError('');
     try {
-      await axios.post(`${API_BASE}/users`, newUser);
+      await axios.post(`${API_BASE}/users`, {
+        ...newUser,
+        performerUsername: currentUser?.username
+      });
       setShowAddUserModal(false);
       setNewUser({ name: '', username: '', role: 'INSPECTOR', password: '' });
       showToast('User created successfully', 'success');
@@ -106,7 +115,7 @@ export default function UserManagement() {
   const handleEditUser = async () => {
     setFormError('');
     try {
-      const dataToUpdate: any = { name: editUser.name, role: editUser.role, isActive: editUser.isActive };
+      const dataToUpdate: any = { name: editUser.name, role: editUser.role, isActive: editUser.isActive, performerUsername: currentUser?.username };
       if (editUser.password) dataToUpdate.password = editUser.password;
       await axios.put(`${API_BASE}/users/${editUser.id}`, dataToUpdate);
       setShowEditUserModal(false);
@@ -121,7 +130,9 @@ export default function UserManagement() {
   const handleDeleteUser = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
-      await axios.delete(`${API_BASE}/users/${id}`);
+      await axios.delete(`${API_BASE}/users/${id}`, {
+        data: { performerUsername: currentUser?.username }
+      });
       showToast('User deleted successfully', 'success');
       fetchUsers();
     } catch (e: any) {
@@ -222,7 +233,7 @@ export default function UserManagement() {
                     )}
                   </td>
                   <td style={{ padding: '16px', textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                    {u.role !== 'SUPER_ADMIN' ? (
+                    {(u.role !== 'SUPER_ADMIN' || currentUser?.role === 'SUPER_ADMIN') ? (
                       <>
                         <button onClick={() => { setEditUser(u); setFormError(''); setShowEditUserModal(true); }} style={{ color: '#3b82f6', background: '#3b82f615', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Edit</button>
                         <button onClick={() => handleDeleteUser(u.id)} style={{ color: '#ef4444', background: '#ef444415', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Delete</button>
@@ -338,6 +349,7 @@ export default function UserManagement() {
                   <option value="INSPECTOR">Inspector</option>
                   <option value="MANAGER">Manager</option>
                   <option value="ADMIN">Admin</option>
+                  {currentUser?.role === 'SUPER_ADMIN' && <option value="SUPER_ADMIN">Super Admin</option>}
                 </select>
               </div>
               <div>
@@ -382,6 +394,7 @@ export default function UserManagement() {
                   <option value="INSPECTOR">Inspector</option>
                   <option value="MANAGER">Manager</option>
                   <option value="ADMIN">Admin</option>
+                  {currentUser?.role === 'SUPER_ADMIN' && <option value="SUPER_ADMIN">Super Admin</option>}
                 </select>
               </div>
               <div>

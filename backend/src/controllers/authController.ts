@@ -80,3 +80,19 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+export const logout = async (req: Request, res: Response): Promise<void> => {
+  const { username } = req.body;
+  try {
+    const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+    if (username) {
+      await prisma.activityLog.create({
+        data: { username, action: 'LOGOUT', ipAddress, details: 'Successful logout' }
+      });
+    }
+    res.json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Logout Error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

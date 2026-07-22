@@ -15,7 +15,7 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const createUser = async (req: Request, res: Response) => {
   try {
-    const { username, password, name, role } = req.body;
+    const { username, password, name, role, performerUsername } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: { username, password: hashedPassword, name, role }
@@ -24,6 +24,7 @@ export const createUser = async (req: Request, res: Response) => {
     // Log activity
     await prisma.activityLog.create({
       data: {
+        username: performerUsername || 'System',
         action: 'User Created',
         details: `User ${username} was created with role ${role}`,
         ipAddress: req.ip
@@ -41,7 +42,7 @@ export const createUser = async (req: Request, res: Response) => {
 export const updateUser = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const { name, role, isActive, password } = req.body;
+    const { name, role, isActive, password, performerUsername } = req.body;
     
     let updateData: any = { name, role, isActive };
     if (password) {
@@ -56,6 +57,7 @@ export const updateUser = async (req: Request, res: Response) => {
     // Log activity
     await prisma.activityLog.create({
       data: {
+        username: performerUsername || 'System',
         action: 'User Updated',
         details: `User ${user.username} was updated`,
         ipAddress: req.ip
@@ -73,11 +75,13 @@ export const updateUser = async (req: Request, res: Response) => {
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
+    const { performerUsername } = req.body;
     const user = await prisma.user.delete({ where: { id } });
     
     // Log activity
     await prisma.activityLog.create({
       data: {
+        username: performerUsername || 'System',
         action: 'User Deleted',
         details: `User ${user.username} was deleted`,
         ipAddress: req.ip
