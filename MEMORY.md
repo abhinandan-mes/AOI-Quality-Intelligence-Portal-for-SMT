@@ -42,7 +42,7 @@ A production-ready web application for an SMT factory to automatically collect i
 5.  [x] File watcher service - Tested successfully. Parses `.rst` and `.xml` and moves to Archive. Added concurrency queuing to prevent event loop blocking.
 6.  [x] Dashboard implementation - Live production metrics, properly mapped yield colors, responsive layout.
 7.  [x] Barcode History implementation - Search with nested machine/defect JSON handling in Vanilla CSS.
-8.  [x] Line & User Management UI/UX - Match corporate standards, added modal forms.
+8.  [x] Line & User Management UI/UX - Match corporate standards, added modal forms, accurate activity logging (logout tracking, performer tracking), Super Admin constraints, and IPv4 sanitization.
 9.  [ ] Comprehensive Testing
 10. [ ] Deployment guide
 
