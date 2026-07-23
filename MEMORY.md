@@ -29,10 +29,10 @@ A production-ready web application for an SMT factory to automatically collect i
 
 ## Key Modules
 1.  **Dashboard:** Real-time production metrics (Yield, Pass/NG, Machine Status, etc.)
-2.  **File Integration:** Automated watcher (`chokidar`) for network folder to import CSV/XML/TXT/RST from AOI/SPI machines. Features an **asynchronous queue mechanism** to prevent Node.js event loop starvation when processing thousands of files concurrently. Features duplicate prevention, merging by time, archiving, and error handling.
-3.  **Line Management:** Configuration of physical lines and mapping to AOI/SPI network drop paths.
+2.  **File Integration:** Automated watcher (`chokidar`) for network folder to import CSV/XML/TXT/RST from POST_AOI/SPI/PRE_AOI machines. Features an **asynchronous queue mechanism** to prevent Node.js event loop starvation when processing thousands of files concurrently. Supports ZIP extraction in-memory. **Non-destructive**: Leaves original files untouched and logs processed paths in PostgreSQL.
+3.  **Line Management:** Configuration of physical lines and mapping to POST_AOI/SPI/PRE_AOI network drop paths.
 4.  **User Management:** Centralized hub for managing users, Access Control Matrix (Role Permissions), and system Activity Logs.
-5.  **Barcode History:** Detailed tracking of specific barcodes across machines and time, with comprehensive export options (CSV, Excel, Word, PDF).
+5.  **Barcode History:** Detailed tracking of specific barcodes across machines and time. Uses append-only historical tracking (no overwriting scans on the same machine) to provide full journey visibility (e.g., Wash & Remounts). Export options (CSV, Excel, Word, PDF).
 
 ## Development Roadmap (Status)
 1.  [x] Complete system architecture - Designed and approved.
@@ -45,8 +45,11 @@ A production-ready web application for an SMT factory to automatically collect i
 8.  [x] Line & User Management UI/UX - Match corporate standards, added modal forms, accurate activity logging (logout tracking, performer tracking), Super Admin constraints, and IPv4 sanitization.
 9.  [x] Activity Logs - Ported UI/UX and logic from vivo-AOI-webapp_update-main. Aligned backend auth tags (LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT).
 10. [x] Internationalization (i18n) - Applied complete Chinese translations across all pages, table headers, and modals via LanguageContext.
-11. [ ] Comprehensive Testing
-12. [ ] Deployment guide
+11. [x] Pre AOI & Post AOI implementation - Renamed AOI to POST_AOI. Added PRE_AOI support across DB, UI, and Watcher.
+12. [x] ZIP Extraction & Non-Destructive File Watcher - Extract ZIPs without modifying folders. Replaced archive/delete logic with a DB tracking mechanism.
+13. [x] Historical Tracking - Scanner updates append records instead of overwriting, properly supporting washed board remounts.
+14. [ ] Comprehensive Testing
+15. [ ] Deployment guide
 
 ## Open Notes
 *   Login credentials hardcoded to admin/admin temporarily until DB seeding.

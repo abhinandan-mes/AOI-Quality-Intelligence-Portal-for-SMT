@@ -83,14 +83,14 @@ export const translations: Translations = {
 
   
   // Line Management Additions
-  'lines.aoiConfigs': { en: 'AOI Configurations', zh: 'AOI 配置' },
-  'lines.aoiPaths': { en: 'Lines with AOI watch paths', zh: '带有 AOI 监控路径的产线' },
+  'lines.postAoiConfigs': { en: 'Post AOI Configurations', zh: 'Post AOI 配置' },
+  'lines.postAoiPaths': { en: 'Lines with Post AOI watch paths', zh: '带有 Post AOI 监控路径的产线' },
   'lines.spiConfigs': { en: 'SPI Configurations', zh: 'SPI 配置' },
   'lines.spiPaths': { en: 'Lines with SPI watch paths', zh: '带有 SPI 监控路径的产线' },
   'lines.configuredLines': { en: 'Configured Production Lines', zh: '已配置的生产线' },
   'lines.colName': { en: 'Line Name', zh: '产线名称' },
   'lines.colDesc': { en: 'Description', zh: '描述' },
-  'lines.colAoiPath': { en: 'AOI Watch Path', zh: 'AOI 监控路径' },
+  'lines.colPostAoiPath': { en: 'Post AOI Watch Path', zh: 'Post AOI 监控路径' },
   'lines.colSpiPath': { en: 'SPI Watch Path', zh: 'SPI 监控路径' },
   'lines.colStatus': { en: 'Status', zh: '状态' },
   'lines.colActions': { en: 'Actions', zh: '操作' },
@@ -107,7 +107,7 @@ export const translations: Translations = {
   'lines.modalDesc': { en: 'Define the physical line name and the network directories where AOI/SPI machines drop their XML/TXT files.', zh: '定义物理产线名称以及 AOI/SPI 设备放置 XML/TXT 文件的网络目录。' },
   'lines.labelName': { en: 'Line Name', zh: '产线名称' },
   'lines.labelDesc': { en: 'Description', zh: '描述' },
-  'lines.labelAoiPath': { en: 'AOI Watch Path', zh: 'AOI 监控路径' },
+  'lines.labelPostAoiPath': { en: 'Post AOI Watch Path', zh: 'Post AOI 监控路径' },
   'lines.labelSpiPath': { en: 'SPI Watch Path', zh: 'SPI 监控路径' },
   'lines.cancel': { en: 'Cancel', zh: '取消' },
   'lines.save': { en: 'Save Configuration', zh: '保存配置' },

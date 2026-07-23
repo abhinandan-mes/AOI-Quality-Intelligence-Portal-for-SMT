@@ -13,6 +13,7 @@
   "type": "module",
   "dependencies": {
     "@prisma/client": "^5.13.0",
+    "adm-zip": "^0.6.0",
     "bcrypt": "^6.0.0",
     "chokidar": "^5.0.0",
     "cors": "^2.8.6",
@@ -24,6 +25,7 @@
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",

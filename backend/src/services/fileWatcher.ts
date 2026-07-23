@@ -1,5 +1,7 @@
 import * as chokidar from 'chokidar';
 import fs from 'fs';
+import AdmZip from 'adm-zip';
+import crypto from 'crypto';
 import path from 'path';
 import xml2js from 'xml2js';
 import prisma from '../prismaClient';
@@ -8,13 +10,8 @@ import { io } from '../server';
 let activeWatchers: chokidar.FSWatcher[] = [];
 
 // Helper to ensure archive and error dirs exist in the target path
-const ensureDirs = (basePath: string) => {
-  const archiveDir = path.join(basePath, 'Archive');
-  const errorDir = path.join(basePath, 'Error');
-  if (!fs.existsSync(archiveDir)) fs.mkdirSync(archiveDir, { recursive: true });
-  if (!fs.existsSync(errorDir)) fs.mkdirSync(errorDir, { recursive: true });
-  return { archiveDir, errorDir };
-};
+
+
 
 export const startFileWatcher = async () => {
   console.log('Initializing dynamic file watchers...');
@@ -24,8 +21,9 @@ export const startFileWatcher = async () => {
     });
 
     lines.forEach(line => {
-      if (line.aoiWatchPath) setupWatcher(line.aoiWatchPath, 'AOI', line.name);
+      if (line.postAoiWatchPath) setupWatcher(line.postAoiWatchPath, 'POST_AOI', line.name);
       if (line.spiWatchPath) setupWatcher(line.spiWatchPath, 'SPI', line.name);
+      if (line.preAoiWatchPath) setupWatcher(line.preAoiWatchPath, 'PRE_AOI', line.name);
     });
   } catch (error) {
     console.error('Error starting file watchers:', error);
@@ -43,25 +41,29 @@ export const reloadWatchers = async () => {
   await startFileWatcher();
 };
 
-const setupWatcher = (watchPath: string, type: 'AOI' | 'SPI', lineName: string) => {
+const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI', lineName: string) => {
   if (!fs.existsSync(watchPath)) {
     console.error(`Watch path does not exist for Line ${lineName} (${type}): ${watchPath}`);
     return;
   }
 
-  const { archiveDir, errorDir } = ensureDirs(watchPath);
+  
 
   const watcher = chokidar.watch(watchPath, {
-    ignored: /(^|[\/\\])\../,
+    ignored: /(^|[\\/\\])\../,
     persistent: true,
     awaitWriteFinish: { stabilityThreshold: 2000, pollInterval: 100 }
   });
 
-  watcher.on('add', (filePath) => {
-    if (filePath.includes('Archive') || filePath.includes('Error')) return;
+  watcher.on('add', async (filePath) => {
+    // Check if already processed
+    try {
+      const existing = await prisma.fileImportLog.findUnique({ where: { filePath } });
+      if (existing && existing.status === 'SUCCESS') return; // Skip
+    } catch(e) {}
     
     console.log(`[${lineName} ${type}] New file detected: ${filePath}. Added to queue.`);
-    fileQueue.push({ filePath, type, lineName, archiveDir, errorDir });
+    fileQueue.push({ filePath, type, lineName });
     processQueue();
   });
 
@@ -71,10 +73,8 @@ const setupWatcher = (watchPath: string, type: 'AOI' | 'SPI', lineName: string) 
 
 interface QueueItem {
   filePath: string;
-  type: 'AOI' | 'SPI';
+  type: 'POST_AOI' | 'SPI' | 'PRE_AOI';
   lineName: string;
-  archiveDir: string;
-  errorDir: string;
 }
 
 const fileQueue: QueueItem[] = [];
@@ -88,27 +88,24 @@ const processQueue = async () => {
     const item = fileQueue.shift();
     if (!item) continue;
     
-    const { filePath, type, lineName, archiveDir, errorDir } = item;
+    const { filePath, type, lineName } = item;
     const ext = path.extname(filePath).toLowerCase();
     
     try {
-      if (type === 'AOI' && (ext === '.rst' || ext === '.json' || ext === '.txt')) {
-        await processAOIFile(filePath, lineName);
+      if (ext === '.zip') {
+        await processZipFile(filePath, type, lineName);
+      } else if ((type === 'POST_AOI' || type === 'PRE_AOI') && (ext === '.rst' || ext === '.json' || ext === '.txt')) {
+        await processAOIFile(filePath, lineName, type);
       } else if (type === 'SPI' && ext === '.xml') {
         await processSPIFile(filePath, lineName);
       } else {
         throw new Error(`Unsupported file extension ${ext} for ${type}`);
       }
 
-      await moveToDir(filePath, archiveDir);
+      await logImport(filePath, 'SUCCESS', 'Imported successfully');
       io.emit('new_inspection', { message: 'New inspection data imported.' });
     } catch (error: any) {
       console.error(`Error processing file ${filePath}:`, error.message);
-      try {
-        await moveToDir(filePath, errorDir);
-      } catch (e) {
-        console.error(`Failed to move to error directory: ${filePath}`);
-      }
       await logImport(filePath, 'ERROR', error.message);
     }
   }
@@ -116,18 +113,34 @@ const processQueue = async () => {
   isProcessingQueue = false;
 };
 
-const moveToDir = async (filePath: string, targetDir: string) => {
-  const ext = path.extname(filePath);
-  const baseName = path.basename(filePath, ext);
-  const timestamp = new Date().getTime();
-  const newFileName = `${baseName}_${timestamp}${ext}`;
-  fs.renameSync(filePath, path.join(targetDir, newFileName));
+const processZipFile = async (filePath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI', lineName: string) => {
+  const zip = new AdmZip(filePath);
+  const zipEntries = zip.getEntries();
+  const tempDir = path.join('/tmp', `aoi_zip_${crypto.randomUUID()}`);
+  fs.mkdirSync(tempDir, { recursive: true });
+
+  try {
+    zip.extractAllTo(tempDir, true);
+    for (const entry of zipEntries) {
+      if (entry.isDirectory) continue;
+      const extractedPath = path.join(tempDir, entry.entryName);
+      const ext = path.extname(extractedPath).toLowerCase();
+      
+      if ((type === 'POST_AOI' || type === 'PRE_AOI') && (ext === '.rst' || ext === '.json' || ext === '.txt')) {
+        await processAOIFile(extractedPath, lineName, type);
+      } else if (type === 'SPI' && ext === '.xml') {
+        await processSPIFile(extractedPath, lineName);
+      }
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
 };
 
 // Processing logic remains largely similar but we pass lineName 
 // instead of letting the machine ID dictate the line if line is already known.
 
-const processAOIFile = async (filePath: string, lineName: string) => {
+const processAOIFile = async (filePath: string, lineName: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI') => {
   const content = fs.readFileSync(filePath, 'utf-8');
   let data;
   try {
@@ -148,7 +161,7 @@ const processAOIFile = async (filePath: string, lineName: string) => {
   if (filePath.match(/[-_\\/]A[-_\\/]/i) || filePath.match(/[-_\\/]TOP[-_\\/]/i)) side = 'TOP';
   else if (filePath.match(/[-_\\/]B[-_\\/]/i) || filePath.match(/[-_\\/]BOTTOM[-_\\/]/i)) side = 'BOTTOM';
   
-  await saveOrUpdateInspection(barcode, modelName, machineId, lineName, 'AOI', inspTime, result, filePath, { side });
+  await saveOrUpdateInspection(barcode, modelName, machineId, lineName, type, inspTime, result, filePath, { side });
 };
 
 const processSPIFile = async (filePath: string, lineName: string) => {
@@ -230,7 +243,7 @@ const saveOrUpdateInspection = async (
   modelName: string, 
   machineId: string,
   lineName: string,
-  type: 'AOI' | 'SPI',
+  type: 'POST_AOI' | 'SPI' | 'PRE_AOI',
   inspTime: Date, 
   status: any, 
   filePath: string,
@@ -257,56 +270,31 @@ const saveOrUpdateInspection = async (
     create: { name: modelName }
   });
 
-  const existing = await prisma.inspection.findFirst({
-    where: { barcode: barcode, machineId: machine.id },
-    orderBy: { inspectionTime: 'desc' }
+  // Create history instead of merging
+  const newInsp = await prisma.inspection.create({
+    data: {
+      barcode, modelId: model.id, machineId: machine.id,
+      inspectionTime: inspTime, status, ...extraData
+    }
   });
-
-  if (existing) {
-    if (existing.inspectionTime <= inspTime) {
-      await prisma.inspection.update({
-        where: { id: existing.id },
-        data: { status, inspectionTime: inspTime, ...extraData }
-      });
-      if (defects && defects.length > 0) {
-        await prisma.defect.deleteMany({ where: { inspectionId: existing.id } });
-        await prisma.defect.createMany({
-          data: defects.map(d => ({
-            inspectionId: existing.id,
-            componentName: d.componentName,
-            defectType: d.defectType,
-            blockId: d.blockId
-          }))
-        });
-      }
-      await logImport(filePath, 'MERGED', `Updated existing barcode ${barcode}`, machine.id);
-    } else {
-      await logImport(filePath, 'DUPLICATE', `Older or duplicate barcode ${barcode}`, machine.id);
-    }
-  } else {
-    const newInsp = await prisma.inspection.create({
-      data: {
-        barcode, modelId: model.id, machineId: machine.id,
-        inspectionTime: inspTime, status, ...extraData
-      }
+  if (defects.length > 0) {
+    await prisma.defect.createMany({
+      data: defects.map(d => ({ 
+        inspectionId: newInsp.id, 
+        componentName: d.componentName, 
+        defectType: d.defectType,
+        blockId: d.blockId
+      }))
     });
-    if (defects.length > 0) {
-      await prisma.defect.createMany({
-        data: defects.map(d => ({ 
-          inspectionId: newInsp.id, 
-          componentName: d.componentName, 
-          defectType: d.defectType,
-          blockId: d.blockId
-        }))
-      });
-    }
-    await logImport(filePath, 'SUCCESS', 'Imported successfully', machine.id);
   }
 };
 
 const logImport = async (filePath: string, status: string, message: string, machineId?: string) => {
-  await prisma.fileImportLog.create({
-    data: {
+  await prisma.fileImportLog.upsert({
+    where: { filePath },
+    update: { status, errorMessage: message },
+    create: {
+      filePath,
       fileName: path.basename(filePath),
       fileType: path.extname(filePath).toUpperCase().replace('.', ''),
       machineId: machineId || null,

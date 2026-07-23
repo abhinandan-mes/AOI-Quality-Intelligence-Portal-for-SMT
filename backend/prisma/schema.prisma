@@ -24,10 +24,11 @@ model Line {
   description  String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  aoiWatchPath String?
-  isInstalled  Boolean   @default(true)
-  spiWatchPath String?
-  machines     Machine[]
+  postAoiWatchPath String?
+  isInstalled     Boolean   @default(true)
+  spiWatchPath    String?
+  preAoiWatchPath String?
+  machines        Machine[]
 }
 
 model Machine {
@@ -95,6 +96,7 @@ model FileImportLog {
   id           String   @id @default(uuid())
   fileName     String
   fileType     String
+  filePath     String?  @unique
   machineId    String?
   status       String
   errorMessage String?
@@ -109,8 +111,9 @@ enum Role {
 }
 
 enum MachineType {
-  AOI
+  POST_AOI
   SPI
+  PRE_AOI
 }
 
 enum InspectionStatus {

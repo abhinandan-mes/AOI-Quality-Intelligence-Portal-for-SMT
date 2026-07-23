@@ -8,8 +8,9 @@ interface Line {
   name: string;
   description: string | null;
   isInstalled: boolean;
-  aoiWatchPath: string | null;
+  postAoiWatchPath: string | null;
   spiWatchPath: string | null;
+  preAoiWatchPath: string | null;
 }
 
 export default function LineManagement() {
@@ -23,8 +24,9 @@ export default function LineManagement() {
     name: '',
     description: '',
     isInstalled: true,
-    aoiWatchPath: '',
-    spiWatchPath: ''
+    postAoiWatchPath: '',
+    spiWatchPath: '',
+    preAoiWatchPath: ''
   });
 
   const fetchLines = async () => {
@@ -49,12 +51,13 @@ export default function LineManagement() {
         name: line.name,
         description: line.description || '',
         isInstalled: line.isInstalled,
-        aoiWatchPath: line.aoiWatchPath || '',
-        spiWatchPath: line.spiWatchPath || ''
+        postAoiWatchPath: line.postAoiWatchPath || '',
+        spiWatchPath: line.spiWatchPath || '',
+        preAoiWatchPath: line.preAoiWatchPath || ''
       });
     } else {
       setEditingLine(null);
-      setFormData({ name: '', description: '', isInstalled: true, aoiWatchPath: '', spiWatchPath: '' });
+      setFormData({ name: '', description: '', isInstalled: true, postAoiWatchPath: '', spiWatchPath: '', preAoiWatchPath: '' });
     }
     setOpenModal(true);
   };
@@ -98,7 +101,7 @@ export default function LineManagement() {
 
   const totalLines = lines.length;
   const activeLines = lines.filter(l => l.isInstalled).length;
-  const configuredAOI = lines.filter(l => l.aoiWatchPath).length;
+  const configuredAOI = lines.filter(l => l.postAoiWatchPath).length;
   const configuredSPI = lines.filter(l => l.spiWatchPath).length;
 
   return (
@@ -135,9 +138,9 @@ export default function LineManagement() {
           <div className="summary-card-subtitle">{t('lines.activeLinesDesc')}</div>
         </div>
         <div className="summary-card orange">
-          <div className="summary-card-title">{t('lines.aoiConfigs')}</div>
+          <div className="summary-card-title">{t('lines.postAoiConfigs')}</div>
           <div className="summary-card-value">{configuredAOI}</div>
-          <div className="summary-card-subtitle">{t('lines.aoiPaths')}</div>
+          <div className="summary-card-subtitle">{t('lines.postAoiPaths')}</div>
         </div>
         <div className="summary-card teal">
           <div className="summary-card-title">{t('lines.spiConfigs')}</div>
@@ -173,7 +176,7 @@ export default function LineManagement() {
                     <td style={{ color: '#64748b' }}>{line.description || '-'}</td>
                     <td>
                       <code style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', color: '#475569' }}>
-                        {line.aoiWatchPath || t('lines.notConfigured')}
+                        {line.postAoiWatchPath || t('lines.notConfigured')}
                       </code>
                     </td>
                     <td>
@@ -262,8 +265,8 @@ export default function LineManagement() {
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('lines.labelAoiPath')}</label>
                 <input 
                   type="text" 
-                  value={formData.aoiWatchPath} 
-                  onChange={(e) => setFormData({...formData, aoiWatchPath: e.target.value})} 
+                  value={formData.postAoiWatchPath} 
+                  onChange={(e) => setFormData({...formData, postAoiWatchPath: e.target.value})} 
                   style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', outline: 'none', fontFamily: 'monospace' }}
                   placeholder="e.g., \\10.172.9.200\shared\AOI"
                 />
@@ -276,6 +279,16 @@ export default function LineManagement() {
                   onChange={(e) => setFormData({...formData, spiWatchPath: e.target.value})} 
                   style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', outline: 'none', fontFamily: 'monospace' }}
                   placeholder="e.g., \\10.172.9.200\shared\SPI"
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('lines.preAoiWatchPath') || 'PRE AOI Watch Path'}</label>
+                <input 
+                  type="text" 
+                  value={formData.preAoiWatchPath} 
+                  onChange={(e) => setFormData({...formData, preAoiWatchPath: e.target.value})} 
+                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', outline: 'none', fontFamily: 'monospace' }}
+                  placeholder="e.g., \\10.172.9.200\shared\PRE_AOI"
                 />
               </div>
             </div>
