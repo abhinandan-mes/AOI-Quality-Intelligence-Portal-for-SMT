@@ -5,9 +5,8 @@ import './Dashboard.css'; // Reuse CSS
 
 export default function UserManagement() {
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState<'users' | 'permissions' | 'logs'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'permissions'>('users');
   const [users, setUsers] = useState<any[]>([]);
-  const [logs, setLogs] = useState<any[]>([]);
   const [permissions, setPermissions] = useState<any[]>([]);
   
   const API_BASE = `http://${window.location.hostname}:5050/api`;
@@ -20,7 +19,6 @@ export default function UserManagement() {
       setCurrentUser(JSON.parse(userStr));
     }
     fetchUsers();
-    fetchLogs();
     fetchPermissions();
   }, []);
 
@@ -28,15 +26,6 @@ export default function UserManagement() {
     try {
       const res = await axios.get(`${API_BASE}/users`);
       setUsers(res.data);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const fetchLogs = async () => {
-    try {
-      const res = await axios.get(`${API_BASE}/activity`);
-      setLogs(res.data);
     } catch (e) {
       console.error(e);
     }
@@ -158,7 +147,7 @@ export default function UserManagement() {
         <div>
           <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{t('menu.users') || 'User Management'}</h1>
           <div className="subtitle">
-            Manage roles, permissions, and view system audits
+            {t('users.subtitle')}
           </div>
         </div>
         <button 
@@ -171,7 +160,7 @@ export default function UserManagement() {
           }}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          Add New User
+          {t('users.addUser')}
         </button>
       </div>
 
@@ -180,19 +169,13 @@ export default function UserManagement() {
           onClick={() => setActiveTab('users')}
           style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'users' ? '#415fff' : '#e2e8f0', color: activeTab === 'users' ? 'white' : '#475569', cursor: 'pointer', fontWeight: 600 }}
         >
-          Users
+          {t('users.tabUsers')}
         </button>
         <button 
           onClick={() => setActiveTab('permissions')}
           style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'permissions' ? '#415fff' : '#e2e8f0', color: activeTab === 'permissions' ? 'white' : '#475569', cursor: 'pointer', fontWeight: 600 }}
         >
-          Role Permissions
-        </button>
-        <button 
-          onClick={() => setActiveTab('logs')}
-          style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'logs' ? '#415fff' : '#e2e8f0', color: activeTab === 'logs' ? 'white' : '#475569', cursor: 'pointer', fontWeight: 600 }}
-        >
-          Activity Logs
+          {t('users.tabPermissions')}
         </button>
       </div>
 
@@ -201,11 +184,11 @@ export default function UserManagement() {
           <table className="vivo-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
               <tr>
-                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>NAME</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>USERNAME</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>ROLE</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>STATUS</th>
-                <th style={{ padding: '16px', textAlign: 'right', color: '#64748b', fontSize: '0.85rem' }}>ACTIONS</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>{t('users.colName')}</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>{t('users.colUsername')}</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>{t('users.colRole')}</th>
+                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>{t('users.colStatus')}</th>
+                <th style={{ padding: '16px', textAlign: 'right', color: '#64748b', fontSize: '0.85rem' }}>{t('users.colActions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -227,19 +210,19 @@ export default function UserManagement() {
                   </td>
                   <td style={{ padding: '16px' }}>
                     {u.isActive ? (
-                      <span style={{ color: '#10b981', fontWeight: 600, fontSize: '0.85rem' }}>● Active</span>
+                      <span style={{ color: '#10b981', fontWeight: 600, fontSize: '0.85rem' }}>● {t('users.active')}</span>
                     ) : (
-                      <span style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.85rem' }}>● Inactive</span>
+                      <span style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.85rem' }}>● {t('users.inactive')}</span>
                     )}
                   </td>
                   <td style={{ padding: '16px', textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                     {(u.role !== 'SUPER_ADMIN' || currentUser?.role === 'SUPER_ADMIN') ? (
                       <>
-                        <button onClick={() => { setEditUser(u); setFormError(''); setShowEditUserModal(true); }} style={{ color: '#3b82f6', background: '#3b82f615', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Edit</button>
-                        <button onClick={() => handleDeleteUser(u.id)} style={{ color: '#ef4444', background: '#ef444415', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Delete</button>
+                        <button onClick={() => { setEditUser(u); setFormError(''); setShowEditUserModal(true); }} style={{ color: '#3b82f6', background: '#3b82f615', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>{t('users.edit')}</button>
+                        <button onClick={() => handleDeleteUser(u.id)} style={{ color: '#ef4444', background: '#ef444415', padding: '6px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>{t('users.delete')}</button>
                       </>
                     ) : (
-                      <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>Protected</span>
+                      <span style={{ color: '#94a3b8', fontSize: '0.85rem', fontWeight: 600 }}>{t('users.protected')}</span>
                     )}
                   </td>
                 </tr>
@@ -251,11 +234,11 @@ export default function UserManagement() {
 
       {activeTab === 'permissions' && (
         <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '24px' }}>
-          <h3 style={{ marginTop: 0 }}>Access Control Matrix</h3>
+          <h3 style={{ marginTop: 0 }}>{t('users.matrixTitle')}</h3>
           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '16px' }}>
             <thead>
               <tr>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>Permission</th>
+                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>{t('users.colPermission')}</th>
                 {['INSPECTOR', 'MANAGER', 'ADMIN', 'SUPER_ADMIN'].map(r => (
                   <th key={r} style={{ padding: '12px', textAlign: 'center', borderBottom: '2px solid #e2e8f0', fontSize: '0.85rem', color: getRoleColor(r) }}>{r}</th>
                 ))}
@@ -286,74 +269,39 @@ export default function UserManagement() {
         </div>
       )}
 
-      {activeTab === 'logs' && (
-        <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-          <table className="vivo-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-              <tr>
-                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>TIME</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>USER</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>ACTION</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>IP ADDRESS</th>
-                <th style={{ padding: '16px', textAlign: 'left', color: '#64748b', fontSize: '0.85rem' }}>DETAILS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {logs.map(l => (
-                <tr key={l.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.85rem' }}>{new Date(l.createdAt).toLocaleString()}</td>
-                  <td style={{ padding: '12px 16px', fontWeight: 600 }}>{l.username || 'System'}</td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <span style={{ 
-                      padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 700,
-                      background: l.action === 'FAILED_LOGIN' || l.action === 'User Deleted' ? '#fef2f2' : '#f1f5f9',
-                      color: l.action === 'FAILED_LOGIN' || l.action === 'User Deleted' ? '#ef4444' : '#334155'
-                    }}>
-                      {l.action}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px 16px', color: '#475569', fontSize: '0.85rem', fontFamily: 'monospace' }}>{l.ipAddress}</td>
-                  <td style={{ padding: '12px 16px', color: '#64748b', fontSize: '0.85rem' }}>{l.details}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       {showAddUserModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
           <div className="table-card animate-slide-up" style={{ width: '100%', maxWidth: '400px', padding: '32px' }}>
             <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '1.25rem', color: '#0f172a', fontWeight: 700 }}>Add New User</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '32px', marginTop: '24px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Full Name</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('users.labelName')}</label>
                 <input 
                   type="text" value={newUser.name} onChange={(e) => setNewUser({...newUser, name: e.target.value})} 
                   style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }} placeholder="e.g., John Doe"
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Username</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('users.labelUsername')}</label>
                 <input 
                   type="text" value={newUser.username} onChange={(e) => setNewUser({...newUser, username: e.target.value})} 
                   style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }} placeholder="e.g., john_doe"
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Role</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('users.labelRole')}</label>
                 <select 
                   value={newUser.role} onChange={(e) => setNewUser({...newUser, role: e.target.value})} 
                   style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', background: 'white' }}
                 >
-                  <option value="INSPECTOR">Inspector</option>
-                  <option value="MANAGER">Manager</option>
-                  <option value="ADMIN">Admin</option>
-                  {currentUser?.role === 'SUPER_ADMIN' && <option value="SUPER_ADMIN">Super Admin</option>}
+                  <option value="INSPECTOR">{t('users.roleInspector')}</option>
+                  <option value="MANAGER">{t('users.roleManager')}</option>
+                  <option value="ADMIN">{t('users.roleAdmin')}</option>
+                  {currentUser?.role === 'SUPER_ADMIN' && <option value="SUPER_ADMIN">{t('users.roleSuperAdmin')}</option>}
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Password</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('users.labelPassword')}</label>
                 <input 
                   type="password" value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value})} 
                   style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }} placeholder="Initial password"
@@ -366,8 +314,8 @@ export default function UserManagement() {
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button onClick={() => setShowAddUserModal(false)} style={{ background: 'transparent', border: 'none', color: '#64748b', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-              <button onClick={handleAddUser} disabled={!newUser.name || !newUser.username || !newUser.password} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', opacity: (!newUser.name || !newUser.username || !newUser.password) ? 0.5 : 1 }}>Create User</button>
+              <button onClick={() => setShowAddUserModal(false)} style={{ background: 'transparent', border: 'none', color: '#64748b', fontWeight: 600, cursor: 'pointer' }}>{t('users.cancel')}</button>
+              <button onClick={handleAddUser} disabled={!newUser.name || !newUser.username || !newUser.password} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', opacity: (!newUser.name || !newUser.username || !newUser.password) ? 0.5 : 1 }}>{t('users.create')}</button>
             </div>
           </div>
         </div>
@@ -376,39 +324,39 @@ export default function UserManagement() {
       {showEditUserModal && editUser && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
           <div className="table-card animate-slide-up" style={{ width: '100%', maxWidth: '400px', padding: '32px' }}>
-            <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '1.25rem', color: '#0f172a', fontWeight: 700 }}>Edit User</h2>
+            <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '1.25rem', color: '#0f172a', fontWeight: 700 }}>{t('users.editTitle')}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '32px', marginTop: '24px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Full Name</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('users.labelName')}</label>
                 <input 
                   type="text" value={editUser.name} onChange={(e) => setEditUser({...editUser, name: e.target.value})} 
                   style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Role</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('users.labelRole')}</label>
                 <select 
                   value={editUser.role} onChange={(e) => setEditUser({...editUser, role: e.target.value})} 
                   style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', background: 'white' }}
                 >
-                  <option value="INSPECTOR">Inspector</option>
-                  <option value="MANAGER">Manager</option>
-                  <option value="ADMIN">Admin</option>
-                  {currentUser?.role === 'SUPER_ADMIN' && <option value="SUPER_ADMIN">Super Admin</option>}
+                  <option value="INSPECTOR">{t('users.roleInspector')}</option>
+                  <option value="MANAGER">{t('users.roleManager')}</option>
+                  <option value="ADMIN">{t('users.roleAdmin')}</option>
+                  {currentUser?.role === 'SUPER_ADMIN' && <option value="SUPER_ADMIN">{t('users.roleSuperAdmin')}</option>}
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Status</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('users.labelStatus')}</label>
                 <select 
                   value={editUser.isActive ? 'true' : 'false'} onChange={(e) => setEditUser({...editUser, isActive: e.target.value === 'true'})} 
                   style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none', background: 'white' }}
                 >
-                  <option value="true">Active</option>
-                  <option value="false">Inactive</option>
+                  <option value="true">{t('users.active')}</option>
+                  <option value="false">{t('users.inactive')}</option>
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>New Password (Leave blank to keep current)</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('users.labelNewPassword')}</label>
                 <input 
                   type="password" value={editUser.password || ''} onChange={(e) => setEditUser({...editUser, password: e.target.value})} 
                   style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', outline: 'none' }} placeholder="Optional"
@@ -421,8 +369,8 @@ export default function UserManagement() {
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-              <button onClick={() => { setShowEditUserModal(false); setEditUser(null); }} style={{ background: 'transparent', border: 'none', color: '#64748b', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-              <button onClick={handleEditUser} disabled={!editUser.name} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', opacity: !editUser.name ? 0.5 : 1 }}>Save Changes</button>
+              <button onClick={() => { setShowEditUserModal(false); setEditUser(null); }} style={{ background: 'transparent', border: 'none', color: '#64748b', fontWeight: 600, cursor: 'pointer' }}>{t('users.cancel')}</button>
+              <button onClick={handleEditUser} disabled={!editUser.name} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', opacity: !editUser.name ? 0.5 : 1 }}>{t('users.save')}</button>
             </div>
           </div>
         </div>

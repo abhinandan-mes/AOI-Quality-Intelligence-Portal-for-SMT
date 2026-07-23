@@ -11,6 +11,7 @@ import DefectSearch from './pages/DefectSearch'
 import Reports from './pages/Reports'
 import Analytics from './pages/Analytics'
 import UserManagement from './pages/UserManagement'
+import ActivityLogs from './pages/ActivityLogs'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -59,6 +60,7 @@ function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="users" element={<UserManagement />} />
+          <Route path="activity-logs" element={<ActivityLogs />} />
         </Route>
       </Routes>
     </Router>

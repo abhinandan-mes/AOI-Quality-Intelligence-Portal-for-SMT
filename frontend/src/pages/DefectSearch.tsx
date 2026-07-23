@@ -4,8 +4,10 @@ import './Reports.css';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function DefectSearch() {
+  const { t } = useLanguage();
   const [defectType, setDefectType] = useState('');
   const [componentName, setComponentName] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -138,7 +140,7 @@ export default function DefectSearch() {
   const exportToDoc = () => {
     if (sortedData.length === 0) return;
     let htmlContent = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Defect Search</title></head><body>";
-    htmlContent += "<h2>Defect Search Report</h2><table border='1' style='border-collapse:collapse;width:100%;'><tr><th>Barcode</th><th>Line</th><th>Machine</th><th>Component</th><th>Defect Type</th><th>Status</th><th>Timestamp</th></tr>";
+    htmlContent += "<h2>Defect Search Report</h2><table border='1' style='border-collapse:collapse;width:100%;'><tr><th>{t('search.colBarcode')}</th><th>{t('search.colLine')}</th><th>{t('search.colMachine')}</th><th>{t('search.colComponent')}</th><th>{t('search.colDefectType')}</th><th>Status</th><th>Timestamp</th></tr>";
     
     sortedData.forEach(row => {
       const d = getRowData(row);
@@ -201,8 +203,8 @@ export default function DefectSearch() {
     <div className="reports-container animate-fade-in">
       <div className="reports-heading" style={{ marginBottom: '32px' }}>
         <div>
-          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px' }}>Defect Search</h2>
-          <p style={{ color: '#64748b', marginTop: '8px', fontSize: '1rem' }}>Pinpoint specific defect types and locations across all lines.</p>
+          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px' }}>{t('menu.search')}</h2>
+          <p style={{ color: '#64748b', marginTop: '8px', fontSize: '1rem' }}>{t('defectSearch.subtitle')}</p>
         </div>
       </div>
 
@@ -244,11 +246,11 @@ export default function DefectSearch() {
           <div className="filter-divider"></div>
           <div className="filter-group date-group">
             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-            <span className="date-separator">to</span>
+            <span className="date-separator">{t('history.to')}</span>
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </div>
           <button className="btn-primary-search" onClick={handleSearch}>
-            Search
+            {t('history.search')}
           </button>
         </div>
 
@@ -256,7 +258,7 @@ export default function DefectSearch() {
           <div className="export-dropdown-container">
             <button className="btn-export-dropdown" onClick={() => setShowExportMenu(!showExportMenu)}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              Export Data
+              {t('history.exportData')}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '14px', height: '14px', marginLeft: '4px' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             {showExportMenu && (
@@ -291,23 +293,23 @@ export default function DefectSearch() {
             <thead>
               <tr>
                 <th onClick={() => handleSort('barcode')} style={{ cursor: 'pointer' }} className="sortable-header">
-                  Barcode {sortConfig?.key === 'barcode' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                  {t('history.colBarcode')} {sortConfig?.key === 'barcode' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                 </th>
                 <th onClick={() => handleSort('line')} style={{ cursor: 'pointer' }} className="sortable-header">
-                  Line {sortConfig?.key === 'line' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                  {t('history.colLine')} {sortConfig?.key === 'line' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                 </th>
                 <th onClick={() => handleSort('machine')} style={{ cursor: 'pointer' }} className="sortable-header">
-                  Machine {sortConfig?.key === 'machine' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                  {t('history.colMachine')} {sortConfig?.key === 'machine' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                 </th>
                 <th onClick={() => handleSort('componentName')} style={{ cursor: 'pointer' }} className="sortable-header">
-                  Component Name {sortConfig?.key === 'componentName' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                  {t('dashboard.component')} {sortConfig?.key === 'componentName' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                 </th>
                 <th onClick={() => handleSort('defectType')} style={{ cursor: 'pointer' }} className="sortable-header">
-                  Defect Type {sortConfig?.key === 'defectType' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                  {t('dashboard.defect')} {sortConfig?.key === 'defectType' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                 </th>
-                <th>Status</th>
+                <th>{t('history.colStatus')}</th>
                 <th onClick={() => handleSort('timestamp')} style={{ cursor: 'pointer' }} className="sortable-header">
-                  Timestamp {sortConfig?.key === 'timestamp' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                  {t('history.colTimestamp')} {sortConfig?.key === 'timestamp' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                 </th>
               </tr>
             </thead>

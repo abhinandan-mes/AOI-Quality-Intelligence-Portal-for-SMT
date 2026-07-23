@@ -187,6 +187,9 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
             <NavLink to="/users" style={({ isActive }) => navItemStyle(isActive)}>
               {t('menu.users') || 'User Management'}
             </NavLink>
+            <NavLink to="/activity-logs" style={({ isActive }) => navItemStyle(isActive)}>
+              {t('menu.activityLogs') || 'Activity Logs'}
+            </NavLink>
           </div>
         </aside>
 

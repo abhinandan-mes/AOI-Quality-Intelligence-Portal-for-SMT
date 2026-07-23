@@ -4,8 +4,10 @@ import './Reports.css';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function BarcodeHistory() {
+  const { t } = useLanguage();
   const [barcode, setBarcode] = useState('');
   const [status, setStatus] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -127,7 +129,7 @@ export default function BarcodeHistory() {
   const exportToDoc = () => {
     if (sortedData.length === 0) return;
     let htmlContent = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
-    htmlContent += "<h2>Barcode History</h2><table border='1' style='border-collapse:collapse;width:100%;'><tr><th>Barcode</th><th>Line</th><th>Machine</th><th>Side</th><th>Status</th><th>Block</th><th>Defect Location</th><th>Phenomenon</th><th>Date</th></tr>";
+    htmlContent += "<h2>{t('history.title')}</h2><table border='1' style='border-collapse:collapse;width:100%;'><tr><th>{t('history.colBarcode')}</th><th>{t('history.colLine')}</th><th>{t('history.colMachine')}</th><th>Side</th><th>{t('history.colStatus')}</th><th>{t('history.colBlock')}</th><th>{t('history.colDefectLocation')}</th><th>{t('history.colPhenomenon')}</th><th>Date</th></tr>";
     
     sortedData.forEach(row => {
       htmlContent += `<tr>
@@ -172,7 +174,7 @@ export default function BarcodeHistory() {
       tableRows.push(rowData);
     });
 
-    doc.text("Barcode History Report", 14, 15);
+    doc.text("{t('history.title')} Report", 14, 15);
     (doc as any).autoTable({
       head: [tableColumn],
       body: tableRows,
@@ -193,8 +195,8 @@ export default function BarcodeHistory() {
     <div className="reports-container animate-fade-in">
       <div className="reports-heading" style={{ marginBottom: '32px' }}>
         <div>
-          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>Barcode History</h2>
-          <p style={{ color: '#64748b', marginTop: '8px', fontSize: '1rem' }}>Search, filter, and export historical AOI and SPI inspection records.</p>
+          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{t('history.title')}</h2>
+          <p style={{ color: '#64748b', marginTop: '8px', fontSize: '1rem' }}>{t('history.desc')}</p>
         </div>
       </div>
 
@@ -205,7 +207,7 @@ export default function BarcodeHistory() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="filter-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input 
               type="text" 
-              placeholder="Barcode..."
+              placeholder={t('history.searchBarcode')}
               value={barcode} 
               onChange={(e) => setBarcode(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -216,7 +218,7 @@ export default function BarcodeHistory() {
           <div className="filter-group">
             <input 
               type="text" 
-              placeholder="Line (e.g. Line-401)"
+              placeholder={t('history.searchLine')}
               value={lineName} 
               onChange={(e) => setLineName(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -226,16 +228,16 @@ export default function BarcodeHistory() {
           <div className="filter-divider"></div>
           <div className="filter-group">
             <select value={side} onChange={(e) => setSide(e.target.value)}>
-              <option value="">All Sides</option>
-              <option value="TOP">TOP</option>
-              <option value="BOTTOM">BOTTOM</option>
+              <option value="">{t('history.allSides')}</option>
+              <option value="TOP">{t('history.sideTop')}</option>
+              <option value="BOTTOM">{t('history.sideBottom')}</option>
             </select>
           </div>
           <div className="filter-divider"></div>
           <div className="filter-group">
             <input 
               type="text" 
-              placeholder="Defect Location"
+              placeholder={t('history.searchDefectLocation')}
               value={defectLocation} 
               onChange={(e) => setDefectLocation(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -245,7 +247,7 @@ export default function BarcodeHistory() {
           <div className="filter-divider"></div>
           <div className="filter-group">
             <select value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="">All Statuses</option>
+              <option value="">{t('history.allStatuses')}</option>
               <option value="PASS">PASS</option>
               <option value="GOOD">GOOD</option>
               <option value="FAIL">FAIL</option>
@@ -256,11 +258,11 @@ export default function BarcodeHistory() {
           <div className="filter-divider"></div>
           <div className="filter-group date-group">
             <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-            <span className="date-separator">to</span>
+            <span className="date-separator">{t('history.to')}</span>
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </div>
           <button className="btn-primary-search" onClick={handleSearch}>
-            Search
+            {t('history.search')}
           </button>
         </div>
 
@@ -268,26 +270,26 @@ export default function BarcodeHistory() {
           <div className="export-dropdown-container">
             <button className="btn-export-dropdown" onClick={() => setShowExportMenu(!showExportMenu)}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              Export Data
+              {t('history.exportData')}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '14px', height: '14px', marginLeft: '4px' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             {showExportMenu && (
               <div className="export-menu" onMouseLeave={() => setShowExportMenu(false)}>
                 <button className="export-menu-item csv" onClick={() => { exportToCSV(); setShowExportMenu(false); }}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  Export as CSV
+                  {t('history.exportCsv')}
                 </button>
                 <button className="export-menu-item excel" onClick={() => { exportToExcel(); setShowExportMenu(false); }}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line><polyline points="10.5 12 12 15 13.5 12"></polyline></svg>
-                  Export as Excel
+                  {t('history.exportExcel')}
                 </button>
                 <button className="export-menu-item doc" onClick={() => { exportToDoc(); setShowExportMenu(false); }}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  Export as Word
+                  {t('history.exportWord')}
                 </button>
                 <button className="export-menu-item pdf" onClick={() => { exportToPDF(); setShowExportMenu(false); }}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  Export as PDF
+                  {t('history.exportPdf')}
                 </button>
               </div>
             )}
@@ -302,19 +304,19 @@ export default function BarcodeHistory() {
           <table className="report-table premium-table">
             <thead>
               <tr>
-                <th>Barcode</th>
-                <th>Line</th>
+                <th>{t('history.colBarcode')}</th>
+                <th>{t('history.colLine')}</th>
                 <th onClick={() => handleSort('machine')} style={{ cursor: 'pointer' }} className="sortable-header">
-                  Machine {sortConfig?.key === 'machine' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                  {t('history.colMachine')} {sortConfig?.key === 'machine' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                 </th>
                 <th onClick={() => handleSort('side')} style={{ cursor: 'pointer' }} className="sortable-header">
-                  Side {sortConfig?.key === 'side' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
+                  {t('history.colSide')} {sortConfig?.key === 'side' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}
                 </th>
-                <th>Status</th>
-                <th>Block</th>
-                <th>Defect Location</th>
-                <th>Phenomenon</th>
-                <th>Timestamp</th>
+                <th>{t('history.colStatus')}</th>
+                <th>{t('history.colBlock')}</th>
+                <th>{t('history.colDefectLocation')}</th>
+                <th>{t('history.colPhenomenon')}</th>
+                <th>{t('history.colTimestamp')}</th>
               </tr>
             </thead>
             <tbody>
@@ -337,8 +339,8 @@ export default function BarcodeHistory() {
                   <td colSpan={9}>
                     <div className="premium-empty-state">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                      <h4>No Inspection Records Found</h4>
-                      <p>Try adjusting your search filters or dates to find what you're looking for.</p>
+                      <h4>{t('history.noRecords')}</h4>
+                      <p>{t('history.noRecordsDesc')}</p>
                     </div>
                   </td>
                 </tr>
@@ -388,7 +390,7 @@ export default function BarcodeHistory() {
         {!loading && sortedData.length > 0 && (
           <div className="premium-pagination">
             <span className="pagination-info">
-              Showing {page * rowsPerPage + 1} to {Math.min((page + 1) * rowsPerPage, sortedData.length)} of {sortedData.length} entries
+              {t('history.showing')} {page * rowsPerPage + 1} {t('history.to')} {Math.min((page + 1) * rowsPerPage, sortedData.length)} {t('history.entries').replace('条记录', '')} {sortedData.length} {t('history.entries')}
             </span>
             <div className="pagination-controls">
               <button 

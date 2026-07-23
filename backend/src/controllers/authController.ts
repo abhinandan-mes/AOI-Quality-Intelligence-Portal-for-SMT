@@ -23,7 +23,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       );
       res.json({ token, user: { username: 'abhinandan', role: 'SUPER_ADMIN' } });
       await prisma.activityLog.create({
-        data: { username: 'abhinandan', action: 'LOGIN', ipAddress, details: 'Fallback superadmin login' }
+        data: { username: 'abhinandan', action: 'LOGIN_SUCCESS', ipAddress, details: 'Fallback superadmin login' }
       });
       return;
     }
@@ -32,7 +32,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     if (!user) {
       await prisma.activityLog.create({
-        data: { username, action: 'FAILED_LOGIN', ipAddress, details: 'User not found' }
+        data: { username, action: 'LOGIN_FAILURE', ipAddress, details: 'User not found' }
       });
       res.status(401).json({ message: 'Invalid credentials' });
       return;
@@ -42,7 +42,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     if (!isMatch) {
       await prisma.activityLog.create({
-        data: { username, action: 'FAILED_LOGIN', ipAddress, details: 'Incorrect password' }
+        data: { username, action: 'LOGIN_FAILURE', ipAddress, details: 'Incorrect password' }
       });
       res.status(401).json({ message: 'Invalid credentials' });
       return;
@@ -50,7 +50,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     if (!user.isActive) {
       await prisma.activityLog.create({
-        data: { username, action: 'FAILED_LOGIN', ipAddress, details: 'Account deactivated' }
+        data: { username, action: 'LOGIN_FAILURE', ipAddress, details: 'Account deactivated' }
       });
       res.status(403).json({ message: 'Account is deactivated' });
       return;
@@ -73,7 +73,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
 
     await prisma.activityLog.create({
-      data: { userId: user.id, username: user.username, action: 'LOGIN', ipAddress, details: 'Successful login' }
+      data: { userId: user.id, username: user.username, action: 'LOGIN_SUCCESS', ipAddress, details: 'Successful login' }
     });
   } catch (error) {
     console.error('Login Error:', error);

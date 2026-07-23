@@ -43,8 +43,10 @@ A production-ready web application for an SMT factory to automatically collect i
 6.  [x] Dashboard implementation - Live production metrics, properly mapped yield colors, responsive layout.
 7.  [x] Barcode History implementation - Search with nested machine/defect JSON handling in Vanilla CSS.
 8.  [x] Line & User Management UI/UX - Match corporate standards, added modal forms, accurate activity logging (logout tracking, performer tracking), Super Admin constraints, and IPv4 sanitization.
-9.  [ ] Comprehensive Testing
-10. [ ] Deployment guide
+9.  [x] Activity Logs - Ported UI/UX and logic from vivo-AOI-webapp_update-main. Aligned backend auth tags (LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT).
+10. [x] Internationalization (i18n) - Applied complete Chinese translations across all pages, table headers, and modals via LanguageContext.
+11. [ ] Comprehensive Testing
+12. [ ] Deployment guide
 
 ## Open Notes
 *   Login credentials hardcoded to admin/admin temporarily until DB seeding.

@@ -60,19 +60,19 @@ export default function Dashboard() {
             className={`timeframe-btn ${timeframe === 'today' ? 'active' : ''}`}
             onClick={() => setTimeframe('today')}
           >
-            Today
+            {t('dashboard.today')}
           </button>
           <button 
             className={`timeframe-btn ${timeframe === 'weekly' ? 'active' : ''}`}
             onClick={() => setTimeframe('weekly')}
           >
-            Weekly
+            {t('dashboard.weekly')}
           </button>
           <button 
             className={`timeframe-btn ${timeframe === 'monthly' ? 'active' : ''}`}
             onClick={() => setTimeframe('monthly')}
           >
-            Monthly
+            {t('dashboard.monthly')}
           </button>
         </div>
       </div>
@@ -81,29 +81,29 @@ export default function Dashboard() {
         <div className="summary-card blue">
           <div className="summary-card-title">{t('dashboard.totalInspections')}</div>
           <div className="summary-card-value">{summary.totalInspections.toLocaleString()}</div>
-          <div className="summary-card-subtitle">Total panel barcodes</div>
+          <div className="summary-card-subtitle">{t('dashboard.subtitle1')}</div>
         </div>
         <div className="summary-card green">
           <div className="summary-card-title">{t('dashboard.passedBoards')}</div>
           <div className="summary-card-value">{summary.passCount.toLocaleString()}</div>
-          <div className="summary-card-subtitle">Boards passed inspection</div>
+          <div className="summary-card-subtitle">{t('dashboard.subtitle2')}</div>
         </div>
         <div className="summary-card orange">
           <div className="summary-card-title">{t('dashboard.defectsDetected')}</div>
           <div className="summary-card-value">{summary.defectCount.toLocaleString()}</div>
-          <div className="summary-card-subtitle">Total individual defects</div>
+          <div className="summary-card-subtitle">{t('dashboard.subtitle3')}</div>
         </div>
         <div className="summary-card teal">
           <div className="summary-card-title">{t('dashboard.activeMachines')}</div>
           <div className="summary-card-value">{summary.activeMachinesCount.toLocaleString()}</div>
-          <div className="summary-card-subtitle">In-progress sessions</div>
+          <div className="summary-card-subtitle">{t('dashboard.subtitle4')}</div>
         </div>
       </div>
 
       <div className="charts-grid">
         <div className="chart-card">
-          <div className="chart-card-title">Output Trend</div>
-          <div className="chart-card-subtitle">Inspections by {timeframe === 'today' ? 'hour' : 'day'} (selected range)</div>
+          <div className="chart-card-title">{t('dashboard.outputTrend')}</div>
+          <div className="chart-card-subtitle">{timeframe === 'today' ? t('dashboard.inspectionsByHour') : t('dashboard.inspectionsByDay')}</div>
           <div style={{ height: 300, width: '100%' }}>
             {!loading && trendData.length > 0 ? (
               <ResponsiveContainer>
@@ -116,14 +116,14 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>Loading...</div>
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>{t('dashboard.loading')}</div>
             )}
           </div>
         </div>
 
         <div className="chart-card">
-          <div className="chart-card-title">Yield Distribution</div>
-          <div className="chart-card-subtitle">Pass vs Fail ratio</div>
+          <div className="chart-card-title">{t('dashboard.yieldDistribution')}</div>
+          <div className="chart-card-subtitle">{t('dashboard.passFailRatio')}</div>
           <div style={{ height: 300, width: '100%', position: 'relative' }}>
             {!loading && distData.length > 0 ? (
               <ResponsiveContainer>
@@ -146,7 +146,7 @@ export default function Dashboard() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>Loading...</div>
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>{t('dashboard.loading')}</div>
             )}
             
             {/* Custom Legend to match screenshot dot style */}
@@ -165,17 +165,17 @@ export default function Dashboard() {
       <div className="tables-grid">
         <div className="table-card" style={{ padding: '20px 24px' }}>
           <div className="table-header-flex">
-            <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>Top Defective Components</h3>
-            <div className="status-live-dot">Live</div>
+            <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>{t('dashboard.topDefects')}</h3>
+            <div className="status-live-dot">{t('dashboard.live')}</div>
           </div>
           
           <table className="vivo-table" style={{ marginTop: '16px' }}>
             <thead>
               <tr>
                 <th>#</th>
-                <th>Component</th>
-                <th>Defect</th>
-                <th>Count</th>
+                <th>{t('dashboard.component')}</th>
+                <th>{t('dashboard.defect')}</th>
+                <th>{t('dashboard.count')}</th>
               </tr>
             </thead>
             <tbody>
@@ -187,7 +187,7 @@ export default function Dashboard() {
                   <td>{comp.count}</td>
                 </tr>
               )) : (
-                <tr><td colSpan={4} style={{ textAlign: 'center', color: '#94a3b8', padding: '24px' }}>No defect data</td></tr>
+                <tr><td colSpan={4} style={{ textAlign: 'center', color: '#94a3b8', padding: '24px' }}>{t('dashboard.noDefectData')}</td></tr>
               )}
             </tbody>
           </table>
@@ -195,18 +195,18 @@ export default function Dashboard() {
 
         <div className="table-card" style={{ padding: '20px 24px' }}>
           <div className="table-header-flex">
-            <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>Recent Inspections</h3>
-            <button style={{ background: 'transparent', border: '1px solid #e2e8f0', padding: '4px 12px', borderRadius: '4px', fontSize: '0.75rem', color: '#64748b', cursor: 'pointer' }}>⬇ Export CSV</button>
+            <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>{t('dashboard.recentInspections')}</h3>
+            <button style={{ background: 'transparent', border: '1px solid #e2e8f0', padding: '4px 12px', borderRadius: '4px', fontSize: '0.75rem', color: '#64748b', cursor: 'pointer' }}>⬇ {t('dashboard.exportCsv')}</button>
           </div>
           
           <table className="vivo-table" style={{ marginTop: '16px' }}>
             <thead>
               <tr>
-                <th>Barcode</th>
-                <th>Line</th>
-                <th>Machine</th>
-                <th>Status</th>
-                <th>Timestamp</th>
+                <th>{t('dashboard.barcode')}</th>
+                <th>{t('dashboard.line')}</th>
+                <th>{t('dashboard.machine')}</th>
+                <th>{t('dashboard.status')}</th>
+                <th>{t('dashboard.timestamp')}</th>
               </tr>
             </thead>
             <tbody>
@@ -224,7 +224,7 @@ export default function Dashboard() {
                   <td style={{ color: '#64748b' }}>{insp.timestamp}</td>
                 </tr>
               )) : (
-                <tr><td colSpan={5} style={{ textAlign: 'center', color: '#94a3b8', padding: '24px' }}>No recent inspections</td></tr>
+                <tr><td colSpan={5} style={{ textAlign: 'center', color: '#94a3b8', padding: '24px' }}>{t('dashboard.noRecentInspections')}</td></tr>
               )}
             </tbody>
           </table>

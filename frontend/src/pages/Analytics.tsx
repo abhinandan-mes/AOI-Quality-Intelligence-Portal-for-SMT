@@ -5,8 +5,10 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   AreaChart, Area 
 } from 'recharts';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Analytics() {
+  const { t } = useLanguage();
   const [lines, setLines] = useState<any[]>([]);
   const [selectedLine, setSelectedLine] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -58,8 +60,8 @@ export default function Analytics() {
     <div className="dashboard-container animate-fade-in">
       <div className="dashboard-header" style={{ marginBottom: '32px' }}>
         <div>
-          <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>Line Analytics</h1>
-          <div className="subtitle">Deep dive into specific line performance and defect correlation.</div>
+          <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{t('menu.analytics')}</h1>
+          <div className="subtitle">{t('analytics.subtitle')}</div>
         </div>
         
         <div style={{ display: 'flex', gap: '12px', background: 'white', padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
@@ -68,7 +70,7 @@ export default function Analytics() {
             onChange={(e) => setSelectedLine(e.target.value)}
             style={{ padding: '6px 12px', border: '1px solid #cbd5e1', borderRadius: '4px', outline: 'none' }}
           >
-            <option value="">All Lines</option>
+            <option value="">{t('analytics.allLines')}</option>
             {lines.map(l => <option key={l.id} value={l.name}>{l.name}</option>)}
           </select>
 
@@ -79,8 +81,8 @@ export default function Analytics() {
 
       <div className="charts-grid">
         <div className="chart-card animate-slide-up">
-          <div className="chart-card-title">Yield Trend ({selectedLine || 'All Lines'})</div>
-          <div className="chart-card-subtitle">Pass/Fail percentage over time</div>
+          <div className="chart-card-title">{t('analytics.yieldTrend')} ({selectedLine || t('analytics.allLines')})</div>
+          <div className="chart-card-subtitle">{t('analytics.yieldTrendDesc')}</div>
           <div style={{ height: 350, width: '100%' }}>
             {loading ? (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#94a3b8' }}>Loading...</div>
@@ -107,8 +109,8 @@ export default function Analytics() {
         </div>
 
         <div className="chart-card animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="chart-card-title">Defect Pareto ({selectedLine || 'All Lines'})</div>
-          <div className="chart-card-subtitle">Highest frequency defects</div>
+          <div className="chart-card-title">{t('analytics.defectPareto')} ({selectedLine || t('analytics.allLines')})</div>
+          <div className="chart-card-subtitle">{t('analytics.defectParetoDesc')}</div>
           <div style={{ height: 350, width: '100%' }}>
             {loading ? (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#94a3b8' }}>Loading...</div>
