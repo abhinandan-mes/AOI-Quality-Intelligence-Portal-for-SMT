@@ -107,9 +107,9 @@ export default function LineManagement() {
 
   return (
     <div className="dashboard-container animate-fade-in">
-      <div className="dashboard-header" style={{ marginBottom: '32px' }}>
-        <div>
-          <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{t('menu.lines')}</h1>
+      <div className="page-header-card">
+        <div className="title-area">
+          <h1>{t('menu.lines')}</h1>
           <div className="subtitle">{t('lines.subtitle')}</div>
         </div>
         

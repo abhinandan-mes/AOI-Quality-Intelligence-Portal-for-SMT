@@ -939,6 +939,38 @@ html, body, #root, .app-layout {
   border-radius: 12px;
 }
 
+/* Standardized Page Header Card */
+.page-header-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-header-card .title-area h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #3b82f6; /* Matching the blue from the screenshot */
+  letter-spacing: -0.5px;
+}
+
+.page-header-card .title-area .subtitle {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.page-header-card .action-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .layout-main {
   flex-grow: 1;
   width: 100%;

@@ -49,9 +49,9 @@ export default function Dashboard() {
   return (
     <div className="dashboard-layout animate-fade-in">
       <div className="dashboard-main">
-        <div className="dashboard-header" style={{ marginBottom: 0, padding: '16px 20px', background: '#fff', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
-          <div>
-            <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '1.8rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{t('menu.dashboard')}</h1>
+        <div className="page-header-card">
+          <div className="title-area">
+            <h1>{t('menu.dashboard')}</h1>
             <div className="subtitle">
               {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')} | Last refreshed {new Date().toLocaleTimeString()}
             </div>
