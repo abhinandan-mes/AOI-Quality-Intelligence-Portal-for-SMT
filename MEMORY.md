@@ -49,7 +49,9 @@ A production-ready web application for an SMT factory to automatically collect i
 12. [x] ZIP Extraction & Non-Destructive File Watcher - Extract ZIPs without modifying folders. Replaced archive/delete logic with a DB tracking mechanism.
 13. [x] Historical Tracking - Scanner updates append records instead of overwriting, properly supporting washed board remounts.
 14. [x] Deployment setup - Configured IIS web server for frontend on port 3030 with React Router URL Rewrite module.
-15. [ ] Comprehensive Testing
+15. [x] BPM Enterprise UI Overhaul - Redesigned pages to use floating cards, updated page headers, moved Barcode History export button to header, and injected Timeframe Toggle (Today | Weekly | Monthly).
+16. [x] Recharts Data Labels - Added LabelList to Area and Bar charts in Analytics and Reports to display actual values.
+17. [ ] Comprehensive Testing
 
 ## Open Notes
 *   Login credentials hardcoded to admin/admin temporarily until DB seeding.
