@@ -201,10 +201,10 @@ export default function DefectSearch() {
 
   return (
     <div className="reports-container animate-fade-in">
-      <div className="reports-heading" style={{ marginBottom: '32px' }}>
-        <div>
-          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px' }}>{t('menu.search')}</h2>
-          <p style={{ color: '#64748b', marginTop: '8px', fontSize: '1rem' }}>{t('defectSearch.subtitle')}</p>
+      <div className="page-header-card">
+        <div className="title-area">
+          <h1>{t('menu.search')}</h1>
+          <div className="subtitle">{t('defectSearch.subtitle')}</div>
         </div>
       </div>
 

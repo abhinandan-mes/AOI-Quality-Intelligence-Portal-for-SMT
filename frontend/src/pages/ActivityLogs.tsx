@@ -279,15 +279,12 @@ export default function ActivityLogs() {
   return (
     <div className="activity-log-container">
       {/* Header Section */}
-      <div className="activity-log-header">
-        <div className="header-title">
-          <span className="subtitle-admin">
-            <span className="sub-tag-bullet">✦</span> {language === 'zh' ? '监控日志' : 'MONITORING'}
-          </span>
+      <div className="page-header-card">
+        <div className="title-area">
           <h1>
             <span className="title-icon">⏰</span> {language === 'zh' ? '系统活动日志' : 'Activity Logs'}
           </h1>
-          <p>{language === 'zh' ? '跟踪系统操作记录、登录历史和点检提交日志。' : 'Track all system actions and changes'}</p>
+          <div className="subtitle">{language === 'zh' ? '跟踪系统操作记录、登录历史和点检提交日志。' : 'Track all system actions and changes'}</div>
         </div>
         <button className="btn-refresh" onClick={fetchLogs} disabled={loading}>
           🔄 {loading ? t('loading') : (language === 'zh' ? '刷新数据' : 'Refresh Logs')}

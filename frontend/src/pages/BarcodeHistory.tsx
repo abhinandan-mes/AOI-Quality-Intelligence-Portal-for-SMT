@@ -193,10 +193,10 @@ export default function BarcodeHistory() {
 
   return (
     <div className="reports-container animate-fade-in">
-      <div className="reports-heading" style={{ marginBottom: '32px' }}>
-        <div>
-          <h2 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{t('history.title')}</h2>
-          <p style={{ color: '#64748b', marginTop: '8px', fontSize: '1rem' }}>{t('history.desc')}</p>
+      <div className="page-header-card">
+        <div className="title-area">
+          <h1>{t('history.title')}</h1>
+          <div className="subtitle">{t('history.desc')}</div>
         </div>
       </div>
 
