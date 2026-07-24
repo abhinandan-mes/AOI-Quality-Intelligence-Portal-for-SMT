@@ -45,7 +45,7 @@ A production-ready web application for an SMT factory to automatically collect i
 8.  [x] Line & User Management UI/UX - Match corporate standards, added modal forms, accurate activity logging (logout tracking, performer tracking), Super Admin constraints, and IPv4 sanitization.
 9.  [x] Activity Logs - Ported UI/UX and logic from vivo-AOI-webapp_update-main. Aligned backend auth tags (LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT).
 10. [x] Internationalization (i18n) - Applied complete Chinese translations across all pages, table headers, and modals via LanguageContext.
-11. [x] Pre AOI & Post AOI implementation - Renamed AOI to POST_AOI. Added PRE_AOI support across DB, UI, and Watcher.
+11. [x] Pre AOI & Post AOI implementation - Renamed AOI to POST_AOI. Added PRE_AOI support across DB, Watcher, and fixed UI translation keys and 5-column grid layouts in Line Management.
 12. [x] ZIP Extraction & Non-Destructive File Watcher - Extract ZIPs without modifying folders. Replaced archive/delete logic with a DB tracking mechanism.
 13. [x] Historical Tracking - Scanner updates append records instead of overwriting, properly supporting washed board remounts.
 14. [x] Deployment setup - Configured IIS web server for frontend on port 3030 with React Router URL Rewrite module.
