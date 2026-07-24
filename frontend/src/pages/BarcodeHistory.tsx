@@ -199,6 +199,34 @@ export default function BarcodeHistory() {
           <h1>{t('history.title')}</h1>
           <div className="subtitle">{t('history.desc')}</div>
         </div>
+
+        <div className="export-dropdown-container">
+            <button className="btn-export-dropdown" onClick={() => setShowExportMenu(!showExportMenu)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              {t('history.exportData')}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '14px', height: '14px', marginLeft: '4px' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            {showExportMenu && (
+              <div className="export-menu" onMouseLeave={() => setShowExportMenu(false)}>
+                <button className="export-menu-item csv" onClick={() => { exportToCSV(); setShowExportMenu(false); }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  {t('history.exportCsv')}
+                </button>
+                <button className="export-menu-item excel" onClick={() => { exportToExcel(); setShowExportMenu(false); }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line><polyline points="10.5 12 12 15 13.5 12"></polyline></svg>
+                  {t('history.exportExcel')}
+                </button>
+                <button className="export-menu-item doc" onClick={() => { exportToDoc(); setShowExportMenu(false); }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  {t('history.exportWord')}
+                </button>
+                <button className="export-menu-item pdf" onClick={() => { exportToPDF(); setShowExportMenu(false); }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  {t('history.exportPdf')}
+                </button>
+              </div>
+            )}
+          </div>
       </div>
 
       {/* Unified Toolbar */}
@@ -273,35 +301,7 @@ export default function BarcodeHistory() {
           </button>
         </div>
 
-        <div className="toolbar-actions">
-          <div className="export-dropdown-container">
-            <button className="btn-export-dropdown" onClick={() => setShowExportMenu(!showExportMenu)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px' }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              {t('history.exportData')}
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '14px', height: '14px', marginLeft: '4px' }}><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </button>
-            {showExportMenu && (
-              <div className="export-menu" onMouseLeave={() => setShowExportMenu(false)}>
-                <button className="export-menu-item csv" onClick={() => { exportToCSV(); setShowExportMenu(false); }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  {t('history.exportCsv')}
-                </button>
-                <button className="export-menu-item excel" onClick={() => { exportToExcel(); setShowExportMenu(false); }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line><polyline points="10.5 12 12 15 13.5 12"></polyline></svg>
-                  {t('history.exportExcel')}
-                </button>
-                <button className="export-menu-item doc" onClick={() => { exportToDoc(); setShowExportMenu(false); }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  {t('history.exportWord')}
-                </button>
-                <button className="export-menu-item pdf" onClick={() => { exportToPDF(); setShowExportMenu(false); }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                  {t('history.exportPdf')}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        
       </div>
 
       {error && <div className="machine-card-rejection animate-slide-up" style={{ marginBottom: '20px' }}>{error}</div>}
