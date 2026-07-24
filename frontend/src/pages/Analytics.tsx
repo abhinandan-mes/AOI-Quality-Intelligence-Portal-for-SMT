@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Dashboard.css';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList,
   AreaChart, Area 
 } from 'recharts';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -106,7 +106,9 @@ export default function Analytics() {
                   <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
                   <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} unit="%" />
                   <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                  <Area type="monotone" dataKey="yieldRate" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorYieldAn)" name="Yield Rate (%)" />
+                  <Area type="monotone" dataKey="yieldRate" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorYieldAn)" name="Yield Rate (%)">
+                    <LabelList dataKey="yieldRate" position="top" fill="#3b82f6" fontSize={12} formatter={(val) => `${val}%`} />
+                  </Area>
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
@@ -128,7 +130,9 @@ export default function Analytics() {
                   <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
                   <RechartsTooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                  <Bar dataKey="count" fill="#ef4444" radius={[4, 4, 0, 0]} name="Occurrences" />
+                  <Bar dataKey="count" fill="#ef4444" radius={[4, 4, 0, 0]} name="Occurrences">
+                    <LabelList dataKey="count" position="top" fill="#64748b" fontSize={12} />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
