@@ -47,61 +47,61 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <div>
-          <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '2.2rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{t('menu.dashboard')}</h1>
-          <div className="subtitle">
-            {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')} | Last refreshed {new Date().toLocaleTimeString()}
+    <div className="dashboard-layout animate-fade-in">
+      <div className="dashboard-main">
+        <div className="dashboard-header" style={{ marginBottom: 0, padding: '16px 20px', background: '#fff', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
+          <div>
+            <h1 className="premium-heading-gradient" style={{ margin: 0, fontSize: '1.8rem', fontWeight: 700, letterSpacing: '-0.5px' }}>{t('menu.dashboard')}</h1>
+            <div className="subtitle">
+              {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')} | Last refreshed {new Date().toLocaleTimeString()}
+            </div>
+          </div>
+          
+          <div className="timeframe-toggle">
+            <button 
+              className={`timeframe-btn ${timeframe === 'today' ? 'active' : ''}`}
+              onClick={() => setTimeframe('today')}
+            >
+              {t('dashboard.today')}
+            </button>
+            <button 
+              className={`timeframe-btn ${timeframe === 'weekly' ? 'active' : ''}`}
+              onClick={() => setTimeframe('weekly')}
+            >
+              {t('dashboard.weekly')}
+            </button>
+            <button 
+              className={`timeframe-btn ${timeframe === 'monthly' ? 'active' : ''}`}
+              onClick={() => setTimeframe('monthly')}
+            >
+              {t('dashboard.monthly')}
+            </button>
           </div>
         </div>
-        
-        <div className="timeframe-toggle">
-          <button 
-            className={`timeframe-btn ${timeframe === 'today' ? 'active' : ''}`}
-            onClick={() => setTimeframe('today')}
-          >
-            {t('dashboard.today')}
-          </button>
-          <button 
-            className={`timeframe-btn ${timeframe === 'weekly' ? 'active' : ''}`}
-            onClick={() => setTimeframe('weekly')}
-          >
-            {t('dashboard.weekly')}
-          </button>
-          <button 
-            className={`timeframe-btn ${timeframe === 'monthly' ? 'active' : ''}`}
-            onClick={() => setTimeframe('monthly')}
-          >
-            {t('dashboard.monthly')}
-          </button>
-        </div>
-      </div>
 
-      <div className="summary-cards-grid">
-        <div className="summary-card blue">
-          <div className="summary-card-title">{t('dashboard.totalInspections')}</div>
-          <div className="summary-card-value">{summary.totalInspections.toLocaleString()}</div>
-          <div className="summary-card-subtitle">{t('dashboard.subtitle1')}</div>
+        <div className="summary-cards-grid" style={{ marginBottom: 0 }}>
+          <div className="summary-card blue">
+            <div className="summary-card-title">{t('dashboard.totalInspections')}</div>
+            <div className="summary-card-value">{summary.totalInspections.toLocaleString()}</div>
+            <div className="summary-card-subtitle">{t('dashboard.subtitle1')}</div>
+          </div>
+          <div className="summary-card green">
+            <div className="summary-card-title">{t('dashboard.passedBoards')}</div>
+            <div className="summary-card-value">{summary.passCount.toLocaleString()}</div>
+            <div className="summary-card-subtitle">{t('dashboard.subtitle2')}</div>
+          </div>
+          <div className="summary-card orange">
+            <div className="summary-card-title">{t('dashboard.defectsDetected')}</div>
+            <div className="summary-card-value">{summary.defectCount.toLocaleString()}</div>
+            <div className="summary-card-subtitle">{t('dashboard.subtitle3')}</div>
+          </div>
+          <div className="summary-card teal">
+            <div className="summary-card-title">{t('dashboard.activeMachines')}</div>
+            <div className="summary-card-value">{summary.activeMachinesCount.toLocaleString()}</div>
+            <div className="summary-card-subtitle">{t('dashboard.subtitle4')}</div>
+          </div>
         </div>
-        <div className="summary-card green">
-          <div className="summary-card-title">{t('dashboard.passedBoards')}</div>
-          <div className="summary-card-value">{summary.passCount.toLocaleString()}</div>
-          <div className="summary-card-subtitle">{t('dashboard.subtitle2')}</div>
-        </div>
-        <div className="summary-card orange">
-          <div className="summary-card-title">{t('dashboard.defectsDetected')}</div>
-          <div className="summary-card-value">{summary.defectCount.toLocaleString()}</div>
-          <div className="summary-card-subtitle">{t('dashboard.subtitle3')}</div>
-        </div>
-        <div className="summary-card teal">
-          <div className="summary-card-title">{t('dashboard.activeMachines')}</div>
-          <div className="summary-card-value">{summary.activeMachinesCount.toLocaleString()}</div>
-          <div className="summary-card-subtitle">{t('dashboard.subtitle4')}</div>
-        </div>
-      </div>
 
-      <div className="charts-grid">
         <div className="chart-card">
           <div className="chart-card-title">{t('dashboard.outputTrend')}</div>
           <div className="chart-card-subtitle">{timeframe === 'today' ? t('dashboard.inspectionsByHour') : t('dashboard.inspectionsByDay')}</div>
@@ -120,78 +120,6 @@ export default function Dashboard() {
               <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>{t('dashboard.loading')}</div>
             )}
           </div>
-        </div>
-
-        <div className="chart-card">
-          <div className="chart-card-title">{t('dashboard.yieldDistribution')}</div>
-          <div className="chart-card-subtitle">{t('dashboard.passFailRatio')}</div>
-          <div style={{ height: 300, width: '100%', position: 'relative' }}>
-            {!loading && distData.length > 0 ? (
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie
-                    data={distData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={100}
-                    paddingAngle={2}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {distData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={getStatusColor(entry.name)} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>{t('dashboard.loading')}</div>
-            )}
-            
-            {/* Custom Legend to match screenshot dot style */}
-            <div style={{ position: 'absolute', right: 10, top: '40%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {distData.map((d, i) => (
-                <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', color: '#334155', fontWeight: 600 }}>
-                  <div style={{ width: '8px', height: '8px', backgroundColor: getStatusColor(d.name) }}></div>
-                  {d.name}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="tables-grid">
-        <div className="table-card" style={{ padding: '20px 24px' }}>
-          <div className="table-header-flex">
-            <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>{t('dashboard.topDefects')}</h3>
-            <div className="status-live-dot">{t('dashboard.live')}</div>
-          </div>
-          
-          <table className="vivo-table" style={{ marginTop: '16px' }}>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>{t('dashboard.component')}</th>
-                <th>{t('dashboard.defect')}</th>
-                <th>{t('dashboard.count')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {topComponents.length > 0 ? topComponents.map((comp, idx) => (
-                <tr key={idx}>
-                  <td style={{ color: '#64748b' }}>{idx + 1}</td>
-                  <td style={{ fontWeight: 700 }}>{comp.component}</td>
-                  <td style={{ color: '#ef4444' }}>{comp.defectType}</td>
-                  <td>{comp.count}</td>
-                </tr>
-              )) : (
-                <tr><td colSpan={4} style={{ textAlign: 'center', color: '#94a3b8', padding: '24px' }}>{t('dashboard.noDefectData')}</td></tr>
-              )}
-            </tbody>
-          </table>
         </div>
 
         <div className="table-card" style={{ padding: '20px 24px' }}>
@@ -226,6 +154,76 @@ export default function Dashboard() {
                 </tr>
               )) : (
                 <tr><td colSpan={5} style={{ textAlign: 'center', color: '#94a3b8', padding: '24px' }}>{t('dashboard.noRecentInspections')}</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="dashboard-sidebar">
+        <div className="chart-card">
+          <div className="chart-card-title">{t('dashboard.yieldDistribution')}</div>
+          <div className="chart-card-subtitle">{t('dashboard.passFailRatio')}</div>
+          <div style={{ height: 260, width: '100%', position: 'relative' }}>
+            {!loading && distData.length > 0 ? (
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={distData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={2}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {distData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={getStatusColor(entry.name)} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>{t('dashboard.loading')}</div>
+            )}
+            
+            {/* Custom Legend to match screenshot dot style */}
+            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '16px', marginTop: '16px' }}>
+              {distData.map((d, i) => (
+                <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#334155', fontWeight: 600 }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: getStatusColor(d.name) }}></div>
+                  {d.name}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="table-card" style={{ padding: '20px 24px' }}>
+          <div className="table-header-flex">
+            <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>{t('dashboard.topDefects')}</h3>
+            <div className="status-live-dot">{t('dashboard.live')}</div>
+          </div>
+          
+          <table className="vivo-table" style={{ marginTop: '16px' }}>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>{t('dashboard.component')}</th>
+                <th>{t('dashboard.count')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topComponents.length > 0 ? topComponents.map((comp, idx) => (
+                <tr key={idx}>
+                  <td style={{ color: '#64748b', padding: '10px 8px' }}>{idx + 1}</td>
+                  <td style={{ fontWeight: 700, padding: '10px 8px' }}>{comp.component}</td>
+                  <td style={{ padding: '10px 8px' }}>{comp.count}</td>
+                </tr>
+              )) : (
+                <tr><td colSpan={3} style={{ textAlign: 'center', color: '#94a3b8', padding: '24px' }}>{t('dashboard.noDefectData')}</td></tr>
               )}
             </tbody>
           </table>

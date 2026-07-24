@@ -72,16 +72,16 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
   const navItemStyle = (isActive: boolean) => ({
     display: 'flex',
     alignItems: 'center',
-    padding: '10px 16px',
-    color: isActive ? '#ffffff' : '#475569',
-    backgroundColor: isActive ? '#415fff' : 'transparent',
+    padding: '12px 16px',
+    color: isActive ? '#415fff' : '#64748b',
+    backgroundColor: isActive ? '#f0f4ff' : 'transparent',
     textDecoration: 'none',
     fontWeight: isActive ? 600 : 500,
     fontSize: '0.9rem',
     borderRadius: '8px',
     transition: 'all 0.2s ease',
-    marginBottom: '6px',
-    margin: '0 12px'
+    marginBottom: '4px',
+    margin: '0 8px'
   });
 
   return (
