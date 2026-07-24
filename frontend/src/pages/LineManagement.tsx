@@ -103,6 +103,7 @@ export default function LineManagement() {
   const activeLines = lines.filter(l => l.isInstalled).length;
   const configuredAOI = lines.filter(l => l.postAoiWatchPath).length;
   const configuredSPI = lines.filter(l => l.spiWatchPath).length;
+  const configuredPreAoi = lines.filter(l => l.preAoiWatchPath).length;
 
   return (
     <div className="dashboard-container animate-fade-in">
@@ -126,7 +127,7 @@ export default function LineManagement() {
         </button>
       </div>
 
-      <div className="summary-cards-grid animate-slide-up">
+      <div className="summary-cards-grid animate-slide-up" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
         <div className="summary-card blue">
           <div className="summary-card-title">{t('lines.totalLines')}</div>
           <div className="summary-card-value">{totalLines}</div>
@@ -147,6 +148,11 @@ export default function LineManagement() {
           <div className="summary-card-value">{configuredSPI}</div>
           <div className="summary-card-subtitle">{t('lines.spiPaths')}</div>
         </div>
+        <div className="summary-card" style={{ borderTopColor: '#8b5cf6' }}>
+          <div className="summary-card-title">{t('lines.preAoiConfigs')}</div>
+          <div className="summary-card-value">{configuredPreAoi}</div>
+          <div className="summary-card-subtitle">{t('lines.preAoiPaths')}</div>
+        </div>
       </div>
 
       <div className="table-card animate-slide-up" style={{ padding: '24px', animationDelay: '0.1s' }}>
@@ -160,7 +166,8 @@ export default function LineManagement() {
               <tr>
                 <th>{t('lines.colName')}</th>
                 <th>{t('lines.colDesc')}</th>
-                <th>{t('lines.colAoiPath')}</th>
+                <th>{t('lines.colPreAoiPath')}</th>
+                <th>{t('lines.colPostAoiPath')}</th>
                 <th>{t('lines.colSpiPath')}</th>
                 <th>{t('lines.colStatus')}</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
@@ -174,6 +181,11 @@ export default function LineManagement() {
                   <tr key={line.id}>
                     <td style={{ fontWeight: 700, color: '#1e293b' }}>{line.name}</td>
                     <td style={{ color: '#64748b' }}>{line.description || '-'}</td>
+                    <td>
+                      <code style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', color: '#475569' }}>
+                        {line.preAoiWatchPath || t('lines.notConfigured')}
+                      </code>
+                    </td>
                     <td>
                       <code style={{ background: '#f1f5f9', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', color: '#475569' }}>
                         {line.postAoiWatchPath || t('lines.notConfigured')}
@@ -262,7 +274,7 @@ export default function LineManagement() {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('lines.labelAoiPath')}</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('lines.labelPostAoiPath')}</label>
                 <input 
                   type="text" 
                   value={formData.postAoiWatchPath} 
@@ -282,7 +294,7 @@ export default function LineManagement() {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('lines.preAoiWatchPath') || 'PRE AOI Watch Path'}</label>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('lines.labelPreAoiPath')}</label>
                 <input 
                   type="text" 
                   value={formData.preAoiWatchPath} 
