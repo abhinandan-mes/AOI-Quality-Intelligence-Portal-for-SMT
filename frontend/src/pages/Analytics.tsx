@@ -6,6 +6,7 @@ import {
   AreaChart, Area 
 } from 'recharts';
 import { useLanguage } from '../contexts/LanguageContext';
+import TimeframeToggle from '../components/TimeframeToggle';
 
 export default function Analytics() {
   const { t } = useLanguage();
@@ -64,7 +65,13 @@ export default function Analytics() {
           <div className="subtitle">{t('analytics.subtitle')}</div>
         </div>
         
-        <div style={{ display: 'flex', gap: '12px', background: 'white', padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+        <div className="action-area" style={{ display: 'flex', gap: '12px', background: 'white', padding: '8px', borderRadius: '8px', border: '1px solid #e2e8f0', alignItems: 'center' }}>
+          <TimeframeToggle 
+            currentStart={startDate} 
+            currentEnd={endDate} 
+            onDatesChange={(start, end) => { setStartDate(start); setEndDate(end); }} 
+          />
+          <div style={{ width: '1px', height: '24px', backgroundColor: '#e2e8f0', margin: '0 4px' }}></div>
           <select 
             value={selectedLine} 
             onChange={(e) => setSelectedLine(e.target.value)}

@@ -8,6 +8,7 @@ import {
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useLanguage } from '../contexts/LanguageContext';
+import TimeframeToggle from '../components/TimeframeToggle';
 
 export default function Reports() {
   const { t } = useLanguage();

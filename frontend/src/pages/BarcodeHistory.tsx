@@ -5,6 +5,7 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { useLanguage } from '../contexts/LanguageContext';
+import TimeframeToggle from '../components/TimeframeToggle';
 
 export default function BarcodeHistory() {
   const { t } = useLanguage();
