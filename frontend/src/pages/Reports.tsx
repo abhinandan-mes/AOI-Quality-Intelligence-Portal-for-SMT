@@ -96,9 +96,15 @@ export default function Reports() {
 
       <div className="premium-toolbar animate-slide-up" style={{ marginBottom: '24px' }}>
         <div className="toolbar-filters">
-          <div className="filter-group date-group">
+          <div className="filter-group date-group" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>{t('reports.filterRange')}</span>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={{ marginLeft: '12px' }}/>
+            <TimeframeToggle 
+              currentStart={startDate} 
+              currentEnd={endDate} 
+              onDatesChange={(start, end) => { setStartDate(start); setEndDate(end); }} 
+            />
+            <div style={{ width: '1px', height: '24px', backgroundColor: '#e2e8f0', margin: '0 4px' }}></div>
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             <span className="date-separator">{t('history.to')}</span>
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </div>
