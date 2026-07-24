@@ -48,10 +48,11 @@ A production-ready web application for an SMT factory to automatically collect i
 11. [x] Pre AOI & Post AOI implementation - Renamed AOI to POST_AOI. Added PRE_AOI support across DB, UI, and Watcher.
 12. [x] ZIP Extraction & Non-Destructive File Watcher - Extract ZIPs without modifying folders. Replaced archive/delete logic with a DB tracking mechanism.
 13. [x] Historical Tracking - Scanner updates append records instead of overwriting, properly supporting washed board remounts.
-14. [ ] Comprehensive Testing
-15. [ ] Deployment guide
+14. [x] Deployment setup - Configured IIS web server for frontend on port 3030 with React Router URL Rewrite module.
+15. [ ] Comprehensive Testing
 
 ## Open Notes
 *   Login credentials hardcoded to admin/admin temporarily until DB seeding.
 *   Backend service runs via `aoiqualityintelligenceportalbackend.exe` (installed via `install_service.js`).
+*   Frontend statically served via Windows IIS on port 3030 (`web.config` handles fallback routing).
 *   Prisma version set to 5.13.0 for stability.
