@@ -54,7 +54,7 @@ A production-ready web application for an SMT factory to automatically collect i
 17. [ ] Comprehensive Testing
 
 ## Open Notes
-*   Login credentials hardcoded to admin/admin temporarily until DB seeding.
+*   Login credentials hardcoded to abhinandan/95003989 temporarily until DB seeding.
 *   Backend service runs via `aoiqualityintelligenceportalbackend.exe` (installed via `install_service.js`).
 *   Frontend statically served via Windows IIS on port 3030 (`web.config` handles fallback routing).
 *   Prisma version set to 5.13.0 for stability.
