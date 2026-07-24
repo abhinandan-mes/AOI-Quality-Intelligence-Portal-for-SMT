@@ -79,7 +79,7 @@ export default function Analytics() {
         </div>
       </div>
 
-      <div className="charts-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
         <div className="chart-card animate-slide-up">
           <div className="chart-card-title">{t('analytics.yieldTrend')} ({selectedLine || t('analytics.allLines')})</div>
           <div className="chart-card-subtitle">{t('analytics.yieldTrendDesc')}</div>
