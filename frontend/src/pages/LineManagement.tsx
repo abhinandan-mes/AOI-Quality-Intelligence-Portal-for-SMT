@@ -148,7 +148,7 @@ export default function LineManagement() {
           <div className="summary-card-value">{configuredSPI}</div>
           <div className="summary-card-subtitle">{t('lines.spiPaths')}</div>
         </div>
-        <div className="summary-card" style={{ borderTopColor: '#8b5cf6' }}>
+        <div className="summary-card purple">
           <div className="summary-card-title">{t('lines.preAoiConfigs')}</div>
           <div className="summary-card-value">{configuredPreAoi}</div>
           <div className="summary-card-subtitle">{t('lines.preAoiPaths')}</div>

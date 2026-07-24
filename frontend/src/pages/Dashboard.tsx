@@ -39,7 +39,8 @@ export default function Dashboard() {
 
   const getStatusColor = (status: string) => {
     const s = status.toUpperCase();
-    if (['PASS', 'GOOD'].includes(s)) return '#10b981'; // Green
+    if (s === 'GOOD') return '#10b981'; // Green
+    if (s === 'PASS') return '#14b8a6'; // Teal
     if (['FAIL', 'NG'].includes(s)) return '#ef4444'; // Red
     if (['WARNING'].includes(s)) return '#f59e0b'; // Orange
     return '#3b82f6'; // Blue
