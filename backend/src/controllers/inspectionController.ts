@@ -3,7 +3,7 @@ import prisma from '../prismaClient';
 
 export const searchInspections = async (req: Request, res: Response) => {
   try {
-    const { barcode, lineName, status, startDate, endDate, machineType, side, defectLocation } = req.query;
+    const { barcode, lineName, machineName, status, startDate, endDate, machineType, side, defectLocation } = req.query;
 
     const whereClause: any = {};
 
@@ -16,11 +16,20 @@ export const searchInspections = async (req: Request, res: Response) => {
     }
 
     if (machineType) {
-      whereClause.machine = { type: String(machineType) };
+      const types = String(machineType).split(',');
+      if (types.length === 1) {
+        whereClause.machine = { ...whereClause.machine, type: types[0] };
+      } else {
+        whereClause.machine = { ...whereClause.machine, type: { in: types } };
+      }
     }
 
     if (lineName) {
       whereClause.machine = { ...whereClause.machine, line: { name: { contains: String(lineName), mode: 'insensitive' } } };
+    }
+
+    if (machineName) {
+      whereClause.machine = { ...whereClause.machine, name: { contains: String(machineName), mode: 'insensitive' } };
     }
 
     if (side) {
