@@ -7,8 +7,8 @@ export const getActivityLogs = async (req: Request, res: Response) => {
       orderBy: { createdAt: 'desc' },
       take: 1000 // Limit to 1000 for performance
     });
-    res.json(logs);
+    res.json({ success: true, logs });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch activity logs' });
+    res.status(500).json({ success: false, error: 'Failed to fetch activity logs' });
   }
 };
