@@ -23,7 +23,13 @@ export const startFileWatcher = async () => {
     lines.forEach(line => {
       if (line.postAoiWatchPath) setupWatcher(line.postAoiWatchPath, 'POST_AOI', line.name);
       if (line.spiWatchPath) setupWatcher(line.spiWatchPath, 'SPI', line.name);
-      if (line.preAoiWatchPath) setupWatcher(line.preAoiWatchPath, 'PRE_AOI', line.name);
+      if (line.preAoiWatchPath) {
+        setupWatcher(line.preAoiWatchPath, 'PRE_AOI', line.name);
+        const preTstPath = line.preAoiWatchPath.replace('PREAOI', 'PRE TST');
+        if (fs.existsSync(preTstPath)) {
+          setupWatcher(preTstPath, 'PRE_TST' as any, line.name);
+        }
+      }
     });
   } catch (error) {
     console.error('Error starting file watchers:', error);
@@ -41,13 +47,11 @@ export const reloadWatchers = async () => {
   await startFileWatcher();
 };
 
-const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI', lineName: string) => {
+const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI' | 'PRE_TST', lineName: string) => {
   if (!fs.existsSync(watchPath)) {
     console.error(`Watch path does not exist for Line ${lineName} (${type}): ${watchPath}`);
     return;
   }
-
-  
 
   const watcher = chokidar.watch(watchPath, {
     ignored: /(^|[\\/\\])\../,
@@ -73,7 +77,7 @@ const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI', l
 
 interface QueueItem {
   filePath: string;
-  type: 'POST_AOI' | 'SPI' | 'PRE_AOI';
+  type: 'POST_AOI' | 'SPI' | 'PRE_AOI' | 'PRE_TST';
   lineName: string;
 }
 
@@ -93,17 +97,25 @@ const processQueue = async () => {
     
     try {
       if (ext === '.zip') {
-        await processZipFile(filePath, type, lineName);
+        await processZipFile(filePath, type as any, lineName);
       } else if ((type === 'POST_AOI' || type === 'PRE_AOI') && (ext === '.rst' || ext === '.json' || ext === '.txt')) {
         await processAOIFile(filePath, lineName, type);
       } else if (type === 'SPI' && ext === '.xml') {
         await processSPIFile(filePath, lineName);
+      } else if (type === 'PRE_AOI' && ext === '.xml') {
+        await processViscomXML(filePath, lineName, type);
+      } else if (type === 'PRE_TST' && ext === '.vis') {
+        await processVISFile(filePath);
+      } else if (['.jpeg', '.jpg', '.png', '.bmp', '.ois'].includes(ext) || ext === '.tst') {
+        // Silently skip images, raw sensor files, and binary tst files
       } else {
         throw new Error(`Unsupported file extension ${ext} for ${type}`);
       }
 
-      await logImport(filePath, 'SUCCESS', 'Imported successfully');
-      io.emit('new_inspection', { message: 'New inspection data imported.' });
+      if (!['.jpeg', '.jpg', '.png', '.bmp', '.ois', '.tst'].includes(ext)) {
+        await logImport(filePath, 'SUCCESS', 'Imported successfully');
+        io.emit('new_inspection', { message: 'New inspection data imported.' });
+      }
     } catch (error: any) {
       console.error(`Error processing file ${filePath}:`, error.message);
       await logImport(filePath, 'ERROR', error.message);
@@ -111,6 +123,51 @@ const processQueue = async () => {
   }
 
   isProcessingQueue = false;
+};
+
+const processViscomXML = async (filePath: string, lineName: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI') => {
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const parser = new xml2js.Parser({ explicitArray: false });
+  const result = await parser.parseStringPromise(content);
+
+  const infos = result.boost_serialization?.infos;
+  if (!infos) throw new Error('Invalid Viscom XML format: Missing infos block');
+
+  const barcode = infos.panelIdCode || infos.subPanelIdCode || 'UNKNOWN';
+  const modelName = infos.productName || infos.modelFamilyName || 'UNKNOWN';
+  const inspTimeStr = infos.creationDate; // "2026/07/25_11:10:05"
+  let inspTime = new Date();
+  if (inspTimeStr) {
+    const cleanStr = inspTimeStr.replace('_', ' ').replace(/\//g, '-');
+    inspTime = new Date(cleanStr);
+  }
+
+  const defectsNode = result.boost_serialization?.defects;
+  let status = 'PASS';
+  const defectsList: { componentName: string, defectType: string }[] = [];
+  
+  if (defectsNode) {
+    const compName = infos.topology || 'Unknown';
+    const defectType = [];
+    for (const key of Object.keys(defectsNode)) {
+      if (key.startsWith('AOI_has') && defectsNode[key] === '1') {
+        defectType.push(key.replace('AOI_has', '').replace('Defect', ''));
+        status = 'FAIL';
+      }
+    }
+    if (defectType.length > 0) {
+      defectsList.push({
+        componentName: compName,
+        defectType: defectType.join(', ')
+      });
+    }
+  }
+
+  let side = null;
+  if (filePath.match(/[-_\/\\]TOP[-_\/\\]/i)) side = 'TOP';
+  else if (filePath.match(/[-_\/\\]BOTTOM[-_\/\\]/i)) side = 'BOTTOM';
+
+  await saveOrUpdateInspection(barcode, modelName, 'Viscom', lineName, type, inspTime, status, filePath, { side }, defectsList);
 };
 
 const processZipFile = async (filePath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI', lineName: string) => {
@@ -130,11 +187,65 @@ const processZipFile = async (filePath: string, type: 'POST_AOI' | 'SPI' | 'PRE_
         await processAOIFile(extractedPath, lineName, type);
       } else if (type === 'SPI' && ext === '.xml') {
         await processSPIFile(extractedPath, lineName);
+      } else if (type === 'PRE_AOI' && ext === '.xml') {
+        // Parse the IPC-2547 XML file
+        await processIPC2547XML(extractedPath, lineName, type);
       }
     }
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }
+};
+
+const processIPC2547XML = async (filePath: string, lineName: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI') => {
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const parser = new xml2js.Parser({ explicitArray: false });
+  const result = await parser.parseStringPromise(content);
+
+  const event = result.IPC2547Event;
+  if (!event) throw new Error('Invalid IPC2547 format: Missing IPC2547Event block');
+
+  const start = event.ProcessSessionStart;
+  const barcode = event.ItemProcessStatus?.$.itemInstanceId || 'UNKNOWN';
+  const modelName = start?.Product?.$.itemType || 'UNKNOWN';
+  const machineId = start?.Entity?.$.stationId || 'VI-L402';
+  const inspTime = new Date(event.ItemProcessStatus?.$.dateTime || new Date());
+  
+  const status = event.ItemProcessStatus?.$.status === 'PASSED' ? 'PASS' : 'FAIL';
+  
+  const defectsList: { componentName: string, defectType: string }[] = [];
+  const steps = event.ProcessStepStatus;
+  
+  if (steps) {
+    const stepsArray = Array.isArray(steps) ? steps : [steps];
+    for (const step of stepsArray) {
+      if (step.$.status === 'FAILED') {
+        const indictments = step.Indictment;
+        if (indictments) {
+          const indArray = Array.isArray(indictments) ? indictments : [indictments];
+          for (const ind of indArray) {
+            // Find component name in Measurement tag
+            let compName = 'Unknown';
+            if (step.Measurement) {
+              const ms = Array.isArray(step.Measurement) ? step.Measurement : [step.Measurement];
+              for (const m of ms) {
+                if (m.Component && m.Component.$ && m.Component.$.designator) {
+                  compName = m.Component.$.designator;
+                  break;
+                }
+              }
+            }
+            defectsList.push({
+              componentName: compName,
+              defectType: ind.$.indictmentKey || 'Defect'
+            });
+          }
+        }
+      }
+    }
+  }
+
+  await saveOrUpdateInspection(barcode, modelName, machineId, lineName, type, inspTime, status, filePath, {}, defectsList);
 };
 
 // Processing logic remains largely similar but we pass lineName 
@@ -302,4 +413,40 @@ const logImport = async (filePath: string, status: string, message: string, mach
       errorMessage: message
     }
   });
+};
+
+const processVISFile = async (filePath: string) => {
+  const content = fs.readFileSync(filePath, 'utf8');
+  const lines = content.split('\n');
+  
+  let modelName = 'UNKNOWN';
+  let boardsPerPanel = 1;
+  
+  const pMatch = content.match(/PANEL_NAME\s+(.*)/);
+  if (pMatch) modelName = pMatch[1].trim();
+  
+  const bMatch = content.match(/NB_BOARD\s+(\d+)/);
+  if (bMatch) boardsPerPanel = parseInt(bMatch[1].trim(), 10) || 1;
+
+  let inComp = false;
+  let componentsPerBoard = 0;
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('COMP 1')) {
+      inComp = true;
+    } else if (inComp && trimmed.startsWith('COMP 2')) {
+      break;
+    } else if (inComp && trimmed !== '') {
+      componentsPerBoard++;
+    }
+  }
+
+  if (modelName !== 'UNKNOWN') {
+    await (prisma.productModel as any).upsert({
+      where: { name: modelName },
+      update: { componentsPerBoard, boardsPerPanel },
+      create: { name: modelName, componentsPerBoard, boardsPerPanel }
+    });
+  }
 };

@@ -4,7 +4,7 @@ import './Dashboard.css';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useLanguage } from '../contexts/LanguageContext';
 
-export default function Dashboard() {
+export default function PreAoiDashboard() {
   const { t } = useLanguage();
   const [timeframe, setTimeframe] = useState<'today' | 'weekly' | 'monthly'>('weekly');
   const [summary, setSummary] = useState<any>({ totalInspections: 0, passCount: 0, defectCount: 0, activeMachinesCount: 0, totalComponentsTested: 0 });
@@ -18,8 +18,8 @@ export default function Dashboard() {
     try {
       setLoading(true);
       const [summaryRes, dataRes] = await Promise.all([
-        axios.get(`http://${window.location.hostname}:5050/api/dashboard/summary?timeframe=${timeframe}`),
-        axios.get(`http://${window.location.hostname}:5050/api/dashboard/data?timeframe=${timeframe}`)
+        axios.get(`http://${window.location.hostname}:5050/api/dashboard/summary?timeframe=${timeframe}&machineType=PRE_AOI`),
+        axios.get(`http://${window.location.hostname}:5050/api/dashboard/data?timeframe=${timeframe}&machineType=PRE_AOI`)
       ]);
       setSummary(summaryRes.data);
       setTrendData(dataRes.data.trendData);
@@ -51,7 +51,7 @@ export default function Dashboard() {
       <div className="dashboard-main">
         <div className="page-header-card">
           <div className="title-area">
-            <h1>{t('menu.dashboard')}</h1>
+            <h1>Pre AOI Dashboard</h1>
             <div className="subtitle">
               {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')} | Last refreshed {new Date().toLocaleTimeString()}
             </div>

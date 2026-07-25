@@ -44,12 +44,14 @@ model Machine {
 }
 
 model ProductModel {
-  id          String       @id @default(uuid())
-  name        String       @unique
-  description String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  inspections Inspection[]
+  id               String       @id @default(uuid())
+  name             String       @unique
+  description      String?
+  componentsPerBoard Int?
+  boardsPerPanel     Int?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  inspections      Inspection[]
 }
 
 model Inspection {

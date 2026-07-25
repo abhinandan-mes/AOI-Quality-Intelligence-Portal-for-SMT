@@ -77,7 +77,14 @@ export const getYieldTrend = async (req: Request, res: Response) => {
     }
 
     if (lineName) {
-      whereClause.machine = { line: { name: String(lineName) } };
+      whereClause.machine = {
+        line: { name: String(lineName) },
+        type: { not: 'PRE_AOI' } // Exclude PRE_AOI machines from FPY
+      };
+    } else {
+      whereClause.machine = {
+        type: { not: 'PRE_AOI' } // Exclude PRE_AOI machines from FPY
+      };
     }
 
     const inspections = await prisma.inspection.findMany({

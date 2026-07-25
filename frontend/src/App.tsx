@@ -5,6 +5,7 @@ import './App.css'
 import LoginPage from './components/LoginPage'
 import MainLayout from './layouts/MainLayout'
 import Dashboard from './pages/Dashboard'
+import PreAoiDashboard from './pages/PreAoiDashboard'
 import LineManagement from './pages/LineManagement'
 import BarcodeHistory from './pages/BarcodeHistory'
 import DefectSearch from './pages/DefectSearch'
@@ -57,6 +58,7 @@ function App() {
         <Route path="/" element={isAuthenticated ? <MainLayout onLogout={() => setIsAuthenticated(false)} /> : <Navigate to="/login" replace />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="pre-aoi" element={<PreAoiDashboard />} />
           <Route path="lines" element={<LineManagement />} />
           <Route path="history" element={<BarcodeHistory />} />
           <Route path="search" element={<DefectSearch />} />

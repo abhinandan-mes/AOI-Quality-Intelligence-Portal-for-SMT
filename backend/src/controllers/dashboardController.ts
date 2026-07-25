@@ -16,33 +16,51 @@ export const getSummary = async (req: Request, res: Response) => {
   try {
     const timeframe = (req.query.timeframe as string) || 'today';
     const startDate = getDateFromTimeframe(timeframe);
+    const machineTypes = req.query.machineType ? (req.query.machineType as string).split(',') : ['SPI', 'POST_AOI'];
+
+    const baseWhere = {
+      inspectionTime: { gte: startDate },
+      machine: { type: { in: machineTypes as any[] } }
+    };
 
     const totalInspections = await prisma.inspection.count({
-      where: { inspectionTime: { gte: startDate } }
+      where: baseWhere
     });
 
     const passCount = await prisma.inspection.count({
-      where: { inspectionTime: { gte: startDate }, status: { in: ['PASS', 'GOOD'] } }
+      where: { ...baseWhere, status: { in: ['PASS', 'GOOD'] } }
     });
 
-    // We'll count the total number of Defects
     const defectCount = await prisma.defect.count({
-      where: { inspection: { inspectionTime: { gte: startDate } } }
+      where: { inspection: baseWhere }
     });
 
-    // Active machines (machines that had an inspection in this timeframe)
     const activeMachinesRes = await prisma.inspection.groupBy({
       by: ['machineId'],
-      where: { inspectionTime: { gte: startDate } },
+      where: baseWhere,
       _count: { machineId: true }
     });
     const activeMachinesCount = activeMachinesRes.length;
+
+    const allInspections = await prisma.inspection.findMany({
+      where: baseWhere,
+      select: { productModel: { select: { componentsPerBoard: true, boardsPerPanel: true } } }
+    });
+    
+    let totalComponentsTested = 0;
+    allInspections.forEach((insp: any) => {
+      const pm = insp.productModel;
+      if (pm && pm.componentsPerBoard) {
+        totalComponentsTested += (pm.componentsPerBoard * (pm.boardsPerPanel || 1));
+      }
+    });
 
     res.json({
       totalInspections,
       passCount,
       defectCount,
-      activeMachinesCount
+      activeMachinesCount,
+      totalComponentsTested
     });
   } catch (error) {
     console.error('Error fetching summary:', error);
@@ -54,12 +72,17 @@ export const getDashboardData = async (req: Request, res: Response) => {
   try {
     const timeframe = (req.query.timeframe as string) || 'today';
     const startDate = getDateFromTimeframe(timeframe);
+    const machineTypes = req.query.machineType ? (req.query.machineType as string).split(',') : ['SPI', 'POST_AOI'];
 
-    // 1. Output Trend (Inspections per day/hour)
+    const baseWhere = {
+      inspectionTime: { gte: startDate },
+      machine: { type: { in: machineTypes as any[] } }
+    };
+
     let trendData: any[] = [];
     if (timeframe === 'today') {
       const inspections = await prisma.inspection.findMany({
-        where: { inspectionTime: { gte: startDate } },
+        where: baseWhere,
         select: { inspectionTime: true }
       });
       const hourly = new Array(24).fill(0);
@@ -69,7 +92,7 @@ export const getDashboardData = async (req: Request, res: Response) => {
       trendData = hourly.map((count, hour) => ({ name: `${hour}:00`, count })).filter(d => d.count > 0);
     } else {
       const inspections = await prisma.inspection.findMany({
-        where: { inspectionTime: { gte: startDate } },
+        where: baseWhere,
         select: { inspectionTime: true }
       });
       const daily: Record<string, number> = {};
@@ -77,21 +100,18 @@ export const getDashboardData = async (req: Request, res: Response) => {
         const d = i.inspectionTime.toLocaleDateString('en-US', { weekday: 'short' });
         daily[d] = (daily[d] || 0) + 1;
       });
-      // We want to sort them somewhat sequentially, but for now just output
       trendData = Object.keys(daily).map(key => ({ name: key, count: daily[key] }));
     }
 
-    // 2. Distribution (Yield: Pass vs Fail vs NG)
     const distDataRaw = await prisma.inspection.groupBy({
       by: ['status'],
-      where: { inspectionTime: { gte: startDate } },
+      where: baseWhere,
       _count: { status: true }
     });
     const distData = distDataRaw.map(d => ({ name: d.status, value: d._count.status }));
 
-    // 3. Top Defective Components
     const defects = await prisma.defect.findMany({
-      where: { inspection: { inspectionTime: { gte: startDate } } },
+      where: { inspection: baseWhere },
       select: { componentName: true, defectType: true }
     });
     
@@ -109,10 +129,10 @@ export const getDashboardData = async (req: Request, res: Response) => {
         count: compCount[comp].count 
       }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 5); // Top 5
+      .slice(0, 5);
 
-    // 4. Recent Inspections
     const recentInspections = await prisma.inspection.findMany({
+      where: baseWhere,
       orderBy: { inspectionTime: 'desc' },
       take: 5,
       include: {

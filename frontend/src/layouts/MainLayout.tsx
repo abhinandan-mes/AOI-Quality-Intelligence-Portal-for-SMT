@@ -169,6 +169,9 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
             <NavLink to="/dashboard" style={({ isActive }) => navItemStyle(isActive)}>
               {t('menu.dashboard') || 'Home'}
             </NavLink>
+            <NavLink to="/pre-aoi" style={({ isActive }) => navItemStyle(isActive)}>
+              Pre AOI Dashboard
+            </NavLink>
             <NavLink to="/lines" style={({ isActive }) => navItemStyle(isActive)}>
               {t('menu.lines') || 'Line Management'}
             </NavLink>

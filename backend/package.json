@@ -10,7 +10,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@prisma/client": "^5.13.0",
     "adm-zip": "^0.6.0",
@@ -37,5 +36,6 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.23.1",
     "typescript": "^7.0.2"
-  }
+  },
+  "type": "module"
 }
