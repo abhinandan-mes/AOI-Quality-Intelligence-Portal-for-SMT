@@ -34,6 +34,9 @@ function App() {
       const response = await axios.post(`http://${window.location.hostname}:5050/api/auth/login`, credentials);
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
+        if (response.data.user) {
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
         setIsAuthenticated(true);
       }
     } catch (error) {

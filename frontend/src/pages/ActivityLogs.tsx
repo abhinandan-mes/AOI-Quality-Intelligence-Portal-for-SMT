@@ -110,10 +110,17 @@ export default function ActivityLogs() {
     setError('');
     try {
       const response = await axios.get(`http://${window.location.hostname}:5050/api/activity`);
+      const mapLogs = (logs: any[]) => logs.map(log => ({
+        ...log,
+        created_at: log.createdAt || log.created_at,
+        activity_type: log.action || log.activity_type,
+        public_ip: log.ipAddress || log.public_ip
+      }));
+
       if (Array.isArray(response.data)) {
-        setLogs(response.data);
+        setLogs(mapLogs(response.data));
       } else if (response.data && response.data.success) {
-        setLogs(response.data.logs || []);
+        setLogs(mapLogs(response.data.logs || []));
       }
     } catch (err: any) {
       console.error('Error fetching logs:', err);
