@@ -21,10 +21,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         process.env.JWT_SECRET || 'fallback_secret',
         { expiresIn: '8h' }
       );
-      res.json({ token, user: { username: 'abhinandan', role: 'SUPER_ADMIN' } });
       await prisma.activityLog.create({
         data: { username: 'abhinandan', action: 'LOGIN_SUCCESS', ipAddress, details: 'Fallback superadmin login' }
       });
+      res.json({ token, user: { username: 'abhinandan', role: 'SUPER_ADMIN', full_name: 'Super Admin' } });
       return;
     }
 
