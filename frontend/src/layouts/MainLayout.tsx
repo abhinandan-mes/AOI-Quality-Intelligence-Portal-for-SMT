@@ -166,8 +166,11 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
         {/* Vertical Sidebar */}
         <aside className="layout-sidebar">
           <div className="nav-links-container">
-            <NavLink to="/spi-post-aoi-dashboard" style={({ isActive }) => navItemStyle(isActive)}>
-              {t('menu.dashboard') || 'Home'}
+            <NavLink to="/spi-dashboard" style={({ isActive }) => navItemStyle(isActive)}>
+              {t('menu.spiDashboard') || 'SPI Dashboard'}
+            </NavLink>
+            <NavLink to="/post-aoi-dashboard" style={({ isActive }) => navItemStyle(isActive)}>
+              {t('menu.postAoiDashboard') || 'Post AOI Dashboard'}
             </NavLink>
             <NavLink to="/pre-aoi" style={({ isActive }) => navItemStyle(isActive)}>
               Pre AOI Dashboard

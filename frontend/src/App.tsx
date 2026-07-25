@@ -4,7 +4,8 @@ import axios from 'axios'
 import './App.css'
 import LoginPage from './components/LoginPage'
 import MainLayout from './layouts/MainLayout'
-import Dashboard from './pages/Dashboard'
+import SpiDashboard from './pages/SpiDashboard'
+import PostAoiDashboard from './pages/PostAoiDashboard'
 import PreAoiDashboard from './pages/PreAoiDashboard'
 import LineManagement from './pages/LineManagement'
 import BarcodeHistory from './pages/BarcodeHistory'
@@ -52,12 +53,13 @@ function App() {
       <Routes>
         <Route 
           path="/login" 
-          element={!isAuthenticated ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/spi-post-aoi-dashboard" replace />} 
+          element={!isAuthenticated ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/spi-dashboard" replace />} 
         />
         
         <Route path="/" element={isAuthenticated ? <MainLayout onLogout={() => setIsAuthenticated(false)} /> : <Navigate to="/login" replace />}>
-          <Route index element={<Navigate to="/spi-post-aoi-dashboard" replace />} />
-          <Route path="spi-post-aoi-dashboard" element={<Dashboard />} />
+          <Route index element={<Navigate to="/spi-dashboard" replace />} />
+          <Route path="spi-dashboard" element={<SpiDashboard />} />
+          <Route path="post-aoi-dashboard" element={<PostAoiDashboard />} />
           <Route path="pre-aoi" element={<PreAoiDashboard />} />
           <Route path="lines" element={<LineManagement />} />
           <Route path="history" element={<BarcodeHistory />} />

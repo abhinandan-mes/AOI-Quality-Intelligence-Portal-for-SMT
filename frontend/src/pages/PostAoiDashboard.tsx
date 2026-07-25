@@ -4,7 +4,7 @@ import './Dashboard.css';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useLanguage } from '../contexts/LanguageContext';
 
-export default function PreAoiDashboard() {
+export default function PostAoiDashboard() {
   const { t } = useLanguage();
   const [timeframe, setTimeframe] = useState<'today' | 'weekly' | 'monthly'>('weekly');
   const [summary, setSummary] = useState<any>({ totalInspections: 0, passCount: 0, defectCount: 0, activeMachinesCount: 0, totalComponentsTested: 0 });
@@ -18,8 +18,8 @@ export default function PreAoiDashboard() {
     try {
       setLoading(true);
       const [summaryRes, dataRes] = await Promise.all([
-        axios.get(`http://${window.location.hostname}:5050/api/dashboard/summary?timeframe=${timeframe}&machineType=PRE_AOI`),
-        axios.get(`http://${window.location.hostname}:5050/api/dashboard/data?timeframe=${timeframe}&machineType=PRE_AOI`)
+        axios.get(`http://${window.location.hostname}:5050/api/dashboard/summary?timeframe=${timeframe}&machineType=POST_AOI`),
+        axios.get(`http://${window.location.hostname}:5050/api/dashboard/data?timeframe=${timeframe}&machineType=POST_AOI`)
       ]);
       setSummary(summaryRes.data);
       setTrendData(dataRes.data.trendData);
@@ -51,7 +51,7 @@ export default function PreAoiDashboard() {
       <div className="dashboard-main">
         <div className="page-header-card">
           <div className="title-area">
-            <h1>Pre AOI Dashboard</h1>
+            <h1>{t('menu.postAoiDashboard')}</h1>
             <div className="subtitle">
               {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/ /g, '-')} | Last refreshed {new Date().toLocaleTimeString()}
             </div>
@@ -85,10 +85,11 @@ export default function PreAoiDashboard() {
             <div className="summary-card-value">{summary.totalInspections.toLocaleString()}</div>
             <div className="summary-card-subtitle">{t('dashboard.subtitle1')}</div>
           </div>
-          <div className="summary-card purple">
-            <div className="summary-card-title">Components Tested</div>
-            <div className="summary-card-value">{summary.totalComponentsTested.toLocaleString()}</div>
-            <div className="summary-card-subtitle">Total tested parts</div>
+
+          <div className="summary-card green">
+            <div className="summary-card-title">{t('dashboard.passedBoards')}</div>
+            <div className="summary-card-value">{summary.passCount.toLocaleString()}</div>
+            <div className="summary-card-subtitle">{t('dashboard.subtitle2')}</div>
           </div>
           <div className="summary-card orange">
             <div className="summary-card-title">{t('dashboard.defectsDetected')}</div>
@@ -161,6 +162,46 @@ export default function PreAoiDashboard() {
       </div>
 
       <div className="dashboard-sidebar">
+        <div className="chart-card">
+          <div className="chart-card-title">{t('dashboard.yieldDistribution')}</div>
+          <div className="chart-card-subtitle">{t('dashboard.passFailRatio')}</div>
+          <div style={{ height: 260, width: '100%', position: 'relative' }}>
+            {!loading && distData.length > 0 ? (
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={distData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={2}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {distData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={getStatusColor(entry.name)} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>{t('dashboard.noDefectData') || 'No Data'}</div>
+            )}
+            
+            {/* Custom Legend to match screenshot dot style */}
+            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '16px', marginTop: '16px' }}>
+              {distData.map((d, i) => (
+                <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#334155', fontWeight: 600 }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: getStatusColor(d.name) }}></div>
+                  {d.name}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <div className="table-card" style={{ padding: '20px 24px' }}>
           <div className="table-header-flex">
             <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>{t('dashboard.topDefects')}</h3>
