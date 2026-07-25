@@ -12,8 +12,8 @@ export default function Analytics() {
   const { t } = useLanguage();
   const [lines, setLines] = useState<any[]>([]);
   const [selectedLine, setSelectedLine] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   
   const [spiPareto, setSpiPareto] = useState<any[]>([]);
   const [preAoiPareto, setPreAoiPareto] = useState<any[]>([]);

@@ -9,10 +9,9 @@ interface Props {
 
 export default function TimeframeToggle({ onDatesChange, currentStart, currentEnd }: Props) {
   const { t } = useLanguage();
-  const [active, setActive] = useState<string>('');
+  const [active, setActive] = useState<string>('today');
 
   const formatDate = (date: Date) => {
-    // Add timezone offset to prevent picking the wrong day
     const offset = date.getTimezoneOffset();
     const adjusted = new Date(date.getTime() - (offset*60*1000));
     return adjusted.toISOString().split('T')[0];

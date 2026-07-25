@@ -236,7 +236,7 @@ export default function BarcodeHistory() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="filter-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input 
               type="text" 
-              placeholder={t('history.searchBarcode')}
+              placeholder={t('history.searchBarcode') || 'Barcode...'}
               value={barcode} 
               onChange={(e) => setBarcode(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -245,9 +245,10 @@ export default function BarcodeHistory() {
           </div>
           <div className="filter-divider"></div>
           <div className="filter-group">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="filter-icon"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
             <input 
               type="text" 
-              placeholder={t('history.searchLine')}
+              placeholder={t('history.searchLine') || 'Line (e.g. Line-401)'}
               value={lineName} 
               onChange={(e) => setLineName(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -256,17 +257,19 @@ export default function BarcodeHistory() {
           </div>
           <div className="filter-divider"></div>
           <div className="filter-group">
-            <select value={side} onChange={(e) => setSide(e.target.value)}>
-              <option value="">{t('history.allSides')}</option>
-              <option value="TOP">{t('history.sideTop')}</option>
-              <option value="BOTTOM">{t('history.sideBottom')}</option>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="filter-icon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+            <select value={side} onChange={(e) => setSide(e.target.value)} style={{ width: '90px', cursor: 'pointer' }}>
+              <option value="">{t('history.allSides') || 'All Sides'}</option>
+              <option value="TOP">{t('history.sideTop') || 'TOP'}</option>
+              <option value="BOTTOM">{t('history.sideBottom') || 'BOTTOM'}</option>
             </select>
           </div>
           <div className="filter-divider"></div>
           <div className="filter-group">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="filter-icon"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
             <input 
               type="text" 
-              placeholder={t('history.searchDefectLocation')}
+              placeholder={t('history.searchDefectLocation') || 'Defect Location'}
               value={defectLocation} 
               onChange={(e) => setDefectLocation(e.target.value)} 
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -275,8 +278,9 @@ export default function BarcodeHistory() {
           </div>
           <div className="filter-divider"></div>
           <div className="filter-group">
-            <select value={status} onChange={(e) => setStatus(e.target.value)}>
-              <option value="">{t('history.allStatuses')}</option>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="filter-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <select value={status} onChange={(e) => setStatus(e.target.value)} style={{ width: '100px', cursor: 'pointer' }}>
+              <option value="">{t('history.allStatuses') || 'All Statuses'}</option>
               <option value="PASS">PASS</option>
               <option value="GOOD">GOOD</option>
               <option value="FAIL">FAIL</option>
@@ -285,19 +289,23 @@ export default function BarcodeHistory() {
             </select>
           </div>
           <div className="filter-divider"></div>
-          <div className="filter-group date-group" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="filter-group date-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <TimeframeToggle 
               currentStart={startDate} 
               currentEnd={endDate} 
               onDatesChange={(start, end) => { setStartDate(start); setEndDate(end); }} 
             />
-            <div style={{ width: '1px', height: '24px', backgroundColor: '#e2e8f0', margin: '0 4px' }}></div>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-            <span className="date-separator">{t('history.to')}</span>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            <div style={{ width: '1px', height: '20px', backgroundColor: '#e2e8f0', margin: '0 4px' }}></div>
+            <div style={{ display: 'flex', alignItems: 'center', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '2px 8px' }}>
+              <input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={{ border: 'none', background: 'transparent', outline: 'none', color: '#475569', fontSize: '0.85rem' }} />
+            </div>
+            <span className="date-separator" style={{ margin: '0' }}>{t('history.to') || 'to'}</span>
+            <div style={{ display: 'flex', alignItems: 'center', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '2px 8px' }}>
+              <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={{ border: 'none', background: 'transparent', outline: 'none', color: '#475569', fontSize: '0.85rem' }} />
+            </div>
           </div>
-          <button className="btn-primary-search" onClick={handleSearch}>
-            {t('history.search')}
+          <button className="btn-primary-search" onClick={handleSearch} style={{ marginLeft: 'auto' }}>
+            {t('history.search') || 'Search'}
           </button>
         </div>
 

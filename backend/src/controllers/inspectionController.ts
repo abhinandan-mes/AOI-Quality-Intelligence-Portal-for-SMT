@@ -40,7 +40,9 @@ export const searchInspections = async (req: Request, res: Response) => {
       if (startDate) whereClause.inspectionTime.gte = new Date(String(startDate));
       if (endDate) {
         const end = new Date(String(endDate));
-        end.setHours(23, 59, 59, 999);
+        if (!String(endDate).includes('T')) {
+          end.setHours(23, 59, 59, 999);
+        }
         whereClause.inspectionTime.lte = end;
       }
     }
