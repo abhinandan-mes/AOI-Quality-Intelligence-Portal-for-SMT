@@ -3,10 +3,10 @@ import prisma from '../prismaClient';
 
 export const getDefectPareto = async (req: Request, res: Response) => {
   try {
-    const { startDate, endDate, lineName } = req.query;
+    const { startDate, endDate, lineName, machineType } = req.query;
 
     const whereClause: any = {};
-    if (startDate || endDate || lineName) {
+    if (startDate || endDate || lineName || machineType) {
       whereClause.inspection = { machine: {} };
       
       if (startDate || endDate) {
@@ -21,6 +21,9 @@ export const getDefectPareto = async (req: Request, res: Response) => {
 
       if (lineName) {
         whereClause.inspection.machine.line = { name: String(lineName) };
+      }
+      if (machineType) {
+        whereClause.inspection.machine.type = String(machineType);
       }
     }
 
@@ -57,7 +60,7 @@ export const getDefectPareto = async (req: Request, res: Response) => {
 
 export const getYieldTrend = async (req: Request, res: Response) => {
   try {
-    const { startDate, endDate, lineName } = req.query;
+    const { startDate, endDate, lineName, machineType } = req.query;
 
     const whereClause: any = {};
     
@@ -76,15 +79,14 @@ export const getYieldTrend = async (req: Request, res: Response) => {
       whereClause.inspectionTime = { gte: lastWeek };
     }
 
+    whereClause.machine = {};
     if (lineName) {
-      whereClause.machine = {
-        line: { name: String(lineName) },
-        type: { not: 'PRE_AOI' } // Exclude PRE_AOI machines from FPY
-      };
+      whereClause.machine.line = { name: String(lineName) };
+    }
+    if (machineType) {
+      whereClause.machine.type = String(machineType);
     } else {
-      whereClause.machine = {
-        type: { not: 'PRE_AOI' } // Exclude PRE_AOI machines from FPY
-      };
+      whereClause.machine.type = { not: 'PRE_AOI' };
     }
 
     const inspections = await prisma.inspection.findMany({

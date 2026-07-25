@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import re
+
+file_path = "/Users/abhinandan/Documents/AOI-Quality-Intelligence-Portal-for-SMT/frontend/src/pages/Reports.tsx"
+
+content = """import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Reports.css';
 import { 
@@ -116,7 +120,7 @@ export default function Reports() {
           <ResponsiveContainer>
             <AreaChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id={`colorYield-${title.replace(/\s/g,'')}`} x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={`colorYield-${title.replace(/\\s/g,'')}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                 </linearGradient>
@@ -126,7 +130,7 @@ export default function Reports() {
               <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} unit="%" />
               <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
               <Legend />
-              <Area type="monotone" dataKey="yieldRate" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill={`url(#colorYield-${title.replace(/\s/g,'')})`} name="Yield Rate (%)">
+              <Area type="monotone" dataKey="yieldRate" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill={`url(#colorYield-${title.replace(/\\s/g,'')})`} name="Yield Rate (%)">
                 <LabelList dataKey="yieldRate" position="top" fill="#10b981" fontSize={12} formatter={(val: any) => `${val}%`} />
               </Area>
             </AreaChart>
@@ -221,3 +225,6 @@ export default function Reports() {
     </div>
   );
 }
+"""
+with open(file_path, "w") as f:
+    f.write(content)
