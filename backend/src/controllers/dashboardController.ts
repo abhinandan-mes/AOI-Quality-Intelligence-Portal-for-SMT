@@ -112,15 +112,28 @@ export const getDashboardData = async (req: Request, res: Response) => {
 
     const defects = await prisma.defect.findMany({
       where: { inspection: baseWhere },
-      select: { componentName: true, defectType: true }
+      select: { 
+        componentName: true, 
+        defectType: true,
+        inspection: { select: { machine: { select: { line: { select: { name: true } } } } } }
+      }
     });
     
     const compCount: Record<string, { type: string, count: number }> = {};
+    const lineCount: Record<string, number> = {};
     defects.forEach(d => {
       const comp = d.componentName || 'Unknown';
       if (!compCount[comp]) compCount[comp] = { type: d.defectType, count: 0 };
       compCount[comp].count++;
+      
+      const lineName = d.inspection?.machine?.line?.name || 'Unknown';
+      lineCount[lineName] = (lineCount[lineName] || 0) + 1;
     });
+    
+    const topLines = Object.keys(lineCount)
+      .map(line => ({ line, count: lineCount[line] }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
     
     const topComponents = Object.keys(compCount)
       .map(comp => ({ 
@@ -152,6 +165,7 @@ export const getDashboardData = async (req: Request, res: Response) => {
       trendData,
       distData,
       topComponents,
+      topLines,
       recentInspections: recentFormatted
     });
   } catch (error) {

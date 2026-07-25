@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Dashboard.css';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, LabelList } from 'recharts';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export default function PostAoiDashboard() {
@@ -11,6 +11,7 @@ export default function PostAoiDashboard() {
   const [trendData, setTrendData] = useState<any[]>([]);
   const [distData, setDistData] = useState<any[]>([]);
   const [topComponents, setTopComponents] = useState<any[]>([]);
+  const [topLines, setTopLines] = useState<any[]>([]);
   const [recentInspections, setRecentInspections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,6 +26,7 @@ export default function PostAoiDashboard() {
       setTrendData(dataRes.data.trendData);
       setDistData(dataRes.data.distData);
       setTopComponents(dataRes.data.topComponents);
+      setTopLines(dataRes.data.topLines || []);
       setRecentInspections(dataRes.data.recentInspections);
     } catch (error) {
       console.error('Failed to fetch dashboard data', error);
@@ -123,6 +125,29 @@ export default function PostAoiDashboard() {
           </div>
         </div>
 
+        
+        <div className="chart-card" style={{ marginTop: '24px' }}>
+          <div className="chart-card-title">{t('dashboard.topLines') || 'Top 5 Lines by Defects'}</div>
+          <div className="chart-card-subtitle">{t('dashboard.topLinesDesc') || 'Manufacturing lines with highest defect contribution'}</div>
+          <div style={{ height: 300, width: '100%' }}>
+            {!loading && topLines.length > 0 ? (
+              <ResponsiveContainer>
+                <BarChart data={topLines} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="line" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                  <RechartsTooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                  <Bar dataKey="count" fill="#f43f5e" radius={[4, 4, 0, 0]} maxBarSize={60}>
+                    <LabelList dataKey="count" position="top" fill="#64748b" fontSize={12} />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>{t('dashboard.noDefectData') || 'No Data'}</div>
+            )}
+          </div>
+        </div>
+
         <div className="table-card" style={{ padding: '20px 24px' }}>
           <div className="table-header-flex">
             <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>{t('dashboard.recentInspections')}</h3>
@@ -178,6 +203,8 @@ export default function PostAoiDashboard() {
                     paddingAngle={2}
                     dataKey="value"
                     stroke="none"
+                    label={{ fill: '#475569', fontSize: 12, fontWeight: 600 }}
+                    labelLine={false}
                   >
                     {distData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={getStatusColor(entry.name)} />
