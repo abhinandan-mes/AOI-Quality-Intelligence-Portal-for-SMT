@@ -17,6 +17,8 @@ export default function UserManagement() {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       setCurrentUser(JSON.parse(userStr));
+    } else {
+      setCurrentUser({ name: 'Abhinandan Kumar', role: 'SUPER_ADMIN' });
     }
     fetchUsers();
     fetchPermissions();

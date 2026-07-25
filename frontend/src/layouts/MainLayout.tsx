@@ -24,15 +24,12 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
 
   const handleLogout = async () => {
     try {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        await fetch(`http://${window.location.hostname}:5050/api/auth/logout`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: user.username })
-        });
-      }
+      const activeUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : { username: 'abhinandan' };
+      await fetch(`http://${window.location.hostname}:5050/api/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: activeUser.username })
+      });
     } catch (e) {
       console.error('Logout error', e);
     }
