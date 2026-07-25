@@ -32,7 +32,7 @@ export const translations: Translations = {
   'footer.line2': { en: 'Designed, Developed & Maintained by', zh: '设计、开发与维护：' },
 
   // Menu
-  'menu.dashboard': { en: 'Dashboard', zh: '仪表板' },
+  'menu.dashboard': { en: 'SPI & Post AOI Dashboard', zh: 'SPI 与 Post AOI 仪表板' },
   'menu.lines': { en: 'Line Management', zh: '产线管理' },
   'menu.history': { en: 'Barcode History', zh: '条码历史' },
   'menu.search': { en: 'Defect Search', zh: '缺陷搜索' },

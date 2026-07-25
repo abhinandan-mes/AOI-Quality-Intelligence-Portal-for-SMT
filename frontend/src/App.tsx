@@ -52,12 +52,12 @@ function App() {
       <Routes>
         <Route 
           path="/login" 
-          element={!isAuthenticated ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/dashboard" replace />} 
+          element={!isAuthenticated ? <LoginPage onLogin={handleLogin} /> : <Navigate to="/spi-post-aoi-dashboard" replace />} 
         />
         
         <Route path="/" element={isAuthenticated ? <MainLayout onLogout={() => setIsAuthenticated(false)} /> : <Navigate to="/login" replace />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route index element={<Navigate to="/spi-post-aoi-dashboard" replace />} />
+          <Route path="spi-post-aoi-dashboard" element={<Dashboard />} />
           <Route path="pre-aoi" element={<PreAoiDashboard />} />
           <Route path="lines" element={<LineManagement />} />
           <Route path="history" element={<BarcodeHistory />} />

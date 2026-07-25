@@ -85,11 +85,7 @@ export default function Dashboard() {
             <div className="summary-card-value">{summary.totalInspections.toLocaleString()}</div>
             <div className="summary-card-subtitle">{t('dashboard.subtitle1')}</div>
           </div>
-          <div className="summary-card purple">
-            <div className="summary-card-title">Components Tested</div>
-            <div className="summary-card-value">{summary.totalComponentsTested.toLocaleString()}</div>
-            <div className="summary-card-subtitle">Total tested parts</div>
-          </div>
+
           <div className="summary-card green">
             <div className="summary-card-title">{t('dashboard.passedBoards')}</div>
             <div className="summary-card-value">{summary.passCount.toLocaleString()}</div>

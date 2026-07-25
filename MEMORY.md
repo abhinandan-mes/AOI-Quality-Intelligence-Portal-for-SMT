@@ -28,7 +28,9 @@ A production-ready web application for an SMT factory to automatically collect i
 6.  **Pop-ups and Notifications:** Do NOT use default browser `alert()` or `confirm()`. Implement custom unified HTML/CSS floating Toasts (top-right, `z-index: 9999`) or Modals that adhere to the corporate color palette.
 
 ## Key Modules
-1.  **Dashboard:** Real-time production metrics (Yield, Pass/NG, Machine Status, etc.)
+1.  **Dashboard:** Two specialized real-time dashboards:
+    - **SPI & Post AOI Dashboard (`/spi-post-aoi-dashboard`)**: General metrics, Yield, Pass/NG, Machine Status, Top Failing Components.
+    - **Pre AOI Dashboard (`/pre-aoi`)**: Specialized metrics focusing on components tested, omitting Yield/Passed Boards.
 2.  **File Integration:** Automated watcher (`chokidar`) for network folder to import CSV/XML/TXT/RST from POST_AOI/SPI/PRE_AOI machines. Features an **asynchronous queue mechanism** to prevent Node.js event loop starvation when processing thousands of files concurrently. Supports ZIP extraction in-memory. **Non-destructive**: Leaves original files untouched and logs processed paths in PostgreSQL.
 3.  **Line Management:** Configuration of physical lines and mapping to POST_AOI/SPI/PRE_AOI network drop paths.
 4.  **User Management:** Centralized hub for managing users, Access Control Matrix (Role Permissions), and system Activity Logs.
