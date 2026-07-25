@@ -90,11 +90,6 @@ export default function PreAoiDashboard() {
             <div className="summary-card-value">{summary.totalComponentsTested.toLocaleString()}</div>
             <div className="summary-card-subtitle">Total tested parts</div>
           </div>
-          <div className="summary-card green">
-            <div className="summary-card-title">{t('dashboard.passedBoards')}</div>
-            <div className="summary-card-value">{summary.passCount.toLocaleString()}</div>
-            <div className="summary-card-subtitle">{t('dashboard.subtitle2')}</div>
-          </div>
           <div className="summary-card orange">
             <div className="summary-card-title">{t('dashboard.defectsDetected')}</div>
             <div className="summary-card-value">{summary.defectCount.toLocaleString()}</div>
@@ -166,46 +161,6 @@ export default function PreAoiDashboard() {
       </div>
 
       <div className="dashboard-sidebar">
-        <div className="chart-card">
-          <div className="chart-card-title">{t('dashboard.yieldDistribution')}</div>
-          <div className="chart-card-subtitle">{t('dashboard.passFailRatio')}</div>
-          <div style={{ height: 260, width: '100%', position: 'relative' }}>
-            {!loading && distData.length > 0 ? (
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie
-                    data={distData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={2}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {distData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={getStatusColor(entry.name)} />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>{t('dashboard.loading')}</div>
-            )}
-            
-            {/* Custom Legend to match screenshot dot style */}
-            <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '16px', marginTop: '16px' }}>
-              {distData.map((d, i) => (
-                <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#334155', fontWeight: 600 }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: getStatusColor(d.name) }}></div>
-                  {d.name}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
         <div className="table-card" style={{ padding: '20px 24px' }}>
           <div className="table-header-flex">
             <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>{t('dashboard.topDefects')}</h3>
