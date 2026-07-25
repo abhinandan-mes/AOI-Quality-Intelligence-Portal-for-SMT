@@ -195,6 +195,9 @@ export const translations: Translations = {
   
   
   // Dashboard Additions
+  'dashboard.topLines': { en: 'Top 5 Lines by Defects', zh: '缺陷排名前5的产线' },
+  'dashboard.topLinesDesc': { en: 'Manufacturing lines with highest defect contribution', zh: '缺陷率最高的生产线' },
+
   'dashboard.colLine': { en: 'Line', zh: '产线' },
   'dashboard.colMachine': { en: 'Machine', zh: '设备' },
   'dashboard.colBarcode': { en: 'Barcode', zh: '条码' },
