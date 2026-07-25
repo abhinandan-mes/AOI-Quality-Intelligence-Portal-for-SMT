@@ -98,11 +98,17 @@ export const getYieldTrend = async (req: Request, res: Response) => {
       orderBy: { inspectionTime: 'asc' }
     });
 
-    // Group by Day (YYYY-MM-DD)
+    const isSingleDay = startDate && endDate && startDate === endDate;
+
+    // Group by Day (YYYY-MM-DD) or Hour
     const grouped: Record<string, { pass: number, fail: number }> = {};
     
     inspections.forEach(insp => {
-      const dateKey = insp.inspectionTime.toISOString().split('T')[0];
+      let dateKey = insp.inspectionTime.toISOString().split('T')[0];
+      if (isSingleDay) {
+        const hour = insp.inspectionTime.getHours().toString().padStart(2, '0');
+        dateKey = `${dateKey} ${hour}:00`;
+      }
       if (!grouped[dateKey]) {
         grouped[dateKey] = { pass: 0, fail: 0 };
       }
