@@ -110,7 +110,9 @@ export default function ActivityLogs() {
     setError('');
     try {
       const response = await axios.get(`http://${window.location.hostname}:5050/api/activity`);
-      if (response.data && response.data.success) {
+      if (Array.isArray(response.data)) {
+        setLogs(response.data);
+      } else if (response.data && response.data.success) {
         setLogs(response.data.logs || []);
       }
     } catch (err: any) {
