@@ -11,6 +11,7 @@ interface Line {
   postAoiWatchPath: string | null;
   spiWatchPath: string | null;
   preAoiWatchPath: string | null;
+  preAoiVisWatchPath: string | null;
 }
 
 export default function LineManagement() {
@@ -26,7 +27,8 @@ export default function LineManagement() {
     isInstalled: true,
     postAoiWatchPath: '',
     spiWatchPath: '',
-    preAoiWatchPath: ''
+    preAoiWatchPath: '',
+    preAoiVisWatchPath: ''
   });
 
   const fetchLines = async () => {
@@ -53,11 +55,12 @@ export default function LineManagement() {
         isInstalled: line.isInstalled,
         postAoiWatchPath: line.postAoiWatchPath || '',
         spiWatchPath: line.spiWatchPath || '',
-        preAoiWatchPath: line.preAoiWatchPath || ''
+        preAoiWatchPath: line.preAoiWatchPath || '',
+        preAoiVisWatchPath: line.preAoiVisWatchPath || ''
       });
     } else {
       setEditingLine(null);
-      setFormData({ name: '', description: '', isInstalled: true, postAoiWatchPath: '', spiWatchPath: '', preAoiWatchPath: '' });
+      setFormData({ name: '', description: '', isInstalled: true, postAoiWatchPath: '', spiWatchPath: '', preAoiWatchPath: '', preAoiVisWatchPath: '' });
     }
     setOpenModal(true);
   };
@@ -292,16 +295,29 @@ export default function LineManagement() {
                   style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', outline: 'none', fontFamily: 'monospace' }}
                   placeholder="e.g., \\10.172.9.200\shared\SPI"
                 />
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('lines.labelPreAoiPath')}</label>
+                  <input 
+                    type="text" 
+                    value={formData.preAoiWatchPath} 
+                    onChange={(e) => setFormData({...formData, preAoiWatchPath: e.target.value})} 
+                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', outline: 'none', fontFamily: 'monospace' }}
+                    placeholder="e.g., \\10.172.9.200\shared\PRE_AOI"
+                  />
+                </div>
               </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>{t('lines.labelPreAoiPath')}</label>
-                <input 
-                  type="text" 
-                  value={formData.preAoiWatchPath} 
-                  onChange={(e) => setFormData({...formData, preAoiWatchPath: e.target.value})} 
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', outline: 'none', fontFamily: 'monospace' }}
-                  placeholder="e.g., \\10.172.9.200\shared\PRE_AOI"
-                />
+
+              <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '8px', textTransform: 'uppercase' }}>Pre AOI VIS File Watch Path</label>
+                  <input 
+                    type="text" 
+                    value={formData.preAoiVisWatchPath} 
+                    onChange={(e) => setFormData({...formData, preAoiVisWatchPath: e.target.value})} 
+                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.9rem', outline: 'none', fontFamily: 'monospace' }}
+                    placeholder="e.g., \\10.172.9.200\shared\PRE_TST"
+                  />
+                </div>
               </div>
             </div>
 

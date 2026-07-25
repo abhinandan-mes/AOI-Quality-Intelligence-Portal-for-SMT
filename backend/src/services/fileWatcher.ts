@@ -25,10 +25,9 @@ export const startFileWatcher = async () => {
       if (line.spiWatchPath) setupWatcher(line.spiWatchPath, 'SPI', line.name);
       if (line.preAoiWatchPath) {
         setupWatcher(line.preAoiWatchPath, 'PRE_AOI', line.name);
-        const preTstPath = line.preAoiWatchPath.replace('PREAOI', 'PRE TST');
-        if (fs.existsSync(preTstPath)) {
-          setupWatcher(preTstPath, 'PRE_TST' as any, line.name);
-        }
+      }
+      if ((line as any).preAoiVisWatchPath) {
+        setupWatcher((line as any).preAoiVisWatchPath, 'PRE_TST' as any, line.name);
       }
     });
   } catch (error) {

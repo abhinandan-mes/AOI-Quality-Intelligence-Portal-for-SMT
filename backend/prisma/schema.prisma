@@ -19,16 +19,17 @@ model User {
 }
 
 model Line {
-  id           String    @id @default(uuid())
-  name         String    @unique
-  description  String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  postAoiWatchPath String?
-  isInstalled     Boolean   @default(true)
-  spiWatchPath    String?
-  preAoiWatchPath String?
-  machines        Machine[]
+  id                 String    @id @default(uuid())
+  name               String    @unique
+  description        String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  postAoiWatchPath   String?
+  isInstalled        Boolean   @default(true)
+  spiWatchPath       String?
+  preAoiWatchPath    String?
+  preAoiVisWatchPath String?
+  machines           Machine[]
 }
 
 model Machine {
