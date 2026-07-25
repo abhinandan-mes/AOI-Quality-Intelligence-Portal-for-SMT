@@ -175,9 +175,6 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
             <NavLink to="/pre-aoi" style={({ isActive }) => navItemStyle(isActive)}>
               Pre AOI Dashboard
             </NavLink>
-            <NavLink to="/lines" style={({ isActive }) => navItemStyle(isActive)}>
-              {t('menu.lines') || 'Line Management'}
-            </NavLink>
             <NavLink to="/history" style={({ isActive }) => navItemStyle(isActive)}>
               {t('menu.history') || 'Checksheets'}
             </NavLink>
@@ -186,6 +183,9 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
             </NavLink>
             <NavLink to="/analytics" style={({ isActive }) => navItemStyle(isActive)}>
               {t('menu.analytics') || 'Analytics'}
+            </NavLink>
+            <NavLink to="/lines" style={({ isActive }) => navItemStyle(isActive)}>
+              {t('menu.lines') || 'Line Management'}
             </NavLink>
             <NavLink to="/users" style={({ isActive }) => navItemStyle(isActive)}>
               {t('menu.users') || 'User Management'}

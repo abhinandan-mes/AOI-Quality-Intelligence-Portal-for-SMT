@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Dashboard.css';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList,
+  BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, LabelList,
   AreaChart, Area 
 } from 'recharts';
 import { useLanguage } from '../contexts/LanguageContext';
 import TimeframeToggle from '../components/TimeframeToggle';
 
 export default function Analytics() {
+  const paretoColors = ['#dc2626', '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#10b981', '#06b6d4', '#3b82f6'];
+
   const { t } = useLanguage();
   const [lines, setLines] = useState<any[]>([]);
   const [selectedLine, setSelectedLine] = useState('');
@@ -81,7 +83,10 @@ export default function Analytics() {
               <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#64748b' }} axisLine={false} tickLine={false} />
               <RechartsTooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-              <Bar dataKey="count" fill="#ef4444" radius={[4, 4, 0, 0]} name="Occurrences">
+              <Bar dataKey="count" radius={[4, 4, 0, 0]} name="Occurrences">
+                {data.map((entry: any, index: number) => (
+                  <Cell key={`cell-${index}`} fill={paretoColors[index % paretoColors.length]} />
+                ))}
                 <LabelList dataKey="count" position="top" fill="#64748b" fontSize={12} />
               </Bar>
             </BarChart>

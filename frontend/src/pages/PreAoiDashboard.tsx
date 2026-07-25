@@ -20,7 +20,7 @@ export default function PreAoiDashboard() {
       setLoading(true);
       const [summaryRes, dataRes] = await Promise.all([
         axios.get(`http://${window.location.hostname}:5050/api/dashboard/summary?timeframe=${timeframe}&machineType=PRE_AOI`),
-        axios.get(`http://${window.location.hostname}:5050/api/dashboard/data?timeframe=${timeframe}&machineType=PRE_AOI`)
+        axios.get(`http://${window.location.hostname}:5050/api/dashboard/data?timeframe=${timeframe}&machineType=PRE_AOI&limit=10`)
       ]);
       setSummary(summaryRes.data);
       setTrendData(dataRes.data.trendData);
@@ -127,7 +127,7 @@ export default function PreAoiDashboard() {
         
         
 
-        <div className="table-card" style={{ padding: '20px 24px' }}>
+        <div className="table-card" style={{ padding: '20px 24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <div className="table-header-flex">
             <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>{t('dashboard.recentInspections')}</h3>
             <button style={{ background: 'transparent', border: '1px solid #e2e8f0', padding: '4px 12px', borderRadius: '4px', fontSize: '0.75rem', color: '#64748b', cursor: 'pointer' }}>⬇ {t('dashboard.exportCsv')}</button>
@@ -168,7 +168,7 @@ export default function PreAoiDashboard() {
       <div className="dashboard-sidebar">
         <div className="table-card" style={{ padding: '20px 24px' }}>
           <div className="table-header-flex">
-            <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>{t('dashboard.topDefects')}</h3>
+            <h3 style={{ margin: 0, fontSize: '1rem', color: '#0f172a' }}>Top 10 Defective Components</h3>
             <div className="status-live-dot">{t('dashboard.live')}</div>
           </div>
           
@@ -194,8 +194,8 @@ export default function PreAoiDashboard() {
           </table>
         </div>
 
-        <div className="chart-card" style={{ marginTop: '24px', paddingBottom: '24px' }}>
-          <div className="chart-card-title">{t('dashboard.topLines') || 'Top 5 Lines by Defects'}</div>
+        <div className="chart-card" style={{ marginTop: '24px', paddingBottom: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div className="chart-card-title">Top 10 Lines by Defects</div>
           <div className="chart-card-subtitle">{t('dashboard.topLinesDesc') || 'Manufacturing lines with highest defect contribution'}</div>
           <div style={{ height: 260, width: '100%' }}>
             {!loading && topLines.length > 0 ? (

@@ -130,10 +130,12 @@ export const getDashboardData = async (req: Request, res: Response) => {
       lineCount[lineName] = (lineCount[lineName] || 0) + 1;
     });
     
+    const limit = parseInt(req.query.limit as string) || 5;
+
     const topLines = Object.keys(lineCount)
       .map(line => ({ line, count: lineCount[line] }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
+      .slice(0, limit);
     
     const topComponents = Object.keys(compCount)
       .map(comp => ({ 
@@ -142,7 +144,7 @@ export const getDashboardData = async (req: Request, res: Response) => {
         count: compCount[comp].count 
       }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
+      .slice(0, limit);
 
     const recentInspections = await prisma.inspection.findMany({
       where: baseWhere,
