@@ -14,8 +14,8 @@ export default function Reports() {
   const paretoColors = ['#dc2626', '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#10b981', '#06b6d4', '#3b82f6'];
 
   const { t } = useLanguage();
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16));
+  const [endDate, setEndDate] = useState(new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16));
   
   const [spiPareto, setSpiPareto] = useState<any[]>([]);
   const [preAoiPareto, setPreAoiPareto] = useState<any[]>([]);
@@ -170,17 +170,23 @@ export default function Reports() {
 
       <div className="premium-toolbar animate-slide-up" style={{ marginBottom: '24px' }}>
         <div className="toolbar-filters">
-          <div className="filter-group date-group" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="filter-group" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{ fontSize: '14px', fontWeight: 600, color: '#334155' }}>{t('reports.filterRange')}</span>
             <TimeframeToggle 
               currentStart={startDate} 
               currentEnd={endDate} 
               onDatesChange={(start, end) => { setStartDate(start); setEndDate(end); }} 
             />
-            <div style={{ width: '1px', height: '24px', backgroundColor: '#e2e8f0', margin: '0 4px' }}></div>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-            <span className="date-separator">{t('history.to')}</span>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+          </div>
+          <div className="filter-divider"></div>
+          <div className="filter-group date-group" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '2px 8px' }}>
+              <input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={{ border: 'none', background: 'transparent', outline: 'none', color: '#475569', fontSize: '0.85rem' }} />
+            </div>
+            <span className="date-separator" style={{ margin: '0', fontSize: '14px', color: '#64748b' }}>{t('history.to') || 'to'}</span>
+            <div style={{ display: 'flex', alignItems: 'center', background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '2px 8px' }}>
+              <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={{ border: 'none', background: 'transparent', outline: 'none', color: '#475569', fontSize: '0.85rem' }} />
+            </div>
           </div>
 
         </div>
