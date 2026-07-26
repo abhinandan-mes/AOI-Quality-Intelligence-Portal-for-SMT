@@ -303,6 +303,7 @@ const processSPIFile = async (filePath: string, lineName: string) => {
 
   // Extract defects
   const defects: { componentName: string; defectType: string; blockId?: string }[] = [];
+  const spcData: any[] = [];
   
   // Only extract locations if there are alarms (which happens in NG and Operator PASS)
   if (panel.Boards?.Board) {
@@ -338,6 +339,18 @@ const processSPIFile = async (filePath: string, lineName: string) => {
               });
             }
           }
+          
+          // Extract Component Level SPC Data
+          if (comp.Value) {
+            spcData.push({
+              componentName: comp.$.name || 'Unknown',
+              height: parseFloat(comp.Value.Height?.$.data || "0"),
+              area: parseFloat(comp.Value.Area?.$.data || "0"),
+              volume: parseFloat(comp.Value.Volume?.$.data || "0"),
+              offsetX: parseFloat(comp.Value.Offset?.$.data_x || "0"),
+              offsetY: parseFloat(comp.Value.Offset?.$.data_y || "0"),
+            });
+          }
         }
       }
     }
@@ -345,7 +358,7 @@ const processSPIFile = async (filePath: string, lineName: string) => {
 
   await saveOrUpdateInspection(barcode, modelName, machineId, lineName, 'SPI', inspTime, status, filePath, {
     spiHeightAvg, spiAreaAvg, spiVolumeAvg, side
-  }, defects);
+  }, defects, spcData);
 };
 
 const saveOrUpdateInspection = async (
@@ -358,7 +371,8 @@ const saveOrUpdateInspection = async (
   status: any, 
   filePath: string,
   extraData: any = {},
-  defects: { componentName: string; defectType: string; blockId?: string }[] = []
+  defects: { componentName: string; defectType: string; blockId?: string }[] = [],
+  spcData: any[] = []
 ) => {
   if (!barcode) throw new Error('Barcode is empty');
 
@@ -394,6 +408,20 @@ const saveOrUpdateInspection = async (
         componentName: d.componentName, 
         defectType: d.defectType,
         blockId: d.blockId
+      }))
+    });
+  }
+  
+  if (spcData.length > 0) {
+    await prisma.spiSpcData.createMany({
+      data: spcData.map(d => ({
+        inspectionId: newInsp.id,
+        componentName: d.componentName,
+        height: d.height,
+        area: d.area,
+        volume: d.volume,
+        offsetX: d.offsetX,
+        offsetY: d.offsetY
       }))
     });
   }

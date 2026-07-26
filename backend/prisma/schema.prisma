@@ -71,6 +71,7 @@ model Inspection {
   updatedAt      DateTime         @updatedAt
   side           String?
   defects        Defect[]
+  spiSpcData     SpiSpcData[]
   machine        Machine          @relation(fields: [machineId], references: [id])
   productModel   ProductModel     @relation(fields: [modelId], references: [id])
 
@@ -143,3 +144,21 @@ model ActivityLog {
   details   String?
   createdAt DateTime @default(now())
 }
+
+model SpiSpcData {
+  id            String     @id @default(uuid())
+  inspectionId  String
+  componentName String
+  height        Float?
+  area          Float?
+  volume        Float?
+  offsetX       Float?
+  offsetY       Float?
+  createdAt     DateTime   @default(now())
+  
+  inspection    Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
+  @@index([inspectionId])
+  @@index([componentName])
+}
+
