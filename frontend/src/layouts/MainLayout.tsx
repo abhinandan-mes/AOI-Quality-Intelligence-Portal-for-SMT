@@ -181,6 +181,9 @@ export default function MainLayout({ onLogout }: { onLogout?: () => void }) {
             <NavLink to="/reports" style={({ isActive }) => navItemStyle(isActive)}>
               {t('menu.reports') || 'Reports'}
             </NavLink>
+            <NavLink to="/spc-explorer" style={({ isActive }) => navItemStyle(isActive)}>
+              SPC Data Explorer
+            </NavLink>
             <NavLink to="/analytics" style={({ isActive }) => navItemStyle(isActive)}>
               {t('menu.analytics') || 'Analytics'}
             </NavLink>
