@@ -12,6 +12,7 @@ import lineRoutes from './routes/lineRoutes';
 import inspectionRoutes from './routes/inspectionRoutes';
 import defectRoutes from './routes/defectRoutes';
 import reportRoutes from './routes/reportRoutes';
+import spcRoutes from './routes/spcRoutes';
 import { startFileWatcher } from './services/fileWatcher';
 
 dotenv.config();
@@ -42,6 +43,7 @@ app.use('/api/lines', lineRoutes);
 app.use('/api/inspections', inspectionRoutes);
 app.use('/api/defects', defectRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/spc', spcRoutes);
 
 // Socket.io connection
 io.on('connection', (socket) => {
