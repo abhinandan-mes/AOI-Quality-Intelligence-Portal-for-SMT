@@ -52,7 +52,7 @@ const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI' | 
     if (watchPath.startsWith('\\\\')) {
       // Force Windows to establish a connection to the network share for the Local System account
       console.log(`Attempting to mount network share: ${watchPath}`);
-      execSync(`net use "${watchPath}" /user:"" ""`, { stdio: 'ignore' });
+      execSync(`net use "${watchPath}" /user:"" ""`, { stdio: 'ignore', timeout: 3000 });
     }
   } catch (e) {
     console.log(`Note: net use command failed for ${watchPath}, proceeding anyway...`);
@@ -68,12 +68,16 @@ const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI' | 
   const watchDepth = (type === 'SPI' || type === 'POST_AOI') ? 4 : 0;
 
   const watcher = chokidar.watch(watchPath, {
-    ignored: /(^|[\\/\\])\../,
+    ignored: /(^|[\/\\])\../,
     persistent: true,
     depth: watchDepth,
     ignoreInitial: true, // Do not scan historical files, only watch for new ones
-    awaitWriteFinish: { stabilityThreshold: 2000, pollInterval: 100 }
+    usePolling: true,
+    interval: 5000,
+    awaitWriteFinish: { stabilityThreshold: 2000, pollInterval: 500 }
   });
+
+  watcher.on('error', error => console.error(`Watcher error for ${watchPath}:`, error));
 
   const checkAndQueueFile = async (filePath: string) => {
     try {
