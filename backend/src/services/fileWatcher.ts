@@ -55,6 +55,8 @@ const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI' | 
   const watcher = chokidar.watch(watchPath, {
     ignored: /(^|[\\/\\])\../,
     persistent: true,
+    depth: 2, // Only watch up to 2 levels deep to prevent massive network scans
+    ignoreInitial: true, // Do not scan historical folders, only watch for new ones
     awaitWriteFinish: { stabilityThreshold: 2000, pollInterval: 100 }
   });
 
