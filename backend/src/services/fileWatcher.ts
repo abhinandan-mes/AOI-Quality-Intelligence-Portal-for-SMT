@@ -52,10 +52,14 @@ const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI' | 
     return;
   }
 
+  // SPI and POST_AOI use deeply nested folders (Program/Lane/Station/Panel/XML).
+  // PRE_AOI creates thousands of root folders, so depth > 0 crashes the event loop.
+  const watchDepth = (type === 'SPI' || type === 'POST_AOI') ? 4 : 0;
+
   const watcher = chokidar.watch(watchPath, {
     ignored: /(^|[\\/\\])\../,
     persistent: true,
-    depth: 0, // CRITICAL: Do not recurse into historical subdirectories to prevent Event Loop starvation on SMB shares
+    depth: watchDepth,
     ignoreInitial: true, // Do not scan historical files, only watch for new ones
     awaitWriteFinish: { stabilityThreshold: 2000, pollInterval: 100 }
   });
@@ -75,20 +79,32 @@ const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI' | 
     await checkAndQueueFile(filePath);
   });
 
+  // Recursive directory walker for manual scans
+  const walkDir = async (dir: string, currentDepth: number, maxDepth: number) => {
+    if (currentDepth > maxDepth) return;
+    try {
+      const items = await fs.promises.readdir(dir, { withFileTypes: true });
+      for (const item of items) {
+        const fullPath = path.join(dir, item.name);
+        if (item.isDirectory()) {
+          await walkDir(fullPath, currentDepth + 1, maxDepth);
+        } else {
+          const ext = path.extname(item.name).toLowerCase();
+          if (['.xml', '.txt', '.vis', '.zip'].includes(ext)) {
+            await checkAndQueueFile(fullPath);
+          }
+        }
+      }
+    } catch (e) {}
+  };
+
   watcher.on('addDir', (dirPath) => {
     if (dirPath === watchPath) return; // Ignore the root directory itself
     
     // When a machine creates a new folder, wait a few seconds for it to write the inspection file inside
     setTimeout(async () => {
-      try {
-        const files = await fs.promises.readdir(dirPath);
-        for (const file of files) {
-          const ext = path.extname(file).toLowerCase();
-          if (['.xml', '.txt', '.vis', '.zip'].includes(ext)) {
-            await checkAndQueueFile(path.join(dirPath, file));
-          }
-        }
-      } catch (err) {}
+      // Walk up to 4 levels deep in the new directory
+      await walkDir(dirPath, 1, 4);
     }, 5000);
   });
 
@@ -102,21 +118,13 @@ const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI' | 
       rootItems.reverse();
       
       for (const item of rootItems) {
+        const fullPath = path.join(watchPath, item.name);
         if (item.isDirectory()) {
-          const dirPath = path.join(watchPath, item.name);
-          try {
-            const files = await fs.promises.readdir(dirPath);
-            for (const file of files) {
-              const ext = path.extname(file).toLowerCase();
-              if (['.xml', '.txt', '.vis', '.zip'].includes(ext)) {
-                await checkAndQueueFile(path.join(dirPath, file));
-              }
-            }
-          } catch(e) {}
+          await walkDir(fullPath, 1, 4); // Always backfill up to depth 4
         } else {
           const ext = path.extname(item.name).toLowerCase();
           if (['.xml', '.txt', '.vis', '.zip'].includes(ext)) {
-            await checkAndQueueFile(path.join(watchPath, item.name));
+            await checkAndQueueFile(fullPath);
           }
         }
       }
@@ -127,7 +135,7 @@ const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI' | 
   }, 10000); // Wait 10s after startup before starting heavy backfill
 
   activeWatchers.push(watcher);
-  console.log(`Watching ${type} for Line ${lineName} at ${watchPath}`);
+  console.log(`Watching ${type} for Line ${lineName} at ${watchPath} (depth: ${watchDepth})`);
 };
 
 interface QueueItem {
