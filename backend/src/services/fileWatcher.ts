@@ -55,22 +55,76 @@ const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI' | 
   const watcher = chokidar.watch(watchPath, {
     ignored: /(^|[\\/\\])\../,
     persistent: true,
-    depth: 2, // Only watch up to 2 levels deep to prevent massive network scans
-    ignoreInitial: true, // Do not scan historical folders, only watch for new ones
+    depth: 0, // CRITICAL: Do not recurse into historical subdirectories to prevent Event Loop starvation on SMB shares
+    ignoreInitial: true, // Do not scan historical files, only watch for new ones
     awaitWriteFinish: { stabilityThreshold: 2000, pollInterval: 100 }
   });
 
-  watcher.on('add', async (filePath) => {
-    // Check if already processed
+  const checkAndQueueFile = async (filePath: string) => {
     try {
       const existing = await prisma.fileImportLog.findUnique({ where: { filePath } });
-      if (existing && existing.status === 'SUCCESS') return; // Skip
+      if (existing && existing.status === 'SUCCESS') return;
+      
+      console.log(`[${lineName} ${type}] File detected: ${filePath}. Added to queue.`);
+      fileQueue.push({ filePath, type, lineName });
+      processQueue();
     } catch(e) {}
-    
-    console.log(`[${lineName} ${type}] New file detected: ${filePath}. Added to queue.`);
-    fileQueue.push({ filePath, type, lineName });
-    processQueue();
+  };
+
+  watcher.on('add', async (filePath) => {
+    await checkAndQueueFile(filePath);
   });
+
+  watcher.on('addDir', (dirPath) => {
+    if (dirPath === watchPath) return; // Ignore the root directory itself
+    
+    // When a machine creates a new folder, wait a few seconds for it to write the inspection file inside
+    setTimeout(async () => {
+      try {
+        const files = await fs.promises.readdir(dirPath);
+        for (const file of files) {
+          const ext = path.extname(file).toLowerCase();
+          if (['.xml', '.txt', '.vis', '.zip'].includes(ext)) {
+            await checkAndQueueFile(path.join(dirPath, file));
+          }
+        }
+      } catch (err) {}
+    }, 5000);
+  });
+
+  // Sequential background backfill of historical data
+  setTimeout(async () => {
+    try {
+      console.log(`[${lineName} ${type}] Starting sequential backfill of historical data in ${watchPath}`);
+      const rootItems = await fs.promises.readdir(watchPath, { withFileTypes: true });
+      
+      // Process backwards (newest folders first based on standard timestamp naming)
+      rootItems.reverse();
+      
+      for (const item of rootItems) {
+        if (item.isDirectory()) {
+          const dirPath = path.join(watchPath, item.name);
+          try {
+            const files = await fs.promises.readdir(dirPath);
+            for (const file of files) {
+              const ext = path.extname(file).toLowerCase();
+              if (['.xml', '.txt', '.vis', '.zip'].includes(ext)) {
+                await checkAndQueueFile(path.join(dirPath, file));
+              }
+            }
+          } catch(e) {}
+        } else {
+          const ext = path.extname(item.name).toLowerCase();
+          if (['.xml', '.txt', '.vis', '.zip'].includes(ext)) {
+            await checkAndQueueFile(path.join(watchPath, item.name));
+          }
+        }
+      }
+      console.log(`[${lineName} ${type}] Backfill queueing complete.`);
+    } catch (err) {
+      console.error(`Error backfilling ${watchPath}:`, err);
+    }
+  }, 10000); // Wait 10s after startup before starting heavy backfill
 
   activeWatchers.push(watcher);
   console.log(`Watching ${type} for Line ${lineName} at ${watchPath}`);
