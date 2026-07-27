@@ -4,6 +4,7 @@ import AdmZip from 'adm-zip';
 import crypto from 'crypto';
 import path from 'path';
 import xml2js from 'xml2js';
+import { execSync } from 'child_process';
 import prisma from '../prismaClient';
 import { io } from '../server';
 
@@ -47,6 +48,16 @@ export const reloadWatchers = async () => {
 };
 
 const setupWatcher = (watchPath: string, type: 'POST_AOI' | 'SPI' | 'PRE_AOI' | 'PRE_TST', lineName: string) => {
+  try {
+    if (watchPath.startsWith('\\\\')) {
+      // Force Windows to establish a connection to the network share for the Local System account
+      console.log(`Attempting to mount network share: ${watchPath}`);
+      execSync(`net use "${watchPath}" /user:"" ""`, { stdio: 'ignore' });
+    }
+  } catch (e) {
+    console.log(`Note: net use command failed for ${watchPath}, proceeding anyway...`);
+  }
+
   if (!fs.existsSync(watchPath)) {
     console.error(`Watch path does not exist for Line ${lineName} (${type}): ${watchPath}`);
     return;
